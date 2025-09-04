@@ -1,0 +1,31 @@
+# Example configuration for Atlassian DC MCP
+# Copy this file to config.yaml and edit it to your needs.
+
+# Server port (default is 8080 if not specified)
+port: 8080
+
+# Logging configuration
+logging:
+  # Development mode enables human-friendly console output
+  development: true
+  
+  # Log level (debug, info, warn, error, fatal)
+  level: "info"
+
+jira:
+  url: "https://jira.example.com"
+  token: "your-jira-api-token"
+  permissions:
+    write: false
+
+confluence:
+  url: "https://confluence.example.com"
+  token: "your-confluence-api-token"
+  permissions:
+    write: false
+
+bitbucket:
+  url: "https://bitbucket.example.com"
+  token: "your-bitbucket-api-token"
+  permissions:
+    write: false

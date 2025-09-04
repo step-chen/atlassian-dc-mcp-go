@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  mcp-server:
+    # Build the image from the Dockerfile in the current directory
+    build: .
+    container_name: atlassian-dc-mcp
+    # Map the container port to the host port
+    ports:
+      - "8080:8080"
+    # Mount the local config file into the container
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    # Environment variables (can override config.yaml values)
+    environment:
+      - PORT=8080
+    # Restart policy
+    restart: unless-stopped
+    

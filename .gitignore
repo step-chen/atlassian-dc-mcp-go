@@ -1,0 +1,58 @@
+# Ignore configuration file with sensitive information
+config.yaml
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with go test -c
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+/.lingma/
+
+# Go workspace file
+go.work
+
+# Docker
+.dockerignore
+
+# Build outputs
+/bin/
+/build/
+/dist/
+/mcp
+/mcp-server
+atlassian-dc-mcp-go
+
+# Log files
+*.log
+
+# Environment files
+.env
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Test configuration files with sensitive information
+test_config.json

@@ -1,0 +1,54 @@
+package jira
+
+import (
+	"net/http"
+	"net/url"
+
+	"atlassian-dc-mcp-go/internal/utils"
+)
+
+// GetProject retrieves a specific project by its key.
+//
+// Parameters:
+//   - projectKey: The key of the project to retrieve
+//
+// Returns:
+//   - map[string]any: The project data
+//   - error: An error if the request fails
+func (c *JiraClient) GetProject(projectKey string) (map[string]any, error) {
+	var project map[string]any
+	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "project", projectKey}, nil, nil, &project)
+	if err != nil {
+		return nil, err
+	}
+
+	return project, nil
+}
+
+// GetAllProjects retrieves all projects with filtering options.
+//
+// Parameters:
+//   - expand: Parameters to expand in the response
+//   - recent: The number of recent projects to return
+//   - includeArchived: Whether to include archived projects
+//   - browseArchive: Whether to include projects in the archive browser
+//
+// Returns:
+//   - []map[string]any: The projects data
+//   - error: An error if the request fails
+func (c *JiraClient) GetAllProjects(expand string, recent int, includeArchived, browseArchive bool) ([]map[string]any, error) {
+
+	queryParams := make(url.Values)
+	utils.SetQueryParam(queryParams, "expand", expand, "")
+	utils.SetQueryParam(queryParams, "recent", recent, 0)
+	utils.SetQueryParam(queryParams, "includeArchived", includeArchived, false)
+	utils.SetQueryParam(queryParams, "browseArchive", browseArchive, false)
+
+	var projects []map[string]any
+	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "project"}, queryParams, nil, &projects)
+	if err != nil {
+		return nil, err
+	}
+
+	return projects, nil
+}

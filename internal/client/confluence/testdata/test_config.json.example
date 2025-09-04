@@ -1,0 +1,42 @@
+{
+  "pages": {
+    "validID": "123456",
+    "commentsID": "123456",
+    "invalidID": "invalid"
+  },
+  "spaces": {
+    "key": "EXAMPLE",
+    "limit": 25,
+    "start": 0,
+    "customLim": 5,
+    "invalidLimit": -1,
+    "nonExistentKey": "NONEXISTENT"
+  },
+  "search": [
+    {
+      "name": "Valid Search",
+      "cql": "type=page",
+      "limit": 25,
+      "start": 0
+    },
+    {
+      "name": "Search With Expand",
+      "cql": "type=page",
+      "limit": 25,
+      "start": 0,
+      "expand": ["body", "version"]
+    },
+    {
+      "name": "Search by Title with Wildcard",
+      "cql": "title ~ \"Example\"",
+      "limit": 10,
+      "start": 0
+    },
+    {
+      "name": "Invalid Search",
+      "cql": "invalid[cql",
+      "limit": 25,
+      "start": 0
+    }
+  ]
+}
