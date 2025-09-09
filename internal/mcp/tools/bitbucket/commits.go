@@ -309,6 +309,7 @@ func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_commits",
 		Description: "Get commits for a repository",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -363,6 +364,7 @@ func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_commit",
 		Description: "Get a specific commit",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -389,6 +391,7 @@ func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_commit_changes",
 		Description: "Get changes for a specific commit",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -411,7 +414,7 @@ func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 					Description: "The limit of the number of changes to return",
 				},
 				"withComments": {
-					Type:        "string",
+					Type:        "boolean",
 					Description: "Include comments in response",
 				},
 				"since": {
@@ -427,6 +430,7 @@ func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_commit_comment",
 		Description: "Get a specific comment on a commit",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -453,6 +457,7 @@ func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_commit_comments",
 		Description: "Get comments on a commit",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -491,6 +496,7 @@ func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_commit_diff_stats_summary",
 		Description: "Get diff statistics summary for a commit",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -533,6 +539,7 @@ func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_diff_between_commits",
 		Description: "Get the diff between two commits",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -579,6 +586,7 @@ func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_diff_between_revisions",
 		Description: "Get the diff between revisions",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -633,6 +641,7 @@ func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_jira_issue_commits",
 		Description: "Get commits related to a Jira issue",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"issueKey": {
 					Type:        "string",
@@ -659,6 +668,7 @@ func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_diff_between_revisions_for_path",
 		Description: "Get the diff between revisions for a specific path",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",

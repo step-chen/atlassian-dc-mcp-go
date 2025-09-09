@@ -327,6 +327,7 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) 
 		Name:        "bitbucket_get_pull_request",
 		Description: "Retrieve details of a specific pull request. This tool provides comprehensive information about a pull request including its status, participants, and comments.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -349,6 +350,7 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) 
 		Name:        "bitbucket_get_pull_requests",
 		Description: "List pull requests in a repository with optional filtering. This tool allows you to retrieve multiple pull requests based on various criteria.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -407,6 +409,7 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) 
 		Name:        "bitbucket_get_pull_request_activities",
 		Description: "Retrieve activities related to a pull request. This includes comments, approvals, and other events associated with the pull request.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -445,6 +448,7 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) 
 		Name:        "bitbucket_get_pull_request_comments",
 		Description: "Retrieve comments on a pull request. This tool allows you to get detailed information about all comments made on a specific pull request.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -507,6 +511,7 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) 
 		Name:        "bitbucket_get_pull_request_suggestions",
 		Description: "Get pull request suggestions based on recent changes. This tool helps identify potential pull requests that could be created based on recent commits.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"changesSince": {
 					Type:        "string",
@@ -525,6 +530,7 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) 
 		Name:        "bitbucket_get_pull_requests_for_user",
 		Description: "Get pull requests associated with a specific user. This tool allows you to retrieve pull requests where the user is involved in various roles.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"closedSince": {
 					Type:        "string",
@@ -567,6 +573,7 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) 
 		Name:        "bitbucket_add_pull_request_comment",
 		Description: "Add a comment to a specific pull request. This tool allows you to add comments to pull requests for discussion and feedback.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -593,6 +600,7 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) 
 		Name:        "bitbucket_merge_pull_request",
 		Description: "Merge a specific pull request. This tool allows you to merge pull requests after review and approval.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -635,6 +643,7 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) 
 		Name:        "bitbucket_decline_pull_request",
 		Description: "Decline a specific pull request. This tool allows you to decline pull requests that are not suitable for merging.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -669,6 +678,7 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) 
 		Name:        "bitbucket_get_pull_request_jira_issues",
 		Description: "Get Jira issues referenced in a pull request. This tool retrieves all Jira issues that are mentioned in a pull request.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -691,6 +701,7 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) 
 		Name:        "bitbucket_get_pull_request_comment",
 		Description: "Get a specific comment on a pull request. This tool retrieves detailed information about a specific comment on a pull request.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",

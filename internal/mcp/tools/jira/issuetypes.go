@@ -32,6 +32,7 @@ func AddIssueTypeTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_issue_types",
 		Description: "Get Jira issue types",
 		InputSchema: &jsonschema.Schema{
+			Type:       "object",
 			Properties: map[string]*jsonschema.Schema{},
 		},
 	}, handler.getIssueTypesHandler)

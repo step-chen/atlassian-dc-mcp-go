@@ -1,5 +1,5 @@
 # Use the official Golang image as the base image for building
-FROM golang:1.24-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o mcp .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o mcp ./cmd/server
 
 # Use a minimal alpine image for the final stage
 FROM alpine:latest
@@ -40,8 +40,9 @@ RUN chown -R mcp:mcp /app
 # Switch to the non-root user
 USER mcp
 
-# Expose the default port
-EXPOSE 8080
+# Expose the default port (only relevant for HTTP/SSE modes)
+# Note: This is just documentation, actual port is configured via config file or environment variables
+EXPOSE 8090
 
 # Command to run the application
 ENTRYPOINT ["./mcp"]

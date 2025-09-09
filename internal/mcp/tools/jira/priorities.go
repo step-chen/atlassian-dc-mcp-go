@@ -32,6 +32,7 @@ func AddPriorityTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_priorities",
 		Description: "Get all Jira priorities",
 		InputSchema: &jsonschema.Schema{
+			Type:       "object",
 			Properties: map[string]*jsonschema.Schema{},
 		},
 	}, handler.getPrioritiesHandler)

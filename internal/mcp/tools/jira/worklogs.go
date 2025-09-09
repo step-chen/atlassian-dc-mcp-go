@@ -36,6 +36,7 @@ func AddWorklogTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_worklogs",
 		Description: "Get worklogs for a Jira issue or a specific worklog by ID",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"issueKey": {
 					Type:        "string",

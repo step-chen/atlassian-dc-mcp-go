@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"atlassian-dc-mcp-go/internal/config"
 	"atlassian-dc-mcp-go/internal/mcp"
@@ -34,14 +35,14 @@ func main() {
 
 	mcpServer := mcp.NewServer(cfg)
 
-	if err := mcpServer.Initialize(context.Background()); err != nil {
+	if err := mcpServer.Initialize(); err != nil {
 		logger.Fatal("Failed to initialize MCP server", zap.Error(err))
 	}
 
 	logger.Info("Atlassian Data Center MCP (Model Context Protocol) server starting...")
 
 	// Create a context that can be cancelled
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	// Start the server in a goroutine

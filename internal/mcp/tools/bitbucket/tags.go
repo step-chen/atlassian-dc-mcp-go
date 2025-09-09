@@ -64,6 +64,7 @@ func AddTagTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_tags",
 		Description: "Get tags for a repository",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -98,6 +99,7 @@ func AddTagTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_tag",
 		Description: "Get a specific tag",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",

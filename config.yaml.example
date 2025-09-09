@@ -1,8 +1,17 @@
 # Example configuration for Atlassian DC MCP
 # Copy this file to config.yaml and edit it to your needs.
 
-# Server port (default is 8080 if not specified)
-port: 8080
+# Server port (default is 8090 if not specified)
+port: 8090
+
+# Client timeout in seconds (default is 60 seconds if not specified)
+client_timeout: 60
+
+# Transport mode (stdio, sse, http)
+# stdio: Standard input/output communication (default)
+# sse: Server-Sent Events communication
+# http: HTTP streaming communication
+transport: "stdio"
 
 # Logging configuration
 logging:
@@ -16,16 +25,19 @@ jira:
   url: "https://jira.example.com"
   token: "your-jira-api-token"
   permissions:
+    read: true
     write: false
 
 confluence:
   url: "https://confluence.example.com"
   token: "your-confluence-api-token"
   permissions:
+    read: true
     write: false
 
 bitbucket:
   url: "https://bitbucket.example.com"
   token: "your-bitbucket-api-token"
   permissions:
+    read: true
     write: false

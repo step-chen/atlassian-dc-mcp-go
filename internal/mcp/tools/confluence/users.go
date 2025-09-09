@@ -24,6 +24,7 @@ func AddUserTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_get_current_user",
 		Description: "Get current Confluence user. This tool retrieves information about the currently authenticated user.",
 		InputSchema: &jsonschema.Schema{
+			Type:       "object",
 			Properties: map[string]*jsonschema.Schema{},
 		},
 	}, handler.getCurrentUserHandler)

@@ -48,6 +48,7 @@ func AddTransitionTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_transitions",
 		Description: "Get transitions for a Jira issue",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"issueKey": {
 					Type:        "string",
@@ -62,6 +63,7 @@ func AddTransitionTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_transition_issue",
 		Description: "Transition a Jira issue",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"issueKey": {
 					Type:        "string",

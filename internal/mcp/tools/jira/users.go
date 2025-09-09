@@ -61,6 +61,7 @@ func AddUserTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_current_user",
 		Description: "Get current Jira user",
 		InputSchema: &jsonschema.Schema{
+			Type:       "object",
 			Properties: map[string]*jsonschema.Schema{},
 		},
 	}, handler.getCurrentUserHandler)
@@ -69,6 +70,7 @@ func AddUserTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_user_by_name",
 		Description: "Get a Jira user by username",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"username": {
 					Type:        "string",
@@ -83,6 +85,7 @@ func AddUserTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_user_by_key",
 		Description: "Get a Jira user by key",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"key": {
 					Type:        "string",
@@ -97,6 +100,7 @@ func AddUserTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_search_users",
 		Description: "Search for Jira users",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"query": {
 					Type:        "string",

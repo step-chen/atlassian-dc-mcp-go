@@ -43,6 +43,7 @@ func AddProjectTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_project",
 		Description: "Get a specific Jira project by key",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -57,6 +58,7 @@ func AddProjectTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_projects",
 		Description: "Get all Jira projects with optional filters",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"expand": {
 					Type:        "string",

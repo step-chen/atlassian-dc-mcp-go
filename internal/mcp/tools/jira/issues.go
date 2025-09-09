@@ -12,7 +12,7 @@ import (
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// getIssueHandler retrieves a Jira issue by its key.
+// getIssueHandler retrieves a Jira issue by its key with default fields.
 func (h *Handler) getIssueHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
 	return tools.HandleToolOperation("get issue", func() (interface{}, error) {
 		issueKey, ok := tools.GetStringArg(args, "issueKey")
@@ -20,8 +20,26 @@ func (h *Handler) getIssueHandler(ctx context.Context, req *mcp.CallToolRequest,
 			return nil, fmt.Errorf("missing or invalid issueKey parameter")
 		}
 
+		// Define default fields to retrieve
+		fields := []string{"summary", "description", "status", "assignee", "reporter", "priority", "issuetype", "project", "created", "updated", "comment"}
+
+		result, err := h.client.GetIssue(issueKey, fields)
+		return result, err
+	})
+}
+
+// getIssueWithFieldsHandler retrieves a Jira issue by its key.
+func (h *Handler) getIssueWithFieldsHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
+	return tools.HandleToolOperation("get issue", func() (interface{}, error) {
+		issueKey, ok := tools.GetStringArg(args, "issueKey")
+		if !ok {
+			return nil, fmt.Errorf("missing or invalid issueKey parameter")
+		}
+
 		fields := tools.GetStringSliceArg(args, "fields")
-		return h.client.GetIssue(issueKey, fields)
+
+		result, err := h.client.GetIssue(issueKey, fields)
+		return result, err
 	})
 }
 
@@ -235,8 +253,24 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "jira_get_issue",
-		Description: "Get a specific Jira issue",
+		Description: "Get a specific Jira issue with default fields (summary, description, status, assignee, reporter, priority, issuetype, project, created, updated, comment).",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
+			Properties: map[string]*jsonschema.Schema{
+				"issueKey": {
+					Type:        "string",
+					Description: "The key of the issue to retrieve",
+				},
+			},
+			Required: []string{"issueKey"},
+		},
+	}, handler.getIssueHandler)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "jira_get_issue_with_fields",
+		Description: "Get a specific Jira issue. You can specify which fields to retrieve using the 'fields' parameter. If no fields are specified, all fields will be returned. Common fields include: summary, description, status, assignee, reporter, priority, issuetype, project, created, updated, and resolution.",
+		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"issueKey": {
 					Type:        "string",
@@ -245,21 +279,22 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
 				"fields": {
 					Type:        "array",
 					Items:       &jsonschema.Schema{Type: "string"},
-					Description: "Fields to include in the response",
+					Description: "Fields to include in the response. Common fields: summary, description, status, assignee, reporter, priority, issuetype, project, created, updated, resolution. If empty or not provided, all fields are returned.",
 				},
 			},
 			Required: []string{"issueKey"},
 		},
-	}, handler.getIssueHandler)
+	}, handler.getIssueWithFieldsHandler)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "jira_search_issues",
-		Description: "Search for Jira issues using JQL",
+		Description: "Search for Jira issues using JQL (Jira Query Language). This tool allows you to find issues based on various criteria such as project, status, assignee, and more using the powerful JQL syntax.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"jql": {
 					Type:        "string",
-					Description: "JQL query string",
+					Description: "JQL query string to filter issues. Example: 'project = PROJ AND status = Open'",
 				},
 				"projectKeyOrId": {
 					Type:        "string",
@@ -277,15 +312,15 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
 				"fields": {
 					Type:        "array",
 					Items:       &jsonschema.Schema{Type: "string"},
-					Description: "Fields to include in the response",
+					Description: "Fields to include in the response. If not provided, all fields are returned.",
 				},
 				"startAt": {
 					Type:        "integer",
-					Description: "The starting index of the returned issues",
+					Description: "The starting index of the returned issues (for pagination). Default: 0",
 				},
 				"maxResults": {
 					Type:        "integer",
-					Description: "The maximum number of issues to return",
+					Description: "The maximum number of issues to return (for pagination). Default: 50, Max: 100",
 				},
 			},
 			Required: []string{"jql"},
@@ -294,8 +329,9 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "jira_create_issue",
-		Description: "Create a new Jira issue",
+		Description: "Create a new Jira issue in the specified project with the provided details.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -324,8 +360,9 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "jira_update_issue",
-		Description: "Update an existing Jira issue",
+		Description: "Update an existing Jira issue with the specified fields.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"issueKey": {
 					Type:        "string",
@@ -342,8 +379,9 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "jira_get_subtasks",
-		Description: "Get subtasks for a Jira issue",
+		Description: "Get all subtasks for a specific Jira issue.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"issueKey": {
 					Type:        "string",
@@ -356,8 +394,9 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "jira_create_subtask",
-		Description: "Create a subtask for a Jira issue",
+		Description: "Create a subtask for a specific Jira issue.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"parentKeyOrID": {
 					Type:        "string",
@@ -390,8 +429,9 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "jira_update_issue_with_options",
-		Description: "Update an existing Jira issue with options",
+		Description: "Update an existing Jira issue with additional options for controlling the update behavior.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"issueKey": {
 					Type:        "string",
@@ -412,8 +452,9 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "jira_create_issue_with_payload",
-		Description: "Create a new Jira issue with a custom payload",
+		Description: "Create a new Jira issue with a custom payload for advanced issue creation scenarios.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"payload": {
 					Type:        "object",
@@ -430,8 +471,9 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "jira_get_agile_issue",
-		Description: "Get an agile issue",
+		Description: "Get an agile issue with additional parameters for expand, fields, and history tracking.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"issueIdOrKey": {
 					Type:        "string",
@@ -457,8 +499,9 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "jira_get_issue_estimation_for_board",
-		Description: "Get issue estimation for board",
+		Description: "Get issue estimation for board to retrieve estimation data for a specific issue on a board.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"issueIdOrKey": {
 					Type:        "string",
@@ -475,8 +518,9 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "jira_set_issue_estimation_for_board",
-		Description: "Set issue estimation for board",
+		Description: "Set issue estimation for board to update the estimation value for a specific issue on a board.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"issueIdOrKey": {
 					Type:        "string",

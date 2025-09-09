@@ -6,6 +6,7 @@ import (
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 	"atlassian-dc-mcp-go/internal/mcp/tools"
+
 	"github.com/google/jsonschema-go/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -62,6 +63,7 @@ func AddUserTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_current_user",
 		Description: "Get current Bitbucket user",
 		InputSchema: &jsonschema.Schema{
+			Type:       "object",
 			Properties: map[string]*jsonschema.Schema{},
 		},
 	}, handler.getCurrentUserHandler)
@@ -70,6 +72,7 @@ func AddUserTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_user",
 		Description: "Get a Bitbucket user",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"userSlug": {
 					Type:        "string",
@@ -84,6 +87,7 @@ func AddUserTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_users",
 		Description: "Get Bitbucket users",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"filter": {
 					Type:        "string",

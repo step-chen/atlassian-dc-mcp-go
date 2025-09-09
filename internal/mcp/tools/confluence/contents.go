@@ -292,6 +292,7 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_get_content",
 		Description: "Get Confluence content with various filter options. This tool allows you to retrieve content items with support for filtering by type, space, title, status, and more.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"type": {
 					Type:        "string",
@@ -335,6 +336,7 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_search_content",
 		Description: "Search for Confluence content using CQL (Confluence Query Language). This tool allows you to find content based on various criteria such as text, space, labels, and more.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"cql": {
 					Type:        "string",
@@ -366,6 +368,7 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_get_content_by_id",
 		Description: "Get a specific Confluence content item by its ID. This tool allows you to retrieve detailed information about a content item including its body, metadata, and version history.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"contentID": {
 					Type:        "string",
@@ -385,6 +388,7 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_create_content",
 		Description: "Create new Confluence content such as pages or blog posts. This tool allows you to create content with a title, body, space, and optional metadata or parent page relationships.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"contentType": {
 					Type:        "string",
@@ -427,6 +431,7 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_update_content",
 		Description: "Update existing Confluence content. This tool allows you to modify various aspects of existing content such as title, body, and other properties.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"contentID": {
 					Type:        "string",
@@ -445,6 +450,7 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_delete_content",
 		Description: "Delete Confluence content by ID. This tool allows you to permanently remove content from Confluence.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"contentID": {
 					Type:        "string",
@@ -459,6 +465,7 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_get_content_history",
 		Description: "Retrieve the history of a Confluence content item. This tool provides detailed information about all versions of a content item.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"contentID": {
 					Type:        "string",
@@ -478,23 +485,24 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_get_content_comments",
 		Description: "Retrieve comments on Confluence content. This tool allows you to get detailed information about all comments made on a specific content item.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"contentID": {
 					Type:        "string",
 					Description: "ID of the content to get comments for.",
 				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned comments (for pagination). Default: 0",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of comments to return (for pagination). Default: 25, Max: 100",
-				},
 				"expand": {
 					Type:        "array",
 					Items:       &jsonschema.Schema{Type: "string"},
-					Description: "Array of properties to expand in the result (e.g., ['body.storage', 'version']).",
+					Description: "Array of properties to expand in the result.",
+				},
+				"start": {
+					Type:        "integer",
+					Description: "The starting index of the returned comments. Default: 0",
+				},
+				"limit": {
+					Type:        "integer",
+					Description: "The limit of the number of comments to return. Default: 25, Max: 100",
 				},
 			},
 			Required: []string{"contentID"},
@@ -505,6 +513,7 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_create_content_comment",
 		Description: "Create a new comment on Confluence content. This tool allows you to add comments to existing content items.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"contentID": {
 					Type:        "string",
@@ -541,6 +550,7 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_get_attachments",
 		Description: "Get attachments for Confluence content. This tool allows you to retrieve all attachments associated with a specific piece of content.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"contentID": {
 					Type:        "string",
@@ -553,19 +563,19 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 				},
 				"start": {
 					Type:        "integer",
-					Description: "The starting index of the returned attachments (for pagination). Default: 0",
+					Description: "The starting index of the returned attachments. Default: 0",
 				},
 				"limit": {
 					Type:        "integer",
-					Description: "The limit of the number of attachments to return (for pagination). Default: 25, Max: 100",
+					Description: "The limit of the number of attachments to return. Default: 25, Max: 100",
 				},
 				"filename": {
 					Type:        "string",
-					Description: "Filename to filter attachments by.",
+					Description: "Filter results to attachments that match this filename.",
 				},
 				"mediaType": {
 					Type:        "string",
-					Description: "Media type to filter attachments by.",
+					Description: "Filter results to attachments that match this media type (e.g., 'image/png').",
 				},
 			},
 			Required: []string{"contentID"},
@@ -576,6 +586,7 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_get_extracted_text",
 		Description: "Get extracted text from a Confluence attachment. This tool allows you to retrieve the text content of an attachment.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"contentID": {
 					Type:        "string",
@@ -594,6 +605,7 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_get_content_labels",
 		Description: "Get labels for Confluence content. This tool allows you to retrieve all labels associated with a specific piece of content.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"contentID": {
 					Type:        "string",
@@ -608,19 +620,20 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_scan_content_by_space_key",
 		Description: "Scan Confluence content by space key. This tool allows you to retrieve all content within a specific space.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"type": {
 					Type:        "string",
-					Description: "Type of content to scan for (e.g., 'page', 'blogpost').",
+					Description: "Type of content to retrieve (e.g., 'page', 'blogpost', 'comment').",
 				},
 				"spaceKey": {
 					Type:        "string",
-					Description: "Key of the space to scan content in (e.g., 'DEV').",
+					Description: "Key of the space to retrieve content from (e.g., 'DEV', 'TEAM').",
 				},
 				"status": {
 					Type:        "array",
 					Items:       &jsonschema.Schema{Type: "string"},
-					Description: "Array of status values to filter by (e.g., ['current', 'draft']).",
+					Description: "Array of status values to filter by (e.g., ['current', 'draft', 'trashed']).",
 				},
 				"postingDay": {
 					Type:        "string",
@@ -637,7 +650,7 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 				},
 				"limit": {
 					Type:        "integer",
-					Description: "The limit of the number of content items to return (for pagination). Default: 25, Max: 100",
+					Description: "The limit of the number of contents to return. Default: 25, Max: 100",
 				},
 			},
 			Required: []string{"spaceKey"},
@@ -648,6 +661,7 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_search",
 		Description: "Search for Confluence content using CQL (Confluence Query Language) with additional parameters. This tool provides more search options compared to confluence_search_content.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"cql": {
 					Type:        "string",

@@ -16,13 +16,6 @@ type Permissions struct {
 	Write bool `mapstructure:"write"`
 }
 
-type Config struct {
-	Jira       JiraConfig       `mapstructure:"jira"`
-	Confluence ConfluenceConfig `mapstructure:"confluence"`
-	Bitbucket  BitbucketConfig  `mapstructure:"bitbucket"`
-	Logging    logging.Config   `mapstructure:"logging"`
-}
-
 type JiraConfig struct {
 	URL         string      `mapstructure:"url"`
 	Token       string      `mapstructure:"token"`
@@ -41,10 +34,41 @@ type BitbucketConfig struct {
 	Permissions Permissions `mapstructure:"permissions"`
 }
 
+type Config struct {
+	Port         int             `mapstructure:"port"`
+	Jira         JiraConfig      `mapstructure:"jira"`
+	Confluence   ConfluenceConfig `mapstructure:"confluence"`
+	Bitbucket    BitbucketConfig  `mapstructure:"bitbucket"`
+	Logging      logging.Config   `mapstructure:"logging"`
+	Transport    string          `mapstructure:"transport"`
+	ClientTimeout int            `mapstructure:"client_timeout"`
+}
+
 // Validate checks that the configuration is valid
 func (c *Config) Validate() error {
-	if c.Jira.URL == "" && c.Confluence.URL == "" && c.Bitbucket.URL == "" {
-		return fmt.Errorf("at least one of jira, confluence, or bitbucket must be configured")
+	// Validate port
+	if c.Port <= 0 || c.Port > 65535 {
+		return fmt.Errorf("invalid port: %d, must be between 1 and 65535", c.Port)
+	}
+
+	// Validate transport mode
+	if c.Transport == "" {
+		c.Transport = "stdio" // default to stdio
+	}
+
+	validTransports := map[string]bool{
+		"stdio": true,
+		"sse":   true,
+		"http":  true,
+	}
+
+	if !validTransports[c.Transport] {
+		return fmt.Errorf("invalid transport mode: %s, valid options are: stdio, sse, http", c.Transport)
+	}
+
+	// Validate client timeout
+	if c.ClientTimeout <= 0 {
+		c.ClientTimeout = 60 // default to 60 seconds
 	}
 
 	if c.Jira.URL != "" {
@@ -104,8 +128,10 @@ func LoadConfig() (*Config, error) {
 	viper.SetDefault("jira.permissions.read", true)
 	viper.SetDefault("confluence.permissions.read", true)
 	viper.SetDefault("bitbucket.permissions.read", true)
+	viper.SetDefault("port", 8090)
 	viper.SetDefault("logging.development", false)
 	viper.SetDefault("logging.level", "info")
+	viper.SetDefault("client_timeout", 60) // Default client timeout in seconds
 
 	viper.SetEnvPrefix("MCP")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
@@ -133,18 +159,18 @@ func LoadConfig() (*Config, error) {
 func WatchConfigOnChange(run func()) {
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		fmt.Println("Config file changed:", e.Name)
-		
+
 		var newConfig Config
 		if err := viper.Unmarshal(&newConfig); err != nil {
 			fmt.Printf("Error unmarshaling updated config: %v\n", err)
 			return
 		}
-		
+
 		if err := newConfig.Validate(); err != nil {
 			fmt.Printf("Error validating updated config: %v\n", err)
 			return
 		}
-		
+
 		run()
 	})
 	viper.WatchConfig()

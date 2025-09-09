@@ -75,21 +75,22 @@ func AddChildrenTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "confluence_get_content_children",
-		Description: "Get children of a specific Confluence content item. This tool allows you to retrieve direct child pages or other content types of a parent content item.",
+		Description: "Get content children",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"contentID": {
 					Type:        "string",
-					Description: "The ID of the parent content item.",
+					Description: "The content ID",
 				},
 				"expand": {
 					Type:        "array",
 					Items:       &jsonschema.Schema{Type: "string"},
-					Description: "Array of properties to expand in the result (e.g., ['body.storage', 'version']).",
+					Description: "Fields to expand in the results",
 				},
 				"parentVersion": {
 					Type:        "string",
-					Description: "The version of the parent content to retrieve children for. Default: \"\" (latest)",
+					Description: "The parent version",
 				},
 			},
 			Required: []string{"contentID"},
@@ -98,33 +99,34 @@ func AddChildrenTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "confluence_get_content_children_by_type",
-		Description: "Get content children filtered by a specific type (e.g., 'page', 'comment', 'attachment').",
+		Description: "Get content children by type",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"contentID": {
 					Type:        "string",
-					Description: "The ID of the parent content item.",
+					Description: "The content ID",
 				},
 				"childType": {
 					Type:        "string",
-					Description: "The type of child content to retrieve (e.g., 'page', 'comment', 'attachment').",
+					Description: "The child type",
 				},
 				"expand": {
 					Type:        "array",
 					Items:       &jsonschema.Schema{Type: "string"},
-					Description: "Array of properties to expand in the result (e.g., ['body.storage', 'version']).",
+					Description: "Fields to expand in the results",
 				},
 				"start": {
 					Type:        "integer",
-					Description: "The starting index of the returned children. Default: 0",
+					Description: "The start index for pagination",
 				},
 				"limit": {
 					Type:        "integer",
-					Description: "The limit of the number of children to return. Default: 25, Max: 100",
+					Description: "The maximum number of results to return",
 				},
 				"orderBy": {
 					Type:        "string",
-					Description: "Field to order results by.",
+					Description: "The order by field",
 				},
 			},
 			Required: []string{"contentID", "childType"},
@@ -133,29 +135,30 @@ func AddChildrenTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "confluence_get_content_comments",
-		Description: "Get comments for a specific Confluence content item.",
+		Description: "Get content comments",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"contentID": {
 					Type:        "string",
-					Description: "The ID of the content item to retrieve comments for.",
+					Description: "The content ID",
 				},
 				"expand": {
 					Type:        "array",
 					Items:       &jsonschema.Schema{Type: "string"},
-					Description: "Array of properties to expand in the result (e.g., ['body.storage', 'version']).",
+					Description: "Fields to expand in the results",
 				},
 				"parentVersion": {
 					Type:        "string",
-					Description: "The version of the parent content to retrieve comments for. Default: \"\" (latest)",
+					Description: "The parent version",
 				},
 				"start": {
 					Type:        "integer",
-					Description: "The starting index of the returned comments. Default: 0",
+					Description: "The start index for pagination",
 				},
 				"limit": {
 					Type:        "integer",
-					Description: "The limit of the number of comments to return. Default: 25, Max: 100",
+					Description: "The maximum number of results to return",
 				},
 			},
 			Required: []string{"contentID"},

@@ -111,6 +111,7 @@ func AddProjectTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_projects",
 		Description: "Get projects",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"name": {
 					Type:        "string",
@@ -136,6 +137,7 @@ func AddProjectTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_project",
 		Description: "Get a specific project by key",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -148,8 +150,9 @@ func AddProjectTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "bitbucket_get_project_primary_enhanced_entity_link",
-		Description: "Get the primary enhanced entity link for a project",
+		Description: "Get project's primary enhanced entity link",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -164,6 +167,7 @@ func AddProjectTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_project_tasks",
 		Description: "Get tasks for a specific project",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -171,7 +175,7 @@ func AddProjectTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 				},
 				"markup": {
 					Type:        "string",
-					Description: "Markup format for the tasks",
+					Description: "Markup format for the response",
 				},
 				"limit": {
 					Type:        "integer",
@@ -190,6 +194,7 @@ func AddProjectTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_repository_tasks",
 		Description: "Get tasks for a specific repository",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -201,7 +206,7 @@ func AddProjectTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 				},
 				"markup": {
 					Type:        "string",
-					Description: "Markup format for the tasks",
+					Description: "Markup format for the response",
 				},
 				"limit": {
 					Type:        "integer",

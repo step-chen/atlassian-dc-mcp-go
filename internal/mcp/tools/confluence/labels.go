@@ -48,6 +48,7 @@ func AddLabelTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_get_related_labels",
 		Description: "Get labels related to a specific label. This tool allows you to find labels that are commonly used together with a given label.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"labelName": {
 					Type:        "string",
@@ -70,6 +71,7 @@ func AddLabelTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_get_labels",
 		Description: "Get labels with various filter options. This tool allows you to retrieve labels based on name, owner, namespace, or space.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"labelName": {
 					Type:        "string",

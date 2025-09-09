@@ -121,6 +121,7 @@ func AddSpaceTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_get_spaces",
 		Description: "Get a list of Confluence spaces. This tool allows you to retrieve multiple spaces with pagination support.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"start": {
 					Type:        "integer",
@@ -138,6 +139,7 @@ func AddSpaceTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_get_space",
 		Description: "Get a specific Confluence space by its key. This tool allows you to retrieve detailed information about a space including its name, description, and metadata.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"spaceKey": {
 					Type:        "string",
@@ -157,6 +159,7 @@ func AddSpaceTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_get_contents_in_space",
 		Description: "Get contents in a specific Confluence space. This tool allows you to retrieve all content items within a space with pagination support.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"spaceKey": {
 					Type:        "string",
@@ -184,6 +187,7 @@ func AddSpaceTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_get_contents_by_type",
 		Description: "Get contents by type in a specific Confluence space. This tool allows you to retrieve content items of a specific type (e.g., page, blogpost) within a space.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"spaceKey": {
 					Type:        "string",
@@ -215,6 +219,7 @@ func AddSpaceTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 		Name:        "confluence_get_spaces_by_key",
 		Description: "Get spaces by key with various filter options. This tool allows you to retrieve spaces using multiple filter criteria including keys, IDs, types, status, and labels.",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"keys": {
 					Type:        "array",

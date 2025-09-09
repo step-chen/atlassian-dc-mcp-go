@@ -73,7 +73,35 @@ func HandleHTTPError(resp *http.Response, service string) error {
 	return fmt.Errorf("[%s] %s : %d - %s", service, strErr, resp.StatusCode, bodyString)
 }
 
+// SetQueryParam sets a query parameter based on its value and an invalid value to compare against.
+// If the value matches the invalid value, the parameter is not set.
+// For slices, the parameter is set only if the slice is not empty.
+// For other types, specific rules apply:
+// - int: set only if greater than 0
+// - string: set only if not empty
+// - bool: always set
+// - pointers: set only if not nil and the dereferenced value is valid
 func SetQueryParam(params url.Values, key string, value any, invalid any) {
+	// Handle slice comparisons specially since slices are not comparable
+	if slice, ok := value.([]string); ok {
+		// Check if slice is empty
+		if len(slice) == 0 {
+			// Also check if the invalid value is an empty slice
+			if invalidSlice, ok := invalid.([]string); ok && len(invalidSlice) == 0 {
+				return
+			} else if invalid == nil {
+				return
+			}
+		}
+
+		// If we get here, the slice is not empty, so process it
+		for _, s := range slice {
+			params.Add(key, s)
+		}
+		return
+	}
+
+	// For non-slice types, use the original comparison
 	if value == invalid {
 		return
 	}
@@ -89,12 +117,6 @@ func SetQueryParam(params url.Values, key string, value any, invalid any) {
 		}
 	case bool:
 		params.Set(key, strconv.FormatBool(v))
-	case []string:
-		if len(v) > 0 {
-			for _, s := range v {
-				params.Add(key, s)
-			}
-		}
 	case *string:
 		if v != nil && *v != "" {
 			params.Set(key, *v)

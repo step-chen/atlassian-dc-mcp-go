@@ -20,9 +20,9 @@ import (
 //   - map[string]any: The issue data
 //   - error: An error if the request fails
 func (c *JiraClient) GetIssue(issueKey string, fields []string) (map[string]any, error) {
-
 	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "fields", fields, []string{})
+	// Pass nil as the invalid value for fields since we want to include fields when the slice is empty
+	utils.SetQueryParam(queryParams, "fields", fields, nil)
 
 	var issue map[string]any
 	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "issue", issueKey}, queryParams, nil, &issue)

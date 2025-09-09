@@ -1,5 +1,5 @@
 # Ignore configuration file with sensitive information
-config.yaml
+config*.yaml
 
 # Binaries for programs and plugins
 *.exe
@@ -56,3 +56,5 @@ Thumbs.db
 
 # Test configuration files with sensitive information
 test_config.json
+
+*.bak

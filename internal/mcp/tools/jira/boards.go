@@ -130,6 +130,7 @@ func AddBoardTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_boards",
 		Description: "Get Jira boards with optional filters",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"startAt": {
 					Type:        "integer",
@@ -159,6 +160,7 @@ func AddBoardTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_board",
 		Description: "Get a specific Jira board by its ID",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"id": {
 					Type:        "integer",
@@ -173,6 +175,7 @@ func AddBoardTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_board_backlog",
 		Description: "Get backlog issues for a Jira board",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"boardId": {
 					Type:        "integer",
@@ -212,6 +215,7 @@ func AddBoardTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_board_epics",
 		Description: "Get epics associated with a Jira board",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"boardId": {
 					Type:        "integer",
@@ -238,6 +242,7 @@ func AddBoardTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_board_sprints",
 		Description: "Get sprints associated with a Jira board",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"boardId": {
 					Type:        "integer",
@@ -264,6 +269,7 @@ func AddBoardTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_sprint",
 		Description: "Get a specific Jira sprint by its ID",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"sprintId": {
 					Type:        "integer",
@@ -278,6 +284,7 @@ func AddBoardTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_sprint_issues",
 		Description: "Get issues in a specific Jira sprint",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"sprintId": {
 					Type:        "integer",

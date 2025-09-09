@@ -72,6 +72,7 @@ func AddAttachmentTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_attachment",
 		Description: "Get a specific attachment",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",
@@ -94,6 +95,7 @@ func AddAttachmentTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 		Name:        "bitbucket_get_attachment_metadata",
 		Description: "Get metadata for a specific attachment",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"projectKey": {
 					Type:        "string",

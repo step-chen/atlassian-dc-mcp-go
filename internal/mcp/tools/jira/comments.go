@@ -53,6 +53,7 @@ func AddCommentTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_get_comments",
 		Description: "Get comments for a Jira issue",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"issueKey": {
 					Type:        "string",
@@ -83,6 +84,7 @@ func AddCommentTools(server *mcp.Server, client *jira.JiraClient) {
 		Name:        "jira_add_comment",
 		Description: "Add a comment to a Jira issue",
 		InputSchema: &jsonschema.Schema{
+			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
 				"issueKey": {
 					Type:        "string",

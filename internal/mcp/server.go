@@ -5,6 +5,10 @@ package mcp
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+
+	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 	"atlassian-dc-mcp-go/internal/client/confluence"
@@ -13,8 +17,6 @@ import (
 	bitbucketTools "atlassian-dc-mcp-go/internal/mcp/tools/bitbucket"
 	confluenceTools "atlassian-dc-mcp-go/internal/mcp/tools/confluence"
 	jiraTools "atlassian-dc-mcp-go/internal/mcp/tools/jira"
-
-	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 type Server struct {
@@ -33,7 +35,7 @@ func NewServer(cfg *config.Config) *Server {
 }
 
 // Initialize sets up the server with clients for Jira, Confluence, and Bitbucket based on configuration
-func (s *Server) Initialize(ctx context.Context) error {
+func (s *Server) Initialize() error {
 	if s.config.Jira.URL != "" && s.config.Jira.Token != "" {
 		s.jiraClient = jira.NewJiraClient(&s.config.Jira)
 	}
@@ -58,9 +60,23 @@ func (s *Server) Initialize(ctx context.Context) error {
 	return nil
 }
 
-// Start begins the MCP server using the stdio transport
+// Start begins the MCP server using the configured transport
 func (s *Server) Start(ctx context.Context) error {
-	return s.mcpServer.Run(ctx, &mcp.StdioTransport{})
+	switch s.config.Transport {
+	case "stdio":
+		return s.mcpServer.Run(ctx, &mcp.StdioTransport{})
+	case "sse":
+		return s.mcpServer.Run(ctx, &mcp.SSEServerTransport{})
+	case "http":
+		handler := mcp.NewStreamableHTTPHandler(func(req *http.Request) *mcp.Server {
+			return s.mcpServer
+		}, nil)
+
+		addr := fmt.Sprintf(":%d", s.config.Port)
+		return http.ListenAndServe(addr, handler)
+	default:
+		return s.mcpServer.Run(ctx, &mcp.StdioTransport{})
+	}
 }
 
 // Stop gracefully stops the MCP server
