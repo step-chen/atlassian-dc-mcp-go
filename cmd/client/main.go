@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
 	"time"
@@ -15,6 +15,20 @@ import (
 )
 
 func main() {
+	// Define command line flags
+	configPath := flag.String("c", "", "Path to config file (optional)")
+	flag.StringVar(configPath, "config", "", "Path to config file (optional)")
+	help := flag.Bool("h", false, "Show help message")
+	flag.BoolVar(help, "help", false, "Show help message")
+	flag.Parse()
+
+	if *help {
+		fmt.Println("Atlassian Data Center MCP Client")
+		fmt.Println("Usage: client [options]")
+		fmt.Println("Options:")
+		flag.PrintDefaults()
+		os.Exit(0)
+	}
 
 	// Initialize logger
 	logging.InitLogger(&logging.Config{
@@ -27,7 +41,7 @@ func main() {
 	}()
 
 	// Load configuration
-	cfg, err := config.LoadConfig()
+	cfg, err := config.LoadConfig(*configPath)
 	if err != nil {
 		logger.Fatal("Failed to load configuration", zap.Error(err))
 	}
@@ -55,65 +69,36 @@ func main() {
 		Version: "1.0.0",
 	}, nil)
 
-	// Connect to the server using appropriate transport based on config
-	var session *mcp.ClientSession
-	if cfg.Transport == "http" {
-		// Use HTTP transport
-		endpoint := fmt.Sprintf("http://localhost:%d", cfg.Port)
-		logger.Info("Connecting to MCP server via HTTP", zap.String("endpoint", endpoint))
-		session, err = client.Connect(ctx, &mcp.StreamableClientTransport{
-			Endpoint: endpoint,
-		}, nil)
-	} else {
-		// Default to stdio transport
-		logger.Info("Connecting to MCP server via stdio")
-		session, err = client.Connect(ctx, &mcp.StdioTransport{}, nil)
-	}
-	
+	// Connect to the server via stdio
+	session, err := client.Connect(ctx, &mcp.StdioTransport{}, nil)
 	if err != nil {
-		logger.Fatal("Failed to connect to MCP server", zap.Error(err))
+		logger.Fatal("Failed to connect to server", zap.Error(err))
 	}
-	defer func() {
-		session.Close()
-		logger.Info("MCP session closed")
-	}()
+	defer session.Close()
 
-	// Call the jira_get_issue tool with issue key HAD-10228
-	logger.Info("Calling jira_get_issue tool for HAD-10228")
-	result, err := session.CallTool(ctx, &mcp.CallToolParams{
-		Name: "jira_get_issue",
-		Arguments: map[string]interface{}{
-			"issueKey": "HAD-10228",
-		},
-	})
-
+	// List available tools
+	tools, err := session.ListTools(ctx, &mcp.ListToolsParams{})
 	if err != nil {
-		logger.Error("Failed to call jira_get_issue tool", zap.Error(err))
-		os.Exit(1)
+		logger.Error("Failed to list tools", zap.Error(err))
+		return
 	}
 
-	// Print the result
-	logger.Info("Successfully called jira_get_issue tool")
-	fmt.Println("\n=== Jira Issue HAD-10228 ===")
-	
-	// Print the raw result
-	resultJSON, _ := json.MarshalIndent(result, "", "  ")
-	fmt.Printf("Raw result: %s\n", resultJSON)
-	
-	// Process content if available
-	if result.Content != nil {
-		fmt.Println("\n--- Content ---")
-		for _, content := range result.Content {
-			// Try to convert to TextContent
-			contentJSON, _ := json.Marshal(content)
-			fmt.Printf("Content: %s\n", string(contentJSON))
+	fmt.Printf("Available tools (%d):\n", len(tools.Tools))
+	for _, tool := range tools.Tools {
+		fmt.Printf("- %s: %s\n", tool.Name, tool.Description)
+	}
+
+	// Example: Call a tool
+	if len(tools.Tools) > 0 {
+		fmt.Println("\nCalling capabilities tool...")
+		result, err := session.CallTool(ctx, &mcp.CallToolParams{
+			Name: "capabilities",
+		})
+		if err != nil {
+			logger.Error("Failed to call capabilities tool", zap.Error(err))
+			return
 		}
-	}
-	
-	// Check for error in result
-	if result.StructuredContent != nil {
-		fmt.Println("\n--- Structured Content ---")
-		structuredJSON, _ := json.MarshalIndent(result.StructuredContent, "", "  ")
-		fmt.Printf("Structured content: %s\n", structuredJSON)
+
+		fmt.Printf("Capabilities result: %+v\n", result)
 	}
 }

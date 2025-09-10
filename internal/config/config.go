@@ -100,28 +100,33 @@ func (c *Config) Validate() error {
 //
 // Returns a pointer to the loaded Config and nil error if successful,
 // or nil and an error if configuration loading fails.
-func LoadConfig() (*Config, error) {
-	viper.SetConfigName("config")
+func LoadConfig(configPath string) (*Config, error) {
 	viper.SetConfigType("yaml")
 
-	viper.AddConfigPath(".")
+	// If a config path is provided, use it directly
+	if configPath != "" {
+		viper.SetConfigFile(configPath)
+	} else {
+		viper.SetConfigName("config")
+		viper.AddConfigPath(".")
 
-	if execPath, err := os.Executable(); err == nil {
-		execDir := filepath.Dir(execPath)
-		viper.AddConfigPath(execDir)
-
-		for i := 0; i < 3; i++ {
-			execDir = filepath.Dir(execDir)
+		if execPath, err := os.Executable(); err == nil {
+			execDir := filepath.Dir(execPath)
 			viper.AddConfigPath(execDir)
+
+			for i := 0; i < 3; i++ {
+				execDir = filepath.Dir(execDir)
+				viper.AddConfigPath(execDir)
+			}
 		}
-	}
 
-	if wd, err := os.Getwd(); err == nil {
-		viper.AddConfigPath(wd)
-
-		for i := 0; i < 3; i++ {
-			wd = filepath.Dir(wd)
+		if wd, err := os.Getwd(); err == nil {
 			viper.AddConfigPath(wd)
+
+			for i := 0; i < 3; i++ {
+				wd = filepath.Dir(wd)
+				viper.AddConfigPath(wd)
+			}
 		}
 	}
 

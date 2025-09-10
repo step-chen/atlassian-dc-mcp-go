@@ -15,6 +15,7 @@ import (
 	"atlassian-dc-mcp-go/internal/client/jira"
 	"atlassian-dc-mcp-go/internal/config"
 	bitbucketTools "atlassian-dc-mcp-go/internal/mcp/tools/bitbucket"
+	"atlassian-dc-mcp-go/internal/mcp/tools/common"
 	confluenceTools "atlassian-dc-mcp-go/internal/mcp/tools/confluence"
 	jiraTools "atlassian-dc-mcp-go/internal/mcp/tools/jira"
 )
@@ -25,6 +26,7 @@ type Server struct {
 	confluenceClient *confluence.ConfluenceClient
 	bitbucketClient  *bitbucket.BitbucketClient
 	mcpServer        *mcp.Server
+	httpServer       *http.Server
 }
 
 // NewServer creates a new MCP server instance with the provided configuration
@@ -73,18 +75,51 @@ func (s *Server) Start(ctx context.Context) error {
 		}, nil)
 
 		addr := fmt.Sprintf(":%d", s.config.Port)
-		return http.ListenAndServe(addr, handler)
+		s.httpServer = &http.Server{
+			Addr:    addr,
+			Handler: handler,
+		}
+		return s.httpServer.ListenAndServe()
 	default:
 		return s.mcpServer.Run(ctx, &mcp.StdioTransport{})
 	}
 }
 
 // Stop gracefully stops the MCP server
-func (s *Server) Stop() {
+func (s *Server) Stop(ctx context.Context) error {
+	if s.httpServer != nil {
+		// For HTTP transport, we gracefully stop the HTTP server
+		return s.httpServer.Shutdown(ctx)
+	}
+	// For stdio and sse, the server is stopped by canceling the context passed to Start().
+	return nil
+}
+
+// GetConfig returns the server's configuration.
+func (s *Server) GetConfig() *config.Config {
+	return s.config
+}
+
+// GetJiraClient returns the Jira client instance.
+func (s *Server) GetJiraClient() *jira.JiraClient {
+	return s.jiraClient
+}
+
+// GetConfluenceClient returns the Confluence client instance.
+func (s *Server) GetConfluenceClient() *confluence.ConfluenceClient {
+	return s.confluenceClient
+}
+
+// GetBitbucketClient returns the Bitbucket client instance.
+func (s *Server) GetBitbucketClient() *bitbucket.BitbucketClient {
+	return s.bitbucketClient
 }
 
 // addTools registers all available tools with the MCP server
 func (s *Server) addTools() {
+	common.AddHealthCheckTool(s.mcpServer, s)
+	common.AddCapabilitiesTool(s.mcpServer)
+
 	if s.jiraClient != nil {
 		s.addJiraTools()
 	}

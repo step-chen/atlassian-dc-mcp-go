@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mcp-server:
-    image: ${IMAGE_NAME}:latest
+    image: ${IMAGE_NAME:-atlassian-dc-mcp-go}:latest
     # Build the image from the Dockerfile in the current directory
     build: .
     container_name: atlassian-dc-mcp
@@ -12,9 +12,9 @@ services:
       - ./.env:/app/.env:ro
     # Expose ports (only relevant for HTTP mode)
     ports:
-      - "${PORT:-8090}:${PORT:-8090}"
+      - "${MCP_PORT:-8090}:${MCP_PORT:-8090}"
     # Environment variables
     environment:
-      - PORT=${PORT:-8090}
+      - MCP_PORT=${MCP_PORT:-8090}
     # Restart policy
     restart: unless-stopped
