@@ -88,6 +88,34 @@ lint:
 	@# Assuming golangci-lint is installed
 	@golangci-lint run
 
+# ==============================================================================
+# Docker Targets
+# ==============================================================================
+DOCKER_IMAGE_NAME ?= github.com/step-chen/atlassian-dc-mcp
+DOCKER_IMAGE_TAG  ?= latest
+
+.PHONY: docker-build docker-push docker-compose-up docker-compose-down
+
+# Build the Docker image
+docker-build:
+	@echo "Building Docker image $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)..."
+	@docker build -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) .
+
+# Push the Docker image to a registry
+docker-push: docker-build
+	@echo "Pushing Docker image $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)..."
+	@docker push $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)
+
+# Run services using docker-compose
+docker-compose-up:
+	@echo "Starting services with docker compose..."
+	@IMAGE_NAME=$(DOCKER_IMAGE_NAME) docker compose up --build -d
+
+# Stop services using docker-compose
+docker-compose-down:
+	@echo "Stopping services with docker compose..."
+	@IMAGE_NAME=$(DOCKER_IMAGE_NAME) docker compose down
+
 # Help information
 help:
 	@echo "Available commands:"
@@ -102,4 +130,11 @@ help:
 	@echo "  make deps          Tidy go.mod and go.sum."
 	@echo "  make lint          Run the linter (requires golangci-lint)."
 	@echo "  make clean         Remove the build directory."
+	@echo ""
+	@echo "Docker Commands:"
+	@echo "  make docker-build        Build the Docker image."
+	@echo "  make docker-push         Push the Docker image to a registry."
+	@echo "  make docker-compose-up   Start services using docker compose."
+	@echo "  make docker-compose-down Stop services using docker compose."
+	@echo ""
 	@echo "  make help          Show this help message."

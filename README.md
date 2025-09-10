@@ -26,13 +26,13 @@ go run cmd/server/main.go
 go run cmd/server/main.go -c /path/to/your/config.yaml
 
 # Or using long form
-go run cmd/server/main.go -config /path/to/your/config.yaml
+go run cmd/server/main.go --config /path/to/your/config.yaml
 
 # Show help
 go run cmd/server/main.go -h
 
 # Or using long form
-go run cmd/server/main.go -help
+go run cmd/server/main.go --help
 ```
 
 ### Building and Running Binaries
@@ -75,15 +75,6 @@ Then edit `config.yaml` with your settings before running the Docker container.
 
 The application can be run in three different modes via Docker, depending on the transport mode configured:
 
-#### Stdio Mode (Default)
-
-For stdio mode, no ports need to be exposed as communication happens through standard input/output:
-
-```bash
-docker build -t atlassian-dc-mcp-go .
-docker run -v $(pwd)/config.yaml:/app/config.yaml atlassian-dc-mcp-go
-```
-
 #### HTTP Mode
 
 For HTTP mode, you need to expose the configured port:
@@ -119,9 +110,27 @@ transport: "sse"
 port: 8090
 ```
 
+#### Stdio Mode (Default)
+
+For stdio mode, no ports need to be exposed as communication happens through standard input/output. This mode is typically used when the server is started by another process that communicates with it directly through stdio pipes:
+
+```bash
+# Build the binary first
+make build
+
+# Run in stdio mode (no need for Docker)
+./dist/atlassian-dc-mcp-server
+
+# Or run directly with go
+make run-server
+```
+
+Note: When using stdio mode, the server should not be run in Docker with port mappings as it doesn't require network communication.
+
 #### MCP Server Configuration
 
 When running the MCP server, make sure your configuration file or environment variables are properly set for the desired transport mode.
+
 #### Docker Compose
 
 A `docker-compose.yml` file is provided for easier deployment:
@@ -260,10 +269,73 @@ MCP_BITBUCKET_PERMISSIONS_READ=true
 MCP_BITBUCKET_PERMISSIONS_WRITE=false
 ```
 
+Create .env file from example:
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` file with your settings. Configuration changes will be automatically applied without restarting the service.
+
 ### Hot Reloading
 
 The application supports hot reloading of configuration. When the config.yaml file is modified, 
 the changes are automatically applied without restarting the service.
+
+## Client Configuration
+
+To use this service with an AI assistant that supports MCP, you need to configure the AI assistant to connect to the MCP server. Here's an example configuration for the MCP servers:
+
+
+This configuration provides two ways to use the service with an AI assistant:
+
+1. **stdio-based method** (`atlassian-dc-mcp-stdio`): 
+   - The AI assistant will directly execute the server binary
+   - No prior setup is required as the server starts on-demand
+```json
+{
+  "mcpServers": {
+    "atlassian-dc-mcp-stdio": {
+      "command": "/path/to/atlassian-dc-mcp-go/dist/atlassian-dc-mcp-server",
+      "args": [
+        "-c",
+        "/path/to/atlassian-dc-mcp-go/config_stdio.yaml"
+      ]
+    }
+  }
+}
+```
+
+2. **HTTP-based method** (`atlassian-dc-mcp-http`):
+   - The AI assistant connects to a running HTTP server at the specified URL
+   - You must start the HTTP server first before using this method
+   - To start the HTTP server, you can use Docker:
+```json
+{
+  "mcpServers": {
+    "atlassian-dc-mcp-http": {
+      "url": "http://localhost:8090/mcp"
+    }
+  }
+}
+```
+
+   ```bash
+   # Make sure you have configured config_http.yaml with your settings
+   cp config.yaml.example config_http.yaml
+   # Edit config_http.yaml to set transport: "http" and your service credentials
+   
+   # Start the HTTP server using Docker
+   docker run -p 8090:8090 -v $(pwd)/config_http.yaml:/app/config.yaml atlassian-dc-mcp-go
+   ```
+
+   - Alternatively, you can start it directly:
+   ```bash
+   # Build the binary first
+   make build
+   
+   # Run with HTTP config
+   ./dist/atlassian-dc-mcp-server -c config_http.yaml
+   ```
 
 ## Permissions
 
@@ -333,6 +405,8 @@ Tools for interacting with Bitbucket:
 
 ### Building
 
+It is recommended to use the Makefile to build the project, which ensures all build artifacts are placed in the unified `dist` directory:
+
 ```bash
 # Build server binary to dist directory
 make build
@@ -341,14 +415,19 @@ make build
 To build binaries for specific operating systems:
 ```bash
 # Build for Linux
-GOOS=linux GOARCH=amd64 make build
+make build-linux
 
 # Build for Windows
-GOOS=windows GOARCH=amd64 make build
+make build-windows
 
 # Build for macOS
-GOOS=darwin GOARCH=amd64 make build
+make build-macos
 ```
+
+Benefits of using make commands:
+- All build artifacts are placed in the `dist` directory
+- Automatically handles cross-platform builds
+- Ensures consistent build parameters
 
 ### Testing
 
