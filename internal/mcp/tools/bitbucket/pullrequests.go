@@ -35,7 +35,7 @@ func (h *Handler) getPullRequestsHandler(ctx context.Context, req *mcp.CallToolR
 		direction, _ := tools.GetStringArg(args, "direction")
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetPullRequests(projectKey, repoSlug, state, withAttributes, at, withProperties, draft, filterText, order, direction, start, limit)
 	})
@@ -85,7 +85,7 @@ func (h *Handler) getPullRequestActivitiesHandler(ctx context.Context, req *mcp.
 		fromId, _ := tools.GetStringArg(args, "fromId")
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetPullRequestActivities(projectKey, repoSlug, pullRequestId, fromType, fromId, start, limit)
 	})
@@ -285,7 +285,7 @@ func (h *Handler) getPullRequestCommentsHandler(ctx context.Context, req *mcp.Ca
 		states, _ := tools.GetStringArg(args, "states")
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetPullRequestComments(projectKey, repoSlug, pullRequestId, path, fromHash, anchorState, toHash, state, diffType, diffTypes, states, start, limit)
 	})
@@ -296,7 +296,7 @@ func (h *Handler) getPullRequestSuggestionsHandler(ctx context.Context, req *mcp
 	return tools.HandleToolOperation("get pull request suggestions", func() (interface{}, error) {
 		changesSince, _ := tools.GetStringArg(args, "changesSince")
 
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetPullRequestSuggestions(changesSince, limit)
 	})
@@ -313,7 +313,7 @@ func (h *Handler) getPullRequestsForUserHandler(ctx context.Context, req *mcp.Ca
 		order, _ := tools.GetStringArg(args, "order")
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetPullRequestsForUser(closedSince, role, participantStatus, state, user, order, start, limit)
 	})

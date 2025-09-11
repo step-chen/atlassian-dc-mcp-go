@@ -19,7 +19,7 @@ func (h *Handler) getRelatedLabelsHandler(ctx context.Context, req *mcp.CallTool
 		}
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetRelatedLabels(labelName, start, limit)
 	})
@@ -34,7 +34,7 @@ func (h *Handler) getLabelsHandler(ctx context.Context, req *mcp.CallToolRequest
 		spaceKey, _ := tools.GetStringArg(args, "spaceKey")
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetLabels(labelName, owner, namespace, spaceKey, start, limit)
 	})

@@ -28,7 +28,7 @@ func (h *Handler) getTagsHandler(ctx context.Context, req *mcp.CallToolRequest, 
 		orderBy, _ := tools.GetStringArg(args, "orderBy")
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetTags(projectKey, repoSlug, filterText, orderBy, start, limit)
 	})

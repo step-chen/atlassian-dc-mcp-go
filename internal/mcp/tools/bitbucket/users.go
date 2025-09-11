@@ -41,7 +41,7 @@ func (h *Handler) getUsersHandler(ctx context.Context, req *mcp.CallToolRequest,
 		permissionFilters := make(map[string]string)
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		// Add pagination to permission filters
 		if start > 0 {

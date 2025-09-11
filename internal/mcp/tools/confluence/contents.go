@@ -168,7 +168,7 @@ func (h *Handler) getCommentsHandler(ctx context.Context, req *mcp.CallToolReque
 
 		expand := tools.GetStringSliceArg(args, "expand")
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetComments(contentID, expand, start, limit)
 	})
@@ -209,7 +209,7 @@ func (h *Handler) getAttachmentsHandler(ctx context.Context, req *mcp.CallToolRe
 
 		expand := tools.GetStringSliceArg(args, "expand")
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 		filename, _ := tools.GetStringArg(args, "filename")
 		mediaType, _ := tools.GetStringArg(args, "mediaType")
 

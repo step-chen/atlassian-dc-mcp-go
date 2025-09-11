@@ -33,7 +33,7 @@ func (h *Handler) getBranchesHandler(ctx context.Context, req *mcp.CallToolReque
 		boostMatches := tools.GetBoolArg(args, "boostMatches", false)
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		details := tools.GetBoolArg(args, "details", false)
 
@@ -77,7 +77,7 @@ func (h *Handler) getBranchInfoByCommitIdHandler(ctx context.Context, req *mcp.C
 		}
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetBranchInfoByCommitId(projectKey, repoSlug, commitId, start, limit)
 	})

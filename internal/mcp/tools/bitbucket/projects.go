@@ -17,7 +17,7 @@ func (h *Handler) getProjectsHandler(ctx context.Context, req *mcp.CallToolReque
 		name, _ := tools.GetStringArg(args, "name")
 		permission, _ := tools.GetStringArg(args, "permission")
 
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 		start := tools.GetIntArg(args, "start", 0)
 
 		return h.client.GetProjects(name, permission, start, limit)
@@ -57,7 +57,7 @@ func (h *Handler) getProjectTasksHandler(ctx context.Context, req *mcp.CallToolR
 
 	markup, _ := tools.GetStringArg(args, "markup")
 
-	limit := tools.GetIntArg(args, "limit", 25)
+	limit := tools.GetIntArg(args, "limit", 10)
 	start := tools.GetIntArg(args, "start", 0)
 
 	tasks, err := h.client.GetProjectTasks(projectKey, markup, start, limit)
@@ -87,7 +87,7 @@ func (h *Handler) getRepositoryTasksHandler(ctx context.Context, req *mcp.CallTo
 
 	markup, _ := tools.GetStringArg(args, "markup")
 
-	limit := tools.GetIntArg(args, "limit", 25)
+	limit := tools.GetIntArg(args, "limit", 10)
 	start := tools.GetIntArg(args, "start", 0)
 
 	tasks, err := h.client.GetRepositoryTasks(projectKey, repoSlug, markup, start, limit)

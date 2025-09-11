@@ -42,7 +42,7 @@ func (h *Handler) getContentChildrenByTypeHandler(ctx context.Context, req *mcp.
 		expand := tools.GetStringSliceArg(args, "expand")
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		orderBy, _ := tools.GetStringArg(args, "orderBy")
 
@@ -63,7 +63,7 @@ func (h *Handler) getContentCommentsHandler(ctx context.Context, req *mcp.CallTo
 		parentVersion, _ := tools.GetStringArg(args, "parentVersion")
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetContentComments(contentID, expand, parentVersion, start, limit)
 	})

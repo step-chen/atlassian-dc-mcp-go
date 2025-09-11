@@ -37,7 +37,7 @@ func (h *Handler) getRepositoriesHandler(ctx context.Context, req *mcp.CallToolR
 		}
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		projectName, _ := tools.GetStringArg(args, "projectName")
 		permission, _ := tools.GetStringArg(args, "permission")
@@ -60,7 +60,7 @@ func (h *Handler) getProjectRepositoriesHandler(ctx context.Context, req *mcp.Ca
 		}
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetProjectRepositories(projectKey, start, limit)
 	})
@@ -142,7 +142,7 @@ func (h *Handler) getFilesHandler(ctx context.Context, req *mcp.CallToolRequest,
 		at, _ := tools.GetStringArg(args, "at")
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetFiles(projectKey, repoSlug, path, at, start, limit)
 	})
@@ -165,7 +165,7 @@ func (h *Handler) getChangesHandler(ctx context.Context, req *mcp.CallToolReques
 		since, _ := tools.GetStringArg(args, "since")
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetChanges(projectKey, repoSlug, until, since, limit, start)
 	})
@@ -197,7 +197,7 @@ func (h *Handler) compareChangesHandler(ctx context.Context, req *mcp.CallToolRe
 		fromRepo, _ := tools.GetStringArg(args, "fromRepo")
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.CompareChanges(projectKey, repoSlug, from, to, fromRepo, limit, start)
 	})
@@ -217,7 +217,7 @@ func (h *Handler) getForksHandler(ctx context.Context, req *mcp.CallToolRequest,
 		}
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetForks(projectKey, repoSlug, start, limit)
 	})
@@ -277,7 +277,7 @@ func (h *Handler) getRelatedRepositoriesHandler(ctx context.Context, req *mcp.Ca
 		}
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetRelatedRepositories(projectKey, repoSlug, start, limit)
 	})

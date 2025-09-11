@@ -29,7 +29,7 @@ func (h *Handler) getCommitsHandler(ctx context.Context, req *mcp.CallToolReques
 		path, _ := tools.GetStringArg(args, "path")
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		merges, _ := tools.GetStringArg(args, "merges")
 
@@ -86,7 +86,7 @@ func (h *Handler) getCommitChangesHandler(ctx context.Context, req *mcp.CallTool
 		}
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		withComments, _ := tools.GetStringArg(args, "withComments")
 		since, _ := tools.GetStringArg(args, "since")
@@ -141,7 +141,7 @@ func (h *Handler) getCommitCommentsHandler(ctx context.Context, req *mcp.CallToo
 		}
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		path, _ := tools.GetStringArg(args, "path")
 
@@ -264,7 +264,7 @@ func (h *Handler) getJiraIssueCommitsHandler(ctx context.Context, req *mcp.CallT
 		}
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 		maxChanges := tools.GetIntArg(args, "maxChanges", 0)
 
 		return h.client.GetJiraIssueCommits(issueKey, start, limit, maxChanges)

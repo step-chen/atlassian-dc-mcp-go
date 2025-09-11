@@ -14,7 +14,7 @@ import (
 func (h *Handler) getSpacesHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
 	return tools.HandleToolOperation("get spaces", func() (interface{}, error) {
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		return h.client.GetSpaces(limit, start)
 	})
@@ -43,7 +43,7 @@ func (h *Handler) getContentsInSpaceHandler(ctx context.Context, req *mcp.CallTo
 		}
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		expand := tools.GetStringSliceArg(args, "expand")
 
@@ -65,7 +65,7 @@ func (h *Handler) getContentsByTypeHandler(ctx context.Context, req *mcp.CallToo
 		}
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		expand := tools.GetStringSliceArg(args, "expand")
 
@@ -79,7 +79,7 @@ func (h *Handler) getSpacesByKeyHandler(ctx context.Context, req *mcp.CallToolRe
 		keys := tools.GetStringSliceArg(args, "keys")
 
 		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 25)
+		limit := tools.GetIntArg(args, "limit", 10)
 
 		expand := tools.GetStringSliceArg(args, "expand")
 
