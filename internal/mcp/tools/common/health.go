@@ -26,9 +26,6 @@ type AppServer interface {
 // getPermissionsList converts Permissions struct to a list of permission strings
 func getPermissionsList(permissions config.Permissions) []string {
 	var perms []string
-	if permissions.Read {
-		perms = append(perms, "read")
-	}
 	if permissions.Write {
 		perms = append(perms, "write")
 	}

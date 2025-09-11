@@ -302,7 +302,7 @@ func (h *Handler) getDiffBetweenRevisionsForPathHandler(ctx context.Context, req
 }
 
 // AddCommitTools registers the commit-related tools with the MCP server
-func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
+func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWritePermission bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -405,6 +405,10 @@ func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 					Type:        "string",
 					Description: "The commit ID to retrieve changes for",
 				},
+				"since": {
+					Type:        "string",
+					Description: "Filter changes since a specific time",
+				},
 				"start": {
 					Type:        "integer",
 					Description: "The starting index of the returned changes",
@@ -417,14 +421,49 @@ func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 					Type:        "boolean",
 					Description: "Include comments in response",
 				},
-				"since": {
-					Type:        "string",
-					Description: "Filter changes since a specific time",
-				},
 			},
 			Required: []string{"projectKey", "repoSlug", "commitId"},
 		},
 	}, handler.getCommitChangesHandler)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "bitbucket_get_commit_comments",
+		Description: "Get comments on a commit",
+		InputSchema: &jsonschema.Schema{
+			Type: "object",
+			Properties: map[string]*jsonschema.Schema{
+				"projectKey": {
+					Type:        "string",
+					Description: "The project key",
+				},
+				"repoSlug": {
+					Type:        "string",
+					Description: "The repository slug",
+				},
+				"commitId": {
+					Type:        "string",
+					Description: "The commit ID",
+				},
+				"path": {
+					Type:        "string",
+					Description: "Filter comments by file path",
+				},
+				"since": {
+					Type:        "string",
+					Description: "Filter comments since a specific time",
+				},
+				"start": {
+					Type:        "integer",
+					Description: "The starting index of the returned comments",
+				},
+				"limit": {
+					Type:        "integer",
+					Description: "The limit of the number of comments to return",
+				},
+			},
+			Required: []string{"projectKey", "repoSlug", "commitId"},
+		},
+	}, handler.getCommitCommentsHandler)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "bitbucket_get_commit_comment",
@@ -452,45 +491,6 @@ func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 			Required: []string{"projectKey", "repoSlug", "commitId", "commentId"},
 		},
 	}, handler.getCommitCommentHandler)
-
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "bitbucket_get_commit_comments",
-		Description: "Get comments on a commit",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"commitId": {
-					Type:        "string",
-					Description: "The commit ID",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned comments",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of comments to return",
-				},
-				"path": {
-					Type:        "string",
-					Description: "Filter comments by file path",
-				},
-				"since": {
-					Type:        "string",
-					Description: "Filter comments since a specific time",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "commitId"},
-		},
-	}, handler.getCommitCommentsHandler)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "bitbucket_get_commit_diff_stats_summary",

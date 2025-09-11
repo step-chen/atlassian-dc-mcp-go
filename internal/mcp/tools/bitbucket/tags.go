@@ -57,7 +57,7 @@ func (h *Handler) getTagHandler(ctx context.Context, req *mcp.CallToolRequest, a
 }
 
 // AddTagTools registers the tag-related tools with the MCP server
-func AddTagTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
+func AddTagTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWritePermission bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

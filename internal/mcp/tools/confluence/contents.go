@@ -285,7 +285,7 @@ func (h *Handler) searchHandler(ctx context.Context, req *mcp.CallToolRequest, a
 }
 
 // AddContentTools registers the content-related tools with the MCP server
-func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
+func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient, hasWritePermission bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -385,83 +385,6 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 	}, handler.getContentByIDHandler)
 
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "confluence_create_content",
-		Description: "Create new Confluence content such as pages or blog posts. This tool allows you to create content with a title, body, space, and optional metadata or parent page relationships.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"contentType": {
-					Type:        "string",
-					Description: "Type of content to create (e.g., 'page', 'blogpost').",
-				},
-				"title": {
-					Type:        "string",
-					Description: "Title of the content to create.",
-				},
-				"space": {
-					Type:        "object",
-					Description: "Space object containing the key of the space to create content in.",
-					Properties: map[string]*jsonschema.Schema{
-						"key": {
-							Type:        "string",
-							Description: "Key of the space to create content in (e.g., 'DEV').",
-						},
-					},
-					Required: []string{"key"},
-				},
-				"body": {
-					Type:        "object",
-					Description: "Body content of the page/blog post.",
-				},
-				"ancestors": {
-					Type:        "array",
-					Items:       &jsonschema.Schema{Type: "object"},
-					Description: "Array of ancestor content (for creating child pages).",
-				},
-				"metadata": {
-					Type:        "object",
-					Description: "Metadata for the content.",
-				},
-			},
-			Required: []string{"contentType", "title", "space", "body"},
-		},
-	}, handler.createContentHandler)
-
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "confluence_update_content",
-		Description: "Update existing Confluence content. This tool allows you to modify various aspects of existing content such as title, body, and other properties.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"contentID": {
-					Type:        "string",
-					Description: "ID of the content to update.",
-				},
-				"contentData": {
-					Type:        "object",
-					Description: "Complete content data to update. Can include type, title, body, status, ancestors, etc.",
-				},
-			},
-			Required: []string{"contentID"},
-		},
-	}, handler.updateContentHandler)
-
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "confluence_delete_content",
-		Description: "Delete Confluence content by ID. This tool allows you to permanently remove content from Confluence.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"contentID": {
-					Type:        "string",
-					Description: "ID of the content to delete.",
-				},
-			},
-			Required: []string{"contentID"},
-		},
-	}, handler.deleteContentHandler)
-
-	mcp.AddTool(server, &mcp.Tool{
 		Name:        "confluence_get_content_history",
 		Description: "Retrieve the history of a Confluence content item. This tool provides detailed information about all versions of a content item.",
 		InputSchema: &jsonschema.Schema{
@@ -508,43 +431,6 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 			Required: []string{"contentID"},
 		},
 	}, handler.getCommentsHandler)
-
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "confluence_create_content_comment",
-		Description: "Create a new comment on Confluence content. This tool allows you to add comments to existing content items.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"contentID": {
-					Type:        "string",
-					Description: "ID of the content to add a comment to.",
-				},
-				"body": {
-					Type:        "object",
-					Description: "Body content of the comment with storage representation.",
-					Properties: map[string]*jsonschema.Schema{
-						"storage": {
-							Type:        "object",
-							Description: "Storage representation of the comment body.",
-							Properties: map[string]*jsonschema.Schema{
-								"value": {
-									Type:        "string",
-									Description: "The actual comment text content.",
-								},
-								"representation": {
-									Type:        "string",
-									Description: "Representation format, typically 'storage'.",
-								},
-							},
-							Required: []string{"value", "representation"},
-						},
-					},
-					Required: []string{"storage"},
-				},
-			},
-			Required: []string{"contentID", "body"},
-		},
-	}, handler.addCommentHandler)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "confluence_get_attachments",
@@ -696,4 +582,121 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient) {
 			Required: []string{"cql"},
 		},
 	}, handler.searchHandler)
+
+	// Only register write tools if write permission is enabled
+	if hasWritePermission {
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "confluence_create_content",
+			Description: "Create new Confluence content such as pages or blog posts. This tool allows you to create content with a title, body, space, and optional metadata or parent page relationships.",
+			InputSchema: &jsonschema.Schema{
+				Type: "object",
+				Properties: map[string]*jsonschema.Schema{
+					"contentType": {
+						Type:        "string",
+						Description: "Type of content to create (e.g., 'page', 'blogpost').",
+					},
+					"title": {
+						Type:        "string",
+						Description: "Title of the content to create.",
+					},
+					"space": {
+						Type:        "object",
+						Description: "Space object containing the key of the space to create content in.",
+						Properties: map[string]*jsonschema.Schema{
+							"key": {
+								Type:        "string",
+								Description: "Key of the space to create content in (e.g., 'DEV').",
+							},
+						},
+						Required: []string{"key"},
+					},
+					"body": {
+						Type:        "object",
+						Description: "Body content of the page/blog post.",
+					},
+					"ancestors": {
+						Type:        "array",
+						Items:       &jsonschema.Schema{Type: "object"},
+						Description: "Array of ancestor content (for creating child pages).",
+					},
+					"metadata": {
+						Type:        "object",
+						Description: "Metadata for the content.",
+					},
+				},
+				Required: []string{"contentType", "title", "space", "body"},
+			},
+		}, handler.createContentHandler)
+
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "confluence_update_content",
+			Description: "Update existing Confluence content. This tool allows you to modify various aspects of existing content such as title, body, and other properties.",
+			InputSchema: &jsonschema.Schema{
+				Type: "object",
+				Properties: map[string]*jsonschema.Schema{
+					"contentID": {
+						Type:        "string",
+						Description: "ID of the content to update.",
+					},
+					"contentData": {
+						Type:        "object",
+						Description: "Complete content data to update. Can include type, title, body, status, ancestors, etc.",
+					},
+				},
+				Required: []string{"contentID"},
+			},
+		}, handler.updateContentHandler)
+
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "confluence_delete_content",
+			Description: "Delete Confluence content by ID. This tool allows you to permanently remove content from Confluence.",
+			InputSchema: &jsonschema.Schema{
+				Type: "object",
+				Properties: map[string]*jsonschema.Schema{
+					"contentID": {
+						Type:        "string",
+						Description: "ID of the content to delete.",
+					},
+				},
+				Required: []string{"contentID"},
+			},
+		}, handler.deleteContentHandler)
+
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "confluence_create_content_comment",
+			Description: "Create a new comment on Confluence content. This tool allows you to add comments to existing content items.",
+			InputSchema: &jsonschema.Schema{
+				Type: "object",
+				Properties: map[string]*jsonschema.Schema{
+					"contentID": {
+						Type:        "string",
+						Description: "ID of the content to add a comment to.",
+					},
+					"body": {
+						Type:        "object",
+						Description: "Body content of the comment with storage representation.",
+						Properties: map[string]*jsonschema.Schema{
+							"storage": {
+								Type:        "object",
+								Description: "Storage representation of the comment body.",
+								Properties: map[string]*jsonschema.Schema{
+									"value": {
+										Type:        "string",
+										Description: "The actual comment text content.",
+									},
+									"representation": {
+										Type:        "string",
+										Description: "Representation format, typically 'storage'.",
+									},
+								},
+								Required: []string{"value", "representation"},
+							},
+						},
+						Required: []string{"storage"},
+					},
+				},
+				Required: []string{"contentID", "body"},
+			},
+		}, handler.addCommentHandler)
+	}
 }

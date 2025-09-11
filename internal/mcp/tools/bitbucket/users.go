@@ -56,7 +56,7 @@ func (h *Handler) getUsersHandler(ctx context.Context, req *mcp.CallToolRequest,
 }
 
 // AddUserTools registers the user-related tools with the MCP server
-func AddUserTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
+func AddUserTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWritePermission bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

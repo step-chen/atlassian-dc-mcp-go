@@ -199,21 +199,21 @@ jira:
   url: "https://jira.example.com"
   token: "your-jira-api-token"
   permissions:
-    read: true
+    # Enable/disable write operations (default: false)
     write: false
 
 confluence:
   url: "https://confluence.example.com"
   token: "your-confluence-api-token"
   permissions:
-    read: true
+    # Enable/disable write operations (default: false)
     write: false
 
 bitbucket:
   url: "https://bitbucket.example.com"
   token: "your-bitbucket-api-token"
   permissions:
-    read: true
+    # Enable/disable write operations (default: false)
     write: false
 
 ```
@@ -350,11 +350,13 @@ This configuration provides two ways to use the service with an AI assistant:
 ## Permissions
 
 Each service (Jira, Confluence, Bitbucket) supports fine-grained permission controls:
-- `read`: Allows read operations (default: true)
+- `read`: Allows read operations (always available, cannot be disabled)
 - `write`: Allows write operations (default: false)
 
-When a service is configured with `read: false`, all endpoints for that service will be disabled.
+Read operations are always available and cannot be disabled. Write operations must be explicitly enabled by setting `write: true` in the configuration.
+
 When a service is configured with `write: false`, only read endpoints will be available.
+When a service is configured with `write: true`, both read and write endpoints will be available.
 
 Permissions are validated at startup and services with invalid configurations will be disabled.
 

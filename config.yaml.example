@@ -32,19 +32,19 @@ jira:
   url: "https://jira.example.com"
   token: "your-jira-api-token"
   permissions:
-    read: true
+    # Enable/disable write operations (default: false)
     write: false
 
 confluence:
   url: "https://confluence.example.com"
   token: "your-confluence-api-token"
   permissions:
-    read: true
+    # Enable/disable write operations (default: false)
     write: false
 
 bitbucket:
   url: "https://bitbucket.example.com"
   token: "your-bitbucket-api-token"
   permissions:
-    read: true
+    # Enable/disable write operations (default: false)
     write: false

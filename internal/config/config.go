@@ -12,7 +12,6 @@ import (
 )
 
 type Permissions struct {
-	Read  bool `mapstructure:"read"`
 	Write bool `mapstructure:"write"`
 }
 
@@ -130,9 +129,6 @@ func LoadConfig(configPath string) (*Config, error) {
 		}
 	}
 
-	viper.SetDefault("jira.permissions.read", true)
-	viper.SetDefault("confluence.permissions.read", true)
-	viper.SetDefault("bitbucket.permissions.read", true)
 	viper.SetDefault("port", 8090)
 	viper.SetDefault("logging.development", false)
 	viper.SetDefault("logging.level", "info")

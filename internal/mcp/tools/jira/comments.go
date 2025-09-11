@@ -46,7 +46,7 @@ func (h *Handler) addCommentHandler(ctx context.Context, req *mcp.CallToolReques
 }
 
 // AddCommentTools registers the comment-related tools with the MCP server
-func AddCommentTools(server *mcp.Server, client *jira.JiraClient) {
+func AddCommentTools(server *mcp.Server, client *jira.JiraClient, hasWritePermission bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -80,22 +80,25 @@ func AddCommentTools(server *mcp.Server, client *jira.JiraClient) {
 		},
 	}, handler.getCommentsHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "jira_add_comment",
-		Description: "Add a comment to a Jira issue",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"issueKey": {
-					Type:        "string",
-					Description: "The key of the issue to add a comment to",
+	// Only register write tools if write permission is enabled
+	if hasWritePermission {
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "jira_add_comment",
+			Description: "Add a comment to a Jira issue",
+			InputSchema: &jsonschema.Schema{
+				Type: "object",
+				Properties: map[string]*jsonschema.Schema{
+					"issueKey": {
+						Type:        "string",
+						Description: "The key of the issue to add a comment to",
+					},
+					"comment": {
+						Type:        "string",
+						Description: "The text content of the comment to add",
+					},
 				},
-				"comment": {
-					Type:        "string",
-					Description: "The text content of the comment to add",
-				},
+				Required: []string{"issueKey", "comment"},
 			},
-			Required: []string{"issueKey", "comment"},
-		},
-	}, handler.addCommentHandler)
+		}, handler.addCommentHandler)
+	}
 }

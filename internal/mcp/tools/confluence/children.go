@@ -70,7 +70,7 @@ func (h *Handler) getContentCommentsHandler(ctx context.Context, req *mcp.CallTo
 }
 
 // AddChildrenTools registers the children-related tools with the MCP server
-func AddChildrenTools(server *mcp.Server, client *confluence.ConfluenceClient) {
+func AddChildrenTools(server *mcp.Server, client *confluence.ConfluenceClient, hasWritePermission bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

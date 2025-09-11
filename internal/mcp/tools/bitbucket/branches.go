@@ -84,7 +84,7 @@ func (h *Handler) getBranchInfoByCommitIdHandler(ctx context.Context, req *mcp.C
 }
 
 // AddBranchTools registers the branch-related tools with the MCP server
-func AddBranchTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
+func AddBranchTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWritePermission bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

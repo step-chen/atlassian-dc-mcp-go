@@ -6,6 +6,7 @@ import (
 
 	"atlassian-dc-mcp-go/internal/client/jira"
 	"atlassian-dc-mcp-go/internal/mcp/tools"
+
 	"github.com/google/jsonschema-go/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -41,7 +42,7 @@ func (h *Handler) transitionIssueHandler(ctx context.Context, req *mcp.CallToolR
 }
 
 // AddTransitionTools registers the transition-related tools with the MCP server
-func AddTransitionTools(server *mcp.Server, client *jira.JiraClient) {
+func AddTransitionTools(server *mcp.Server, client *jira.JiraClient, hasWritePermission bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -59,22 +60,24 @@ func AddTransitionTools(server *mcp.Server, client *jira.JiraClient) {
 		},
 	}, handler.getTransitionsHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "jira_transition_issue",
-		Description: "Transition a Jira issue",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"issueKey": {
-					Type:        "string",
-					Description: "The key of the issue to transition",
+	if hasWritePermission {
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "jira_transition_issue",
+			Description: "Transition a Jira issue",
+			InputSchema: &jsonschema.Schema{
+				Type: "object",
+				Properties: map[string]*jsonschema.Schema{
+					"issueKey": {
+						Type:        "string",
+						Description: "The key of the issue to transition",
+					},
+					"transitionID": {
+						Type:        "string",
+						Description: "The ID of the transition to apply",
+					},
 				},
-				"transitionID": {
-					Type:        "string",
-					Description: "The ID of the transition to apply",
-				},
+				Required: []string{"issueKey", "transitionID"},
 			},
-			Required: []string{"issueKey", "transitionID"},
-		},
-	}, handler.transitionIssueHandler)
+		}, handler.transitionIssueHandler)
+	}
 }

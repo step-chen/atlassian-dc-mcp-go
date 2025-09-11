@@ -320,7 +320,7 @@ func (h *Handler) getPullRequestsForUserHandler(ctx context.Context, req *mcp.Ca
 }
 
 // AddPullRequestTools registers the pull request-related tools with the MCP server
-func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
+func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWritePermission bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -532,9 +532,13 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) 
 		InputSchema: &jsonschema.Schema{
 			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
-				"closedSince": {
+				"user": {
 					Type:        "string",
-					Description: "Timestamp to filter closed pull requests since (format: ISO 8601).",
+					Description: "Username of the user to filter by.",
+				},
+				"state": {
+					Type:        "string",
+					Description: "State of the pull request (e.g., 'OPEN', 'MERGED', 'DECLINED').",
 				},
 				"role": {
 					Type:        "string",
@@ -544,17 +548,13 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) 
 					Type:        "string",
 					Description: "Status of the participant (e.g., 'APPROVED', 'UNAPPROVED').",
 				},
-				"state": {
-					Type:        "string",
-					Description: "State of the pull request (e.g., 'OPEN', 'MERGED', 'DECLINED').",
-				},
-				"user": {
-					Type:        "string",
-					Description: "Username of the user to filter by.",
-				},
 				"order": {
 					Type:        "string",
 					Description: "Order of the pull requests (e.g., 'NEWEST', 'OLDEST').",
+				},
+				"closedSince": {
+					Type:        "string",
+					Description: "Timestamp to filter closed pull requests since (format: ISO 8601).",
 				},
 				"start": {
 					Type:        "integer",
@@ -568,111 +568,6 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) 
 			Required: []string{},
 		},
 	}, handler.getPullRequestsForUserHandler)
-
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "bitbucket_add_pull_request_comment",
-		Description: "Add a comment to a specific pull request. This tool allows you to add comments to pull requests for discussion and feedback.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "Key of the project containing the pull request (e.g., 'PROJ').",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "Slug of the repository containing the pull request (e.g., 'my-repo').",
-				},
-				"pullRequestId": {
-					Type:        "integer",
-					Description: "ID of the pull request to add comment to.",
-				},
-				"commentText": {
-					Type:        "string",
-					Description: "Text of the comment to add.",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "pullRequestId", "commentText"},
-		},
-	}, handler.addPullRequestCommentHandler)
-
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "bitbucket_merge_pull_request",
-		Description: "Merge a specific pull request. This tool allows you to merge pull requests after review and approval.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "Key of the project containing the pull request (e.g., 'PROJ').",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "Slug of the repository containing the pull request (e.g., 'my-repo').",
-				},
-				"pullRequestId": {
-					Type:        "integer",
-					Description: "ID of the pull request to merge.",
-				},
-				"version": {
-					Type:        "integer",
-					Description: "Version of the pull request to merge.",
-				},
-				"autoMerge": {
-					Type:        "boolean",
-					Description: "Whether to auto-merge the pull request.",
-				},
-				"autoSubject": {
-					Type:        "string",
-					Description: "Auto-generated subject for the merge commit.",
-				},
-				"message": {
-					Type:        "string",
-					Description: "Commit message for the merge.",
-				},
-				"strategyId": {
-					Type:        "string",
-					Description: "Merge strategy to use.",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "pullRequestId"},
-		},
-	}, handler.mergePullRequestHandler)
-
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "bitbucket_decline_pull_request",
-		Description: "Decline a specific pull request. This tool allows you to decline pull requests that are not suitable for merging.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "Key of the project containing the pull request (e.g., 'PROJ').",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "Slug of the repository containing the pull request (e.g., 'my-repo').",
-				},
-				"pullRequestId": {
-					Type:        "integer",
-					Description: "ID of the pull request to decline.",
-				},
-				"version": {
-					Type:        "string",
-					Description: "Version of the pull request to decline.",
-				},
-				"comment": {
-					Type:        "string",
-					Description: "Comment explaining why the pull request is declined.",
-				},
-				"optionsVersion": {
-					Type:        "integer",
-					Description: "Version in the decline options.",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "pullRequestId"},
-		},
-	}, handler.declinePullRequestHandler)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "bitbucket_get_pull_request_jira_issues",
@@ -723,4 +618,112 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient) 
 			Required: []string{"projectKey", "repoSlug", "pullRequestId", "commentId"},
 		},
 	}, handler.getPullRequestCommentHandler)
+
+	// Only register write tools if write permission is enabled
+	if hasWritePermission {
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "bitbucket_add_pull_request_comment",
+			Description: "Add a comment to a specific pull request. This tool allows you to add comments to pull requests for discussion and feedback.",
+			InputSchema: &jsonschema.Schema{
+				Type: "object",
+				Properties: map[string]*jsonschema.Schema{
+					"projectKey": {
+						Type:        "string",
+						Description: "Key of the project containing the pull request (e.g., 'PROJ').",
+					},
+					"repoSlug": {
+						Type:        "string",
+						Description: "Slug of the repository containing the pull request (e.g., 'my-repo').",
+					},
+					"pullRequestId": {
+						Type:        "integer",
+						Description: "ID of the pull request to add comment to.",
+					},
+					"commentText": {
+						Type:        "string",
+						Description: "Text of the comment to add.",
+					},
+				},
+				Required: []string{"projectKey", "repoSlug", "pullRequestId", "commentText"},
+			},
+		}, handler.addPullRequestCommentHandler)
+
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "bitbucket_merge_pull_request",
+			Description: "Merge a specific pull request. This tool allows you to merge pull requests after review and approval.",
+			InputSchema: &jsonschema.Schema{
+				Type: "object",
+				Properties: map[string]*jsonschema.Schema{
+					"projectKey": {
+						Type:        "string",
+						Description: "Key of the project containing the pull request (e.g., 'PROJ').",
+					},
+					"repoSlug": {
+						Type:        "string",
+						Description: "Slug of the repository containing the pull request (e.g., 'my-repo').",
+					},
+					"pullRequestId": {
+						Type:        "integer",
+						Description: "ID of the pull request to merge.",
+					},
+					"version": {
+						Type:        "integer",
+						Description: "Version of the pull request to merge.",
+					},
+					"autoMerge": {
+						Type:        "boolean",
+						Description: "Whether to auto-merge the pull request.",
+					},
+					"autoSubject": {
+						Type:        "string",
+						Description: "Auto-generated subject for the merge commit.",
+					},
+					"message": {
+						Type:        "string",
+						Description: "Commit message for the merge.",
+					},
+					"strategyId": {
+						Type:        "string",
+						Description: "Merge strategy to use.",
+					},
+				},
+				Required: []string{"projectKey", "repoSlug", "pullRequestId"},
+			},
+		}, handler.mergePullRequestHandler)
+
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "bitbucket_decline_pull_request",
+			Description: "Decline a specific pull request. This tool allows you to decline pull requests that are not suitable for merging.",
+			InputSchema: &jsonschema.Schema{
+				Type: "object",
+				Properties: map[string]*jsonschema.Schema{
+					"projectKey": {
+						Type:        "string",
+						Description: "Key of the project containing the pull request (e.g., 'PROJ').",
+					},
+					"repoSlug": {
+						Type:        "string",
+						Description: "Slug of the repository containing the pull request (e.g., 'my-repo').",
+					},
+					"pullRequestId": {
+						Type:        "integer",
+						Description: "ID of the pull request to decline.",
+					},
+					"version": {
+						Type:        "string",
+						Description: "Version of the pull request to decline.",
+					},
+					"comment": {
+						Type:        "string",
+						Description: "Comment explaining why the pull request is declined.",
+					},
+					"optionsVersion": {
+						Type:        "integer",
+						Description: "Version in the decline options.",
+					},
+				},
+				Required: []string{"projectKey", "repoSlug", "pullRequestId"},
+			},
+		}, handler.declinePullRequestHandler)
+	}
 }

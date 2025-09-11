@@ -41,7 +41,7 @@ func (h *Handler) getLabelsHandler(ctx context.Context, req *mcp.CallToolRequest
 }
 
 // AddLabelTools registers the label-related tools with the MCP server
-func AddLabelTools(server *mcp.Server, client *confluence.ConfluenceClient) {
+func AddLabelTools(server *mcp.Server, client *confluence.ConfluenceClient, hasWritePermission bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

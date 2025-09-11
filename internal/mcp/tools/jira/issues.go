@@ -248,7 +248,7 @@ func (h *Handler) setIssueEstimationForBoardHandler(ctx context.Context, req *mc
 }
 
 // AddIssueTools registers the issue-related tools with the MCP server
-func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
+func AddIssueTools(server *mcp.Server, client *jira.JiraClient, hasWritePermission bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -328,56 +328,6 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
 	}, handler.searchIssuesHandler)
 
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "jira_create_issue",
-		Description: "Create a new Jira issue in the specified project with the provided details.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "Project key for the new issue",
-				},
-				"summary": {
-					Type:        "string",
-					Description: "Summary of the new issue",
-				},
-				"issueType": {
-					Type:        "string",
-					Description: "Type of the new issue",
-				},
-				"description": {
-					Type:        "string",
-					Description: "Description of the new issue",
-				},
-				"priority": {
-					Type:        "string",
-					Description: "Priority of the new issue",
-				},
-			},
-			Required: []string{"projectKey", "summary", "issueType"},
-		},
-	}, handler.createIssueHandler)
-
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "jira_update_issue",
-		Description: "Update an existing Jira issue with the specified fields.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"issueKey": {
-					Type:        "string",
-					Description: "The key of the issue to update",
-				},
-				"updates": {
-					Type:        "object",
-					Description: "Fields to update",
-				},
-			},
-			Required: []string{"issueKey", "updates"},
-		},
-	}, handler.updateIssueHandler)
-
-	mcp.AddTool(server, &mcp.Tool{
 		Name:        "jira_get_subtasks",
 		Description: "Get all subtasks for a specific Jira issue.",
 		InputSchema: &jsonschema.Schema{
@@ -393,81 +343,23 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
 	}, handler.getSubtasksHandler)
 
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "jira_create_subtask",
-		Description: "Create a subtask for a specific Jira issue.",
+		Name:        "jira_get_issue_estimation_for_board",
+		Description: "Get issue estimation for board to retrieve estimation data for a specific issue on a board.",
 		InputSchema: &jsonschema.Schema{
 			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
-				"parentKeyOrID": {
+				"issueIdOrKey": {
 					Type:        "string",
-					Description: "The key or ID of the parent issue",
+					Description: "Issue ID or key",
 				},
-				"projectKey": {
-					Type:        "string",
-					Description: "Project key for the new subtask",
-				},
-				"summary": {
-					Type:        "string",
-					Description: "Summary of the new subtask",
-				},
-				"issueType": {
-					Type:        "string",
-					Description: "Type of the new subtask",
-				},
-				"description": {
-					Type:        "string",
-					Description: "Description of the new subtask",
-				},
-				"priority": {
-					Type:        "string",
-					Description: "Priority of the new subtask",
+				"boardId": {
+					Type:        "integer",
+					Description: "Board ID",
 				},
 			},
-			Required: []string{"parentKeyOrID", "projectKey", "summary", "issueType"},
+			Required: []string{"issueIdOrKey", "boardId"},
 		},
-	}, handler.createSubTaskHandler)
-
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "jira_update_issue_with_options",
-		Description: "Update an existing Jira issue with additional options for controlling the update behavior.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"issueKey": {
-					Type:        "string",
-					Description: "The key of the issue to update",
-				},
-				"updates": {
-					Type:        "object",
-					Description: "Fields to update",
-				},
-				"options": {
-					Type:        "object",
-					Description: "Options for the update",
-				},
-			},
-			Required: []string{"issueKey", "updates", "options"},
-		},
-	}, handler.updateIssueWithOptionsHandler)
-
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "jira_create_issue_with_payload",
-		Description: "Create a new Jira issue with a custom payload for advanced issue creation scenarios.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"payload": {
-					Type:        "object",
-					Description: "Custom payload for the issue creation",
-				},
-				"updateHistory": {
-					Type:        "boolean",
-					Description: "Whether to update the issue view history",
-				},
-			},
-			Required: []string{"payload"},
-		},
-	}, handler.createIssueWithPayloadHandler)
+	}, handler.getIssueEstimationForBoardHandler)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "jira_get_agile_issue",
@@ -497,45 +389,157 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient) {
 		},
 	}, handler.getAgileIssueHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "jira_get_issue_estimation_for_board",
-		Description: "Get issue estimation for board to retrieve estimation data for a specific issue on a board.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"issueIdOrKey": {
-					Type:        "string",
-					Description: "Issue ID or key",
+	// Only register write tools if write permission is enabled
+	if hasWritePermission {
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "jira_create_issue",
+			Description: "Create a new Jira issue in the specified project with the provided details.",
+			InputSchema: &jsonschema.Schema{
+				Type: "object",
+				Properties: map[string]*jsonschema.Schema{
+					"projectKey": {
+						Type:        "string",
+						Description: "Project key for the new issue",
+					},
+					"summary": {
+						Type:        "string",
+						Description: "Summary of the new issue",
+					},
+					"issueType": {
+						Type:        "string",
+						Description: "Type of the new issue",
+					},
+					"description": {
+						Type:        "string",
+						Description: "Description of the new issue",
+					},
+					"priority": {
+						Type:        "string",
+						Description: "Priority of the new issue",
+					},
 				},
-				"boardId": {
-					Type:        "integer",
-					Description: "Board ID",
-				},
+				Required: []string{"projectKey", "summary", "issueType"},
 			},
-			Required: []string{"issueIdOrKey", "boardId"},
-		},
-	}, handler.getIssueEstimationForBoardHandler)
+		}, handler.createIssueHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "jira_set_issue_estimation_for_board",
-		Description: "Set issue estimation for board to update the estimation value for a specific issue on a board.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"issueIdOrKey": {
-					Type:        "string",
-					Description: "Issue ID or key",
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "jira_update_issue",
+			Description: "Update an existing Jira issue with the specified fields.",
+			InputSchema: &jsonschema.Schema{
+				Type: "object",
+				Properties: map[string]*jsonschema.Schema{
+					"issueKey": {
+						Type:        "string",
+						Description: "The key of the issue to update",
+					},
+					"updates": {
+						Type:        "object",
+						Description: "Fields to update",
+					},
 				},
-				"boardId": {
-					Type:        "integer",
-					Description: "Board ID",
-				},
-				"value": {
-					Type:        "string",
-					Description: "Estimation value",
-				},
+				Required: []string{"issueKey", "updates"},
 			},
-			Required: []string{"issueIdOrKey", "boardId", "value"},
-		},
-	}, handler.setIssueEstimationForBoardHandler)
+		}, handler.updateIssueHandler)
+
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "jira_create_subtask",
+			Description: "Create a subtask for a specific Jira issue.",
+			InputSchema: &jsonschema.Schema{
+				Type: "object",
+				Properties: map[string]*jsonschema.Schema{
+					"parentKeyOrID": {
+						Type:        "string",
+						Description: "The key or ID of the parent issue",
+					},
+					"projectKey": {
+						Type:        "string",
+						Description: "Project key for the new subtask",
+					},
+					"summary": {
+						Type:        "string",
+						Description: "Summary of the new subtask",
+					},
+					"issueType": {
+						Type:        "string",
+						Description: "Type of the new subtask",
+					},
+					"description": {
+						Type:        "string",
+						Description: "Description of the new subtask",
+					},
+					"priority": {
+						Type:        "string",
+						Description: "Priority of the new subtask",
+					},
+				},
+				Required: []string{"parentKeyOrID", "projectKey", "summary", "issueType"},
+			},
+		}, handler.createSubTaskHandler)
+
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "jira_set_issue_estimation_for_board",
+			Description: "Set issue estimation for board to update the estimation value for a specific issue on a board.",
+			InputSchema: &jsonschema.Schema{
+				Type: "object",
+				Properties: map[string]*jsonschema.Schema{
+					"issueIdOrKey": {
+						Type:        "string",
+						Description: "Issue ID or key",
+					},
+					"boardId": {
+						Type:        "integer",
+						Description: "Board ID",
+					},
+					"value": {
+						Type:        "string",
+						Description: "Estimation value",
+					},
+				},
+				Required: []string{"issueIdOrKey", "boardId", "value"},
+			},
+		}, handler.setIssueEstimationForBoardHandler)
+
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "jira_update_issue_with_options",
+			Description: "Update an existing Jira issue with additional options for controlling the update behavior.",
+			InputSchema: &jsonschema.Schema{
+				Type: "object",
+				Properties: map[string]*jsonschema.Schema{
+					"issueKey": {
+						Type:        "string",
+						Description: "The key of the issue to update",
+					},
+					"updates": {
+						Type:        "object",
+						Description: "Fields to update",
+					},
+					"options": {
+						Type:        "object",
+						Description: "Options for the update",
+					},
+				},
+				Required: []string{"issueKey", "updates", "options"},
+			},
+		}, handler.updateIssueWithOptionsHandler)
+
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "jira_create_issue_with_payload",
+			Description: "Create a new Jira issue with a custom payload for advanced issue creation scenarios.",
+			InputSchema: &jsonschema.Schema{
+				Type: "object",
+				Properties: map[string]*jsonschema.Schema{
+					"payload": {
+						Type:        "object",
+						Description: "Custom payload for the issue creation",
+					},
+					"updateHistory": {
+						Type:        "boolean",
+						Description: "Whether to update the issue view history",
+					},
+				},
+				Required: []string{"payload"},
+			},
+		}, handler.createIssueWithPayloadHandler)
+
+	}
 }

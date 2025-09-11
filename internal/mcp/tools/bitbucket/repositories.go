@@ -284,7 +284,7 @@ func (h *Handler) getRelatedRepositoriesHandler(ctx context.Context, req *mcp.Ca
 }
 
 // AddRepositoryTools registers the repository-related tools with the MCP server
-func AddRepositoryTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
+func AddRepositoryTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWritePermission bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -421,14 +421,6 @@ func AddRepositoryTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 					Type:        "string",
 					Description: "The commit ID or ref to retrieve the file at",
 				},
-				"size": {
-					Type:        "boolean",
-					Description: "Include file size information",
-				},
-				"type": {
-					Type:        "boolean",
-					Description: "Include file type information",
-				},
 				"blame": {
 					Type:        "boolean",
 					Description: "Include blame information",
@@ -436,6 +428,14 @@ func AddRepositoryTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 				"noContent": {
 					Type:        "boolean",
 					Description: "Skip content retrieval",
+				},
+				"size": {
+					Type:        "boolean",
+					Description: "Include file size information",
+				},
+				"type": {
+					Type:        "boolean",
+					Description: "Include file type information",
 				},
 			},
 			Required: []string{"projectKey", "repoSlug", "path"},
@@ -491,13 +491,13 @@ func AddRepositoryTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
 					Type:        "string",
 					Description: "The repository slug",
 				},
-				"until": {
-					Type:        "string",
-					Description: "The commit ID or ref to compare until",
-				},
 				"since": {
 					Type:        "string",
 					Description: "The commit ID or ref to compare since",
+				},
+				"until": {
+					Type:        "string",
+					Description: "The commit ID or ref to compare until",
 				},
 				"start": {
 					Type:        "integer",

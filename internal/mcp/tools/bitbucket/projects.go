@@ -104,7 +104,7 @@ func (h *Handler) getRepositoryTasksHandler(ctx context.Context, req *mcp.CallTo
 }
 
 // AddProjectTools registers the project-related tools with the MCP server
-func AddProjectTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
+func AddProjectTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWritePermission bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

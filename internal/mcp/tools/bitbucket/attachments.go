@@ -65,7 +65,7 @@ func (h *Handler) getAttachmentMetadataHandler(ctx context.Context, req *mcp.Cal
 }
 
 // AddAttachmentTools registers the attachment-related tools with the MCP server
-func AddAttachmentTools(server *mcp.Server, client *bitbucket.BitbucketClient) {
+func AddAttachmentTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWritePermission bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
