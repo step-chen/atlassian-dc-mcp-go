@@ -2,25 +2,51 @@
 package logging
 
 import (
+	"os"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 var logger *zap.Logger
 
 func InitLogger(cfg *Config) {
-	var zapConfig zap.Config
+	var cores []zapcore.Core
 
+	// Console logging
 	if cfg.Development {
-		zapConfig = zap.NewDevelopmentConfig()
-		zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
+		consoleWriter := zapcore.AddSync(os.Stdout)
+		consoleCore := zapcore.NewCore(consoleEncoder, consoleWriter, getZapLevel(cfg.Level))
+		cores = append(cores, consoleCore)
 	} else {
-		zapConfig = zap.NewProductionConfig()
+		consoleEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
+		consoleWriter := zapcore.Lock(zapcore.AddSync(os.Stdout))
+		consoleCore := zapcore.NewCore(consoleEncoder, consoleWriter, getZapLevel(cfg.Level))
+		cores = append(cores, consoleCore)
 	}
 
-	zapConfig.Level = zap.NewAtomicLevelAt(getZapLevel(cfg.Level))
+	// File logging
+	if cfg.FilePath != "" {
+		fileEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
+		fileWriter := zapcore.AddSync(&lumberjack.Logger{
+			Filename:   cfg.FilePath,
+			MaxSize:    100, // megabytes
+			MaxAge:     7,   // days
+			MaxBackups: 3,
+			Compress:   true,
+		})
+		fileLevel := getZapLevel(cfg.FileLevel)
+		if cfg.FileLevel == "" {
+			fileLevel = getZapLevel(cfg.Level)
+		}
+		fileCore := zapcore.NewCore(fileEncoder, fileWriter, fileLevel)
+		cores = append(cores, fileCore)
+	}
 
-	logger, _ = zapConfig.Build()
+	core := zapcore.NewTee(cores...)
+	logger = zap.New(core, zap.AddCaller())
 }
 
 func getZapLevel(level string) zapcore.Level {

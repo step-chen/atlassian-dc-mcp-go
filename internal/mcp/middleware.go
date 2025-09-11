@@ -11,28 +11,28 @@ import (
 )
 
 // LoggingMiddleware creates a middleware that logs method calls with their duration
+// Only logs when execution time exceeds threshold or when an error occurs
 func LoggingMiddleware() mcp.Middleware {
+	// Threshold for logging - only log methods that take longer than this
+	const timeThreshold = 100 * time.Millisecond
+	
 	return func(next mcp.MethodHandler) mcp.MethodHandler {
 		return func(ctx context.Context, method string, req mcp.Request) (mcp.Result, error) {
 			logger := logging.GetLogger()
 
 			start := time.Now()
-
-			logger.Info("Starting method",
-				zap.String("method", method),
-			)
-
 			result, err := next(ctx, method, req)
-
 			duration := time.Since(start)
+
+			// Only log if duration exceeds threshold or an error occurred
 			if err != nil {
 				logger.Error("Method failed",
 					zap.String("method", method),
 					zap.Duration("duration", duration),
 					zap.Error(err),
 				)
-			} else {
-				logger.Info("Method completed",
+			} else if duration >= timeThreshold {
+				logger.Info("Method completed slowly",
 					zap.String("method", method),
 					zap.Duration("duration", duration),
 				)

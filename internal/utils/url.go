@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"atlassian-dc-mcp-go/internal/utils/logging"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -8,19 +9,27 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"go.uber.org/zap"
 )
 
 func BuildURL(baseURL string, pathParams []string, queryParams url.Values) (string, error) {
-	fullPath, err := url.JoinPath(baseURL, pathParams...)
+	u, err := url.Parse(baseURL)
 	if err != nil {
-		return "", fmt.Errorf("failed to join path segments: %w", err)
+		return "", fmt.Errorf("failed to parse base URL: %w", err)
 	}
 
-	if len(queryParams) > 0 {
-		return fullPath + "?" + queryParams.Encode(), nil
-	}
+	u = u.JoinPath(pathParams...)
 
-	return fullPath, nil
+	q := u.Query()
+	for key, values := range queryParams {
+		for _, value := range values {
+			q.Add(key, value)
+		}
+	}
+	u.RawQuery = q.Encode()
+
+	return u.String(), nil
 }
 
 func BuildHttpRequest(method, baseURL string, pathParams []string, queryParams url.Values, body []byte, token string) (*http.Request, error) {
@@ -29,6 +38,7 @@ func BuildHttpRequest(method, baseURL string, pathParams []string, queryParams u
 		return nil, fmt.Errorf("failed to build URL: %w", err)
 	}
 
+	logging.GetLogger().Info("Building request", zap.String("method", method), zap.String("url", url))
 	var req *http.Request
 	if body != nil {
 		req, err = http.NewRequest(method, url, bytes.NewBuffer(body))
@@ -71,6 +81,14 @@ func HandleHTTPError(resp *http.Response, service string) error {
 	bodyBytes, _ := io.ReadAll(resp.Body)
 	bodyString := string(bodyBytes)
 	return fmt.Errorf("[%s] %s : %d - %s", service, strErr, resp.StatusCode, bodyString)
+}
+
+func SetRequiredPathQueryParam(params url.Values, path string) {
+	if path == "" {
+		params.Add("path", "/")
+	} else {
+		params.Add("path", path)
+	}
 }
 
 // SetQueryParam sets a query parameter based on its value and an invalid value to compare against.

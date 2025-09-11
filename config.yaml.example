@@ -21,6 +21,13 @@ logging:
   # Log level (debug, info, warn, error, fatal)
   level: "info"
 
+  # File logging configuration (optional)
+  # Path to the log file (if not specified, file logging is disabled)
+  file_path: "/var/log/mcp/mcp.log"
+  
+  # Log level for file output (if not specified, uses the same level as console)
+  file_level: "debug"
+
 jira:
   url: "https://jira.example.com"
   token: "your-jira-api-token"

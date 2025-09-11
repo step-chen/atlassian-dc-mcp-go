@@ -411,7 +411,7 @@ func (c *BitbucketClient) GetPullRequestComment(projectKey, repoSlug string, pul
 func (c *BitbucketClient) GetPullRequestComments(projectKey, repoSlug string, pullRequestID int, path, fromHash, anchorState, toHash, state, diffType, diffTypes, states string, start, limit int) (map[string]interface{}, error) {
 	queryParams := make(url.Values)
 
-	utils.SetQueryParam(queryParams, "path", path, "")
+	utils.SetRequiredPathQueryParam(queryParams, path)
 	utils.SetQueryParam(queryParams, "fromHash", fromHash, "")
 	utils.SetQueryParam(queryParams, "anchorState", anchorState, "")
 	utils.SetQueryParam(queryParams, "toHash", toHash, "")

@@ -186,6 +186,14 @@ logging:
   
   # Log level (debug, info, warn, error, fatal)
   level: "info"
+  
+  # Path to log file (optional)
+  # If not specified, logs go to console only
+  file_path: "/var/log/atlassian-dc-mcp.log"
+  
+  # Log level for file output (optional)
+  # If not specified, uses the level set for console output
+  file_level: "debug"
 
 jira:
   url: "https://jira.example.com"
@@ -220,6 +228,8 @@ export MCP_TRANSPORT="stdio"  # Transport mode (stdio, sse, http)
 # Logging configuration
 export MCP_LOGGING_DEVELOPMENT=true  # Enable human-friendly console output
 export MCP_LOGGING_LEVEL="info"  # Log level (debug, info, warn, error, fatal)
+export MCP_LOGGING_FILE_PATH="/var/log/atlassian-dc-mcp.log"  # Path to log file
+export MCP_LOGGING_FILE_LEVEL="debug"  # Log level for file output
 
 # Service configurations
 export MCP_JIRA_URL="https://jira.example.com"

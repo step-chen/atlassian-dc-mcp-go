@@ -165,7 +165,6 @@ func (c *BitbucketClient) GetFileContent(projectKey, repoSlug, path, at string, 
 	queryParams := make(url.Values)
 
 	utils.SetQueryParam(queryParams, "at", at, "")
-
 	utils.SetQueryParam(queryParams, "size", size, (*bool)(nil))
 	utils.SetQueryParam(queryParams, "type", typeParam, (*bool)(nil))
 	utils.SetQueryParam(queryParams, "blame", blame, (*bool)(nil))
@@ -173,7 +172,7 @@ func (c *BitbucketClient) GetFileContent(projectKey, repoSlug, path, at string, 
 
 	return c.executeTextRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "browse", path},
+		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "raw", path},
 		queryParams,
 		nil,
 	)
