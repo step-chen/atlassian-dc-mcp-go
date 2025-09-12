@@ -56,7 +56,6 @@ func (s *Server) Initialize() error {
 	}, nil)
 
 	s.mcpServer.AddReceivingMiddleware(LoggingMiddleware())
-	s.mcpServer.AddReceivingMiddleware(CheckPermissionMiddleware(s.config))
 
 	s.addTools()
 
@@ -138,7 +137,7 @@ func (s *Server) addTools() {
 func (s *Server) addJiraTools() {
 	// Check if Jira write permission is enabled
 	hasWritePermission := s.config.Jira.Permissions.Write
-	
+
 	jiraTools.AddIssueTools(s.mcpServer, s.jiraClient, hasWritePermission)
 	jiraTools.AddBoardTools(s.mcpServer, s.jiraClient)
 	jiraTools.AddProjectTools(s.mcpServer, s.jiraClient)
@@ -154,7 +153,7 @@ func (s *Server) addJiraTools() {
 func (s *Server) addConfluenceTools() {
 	// Check if Confluence write permission is enabled
 	hasWritePermission := s.config.Confluence.Permissions.Write
-	
+
 	confluenceTools.AddContentTools(s.mcpServer, s.confluenceClient, hasWritePermission)
 	confluenceTools.AddSpaceTools(s.mcpServer, s.confluenceClient, hasWritePermission)
 	confluenceTools.AddChildrenTools(s.mcpServer, s.confluenceClient, hasWritePermission)
@@ -165,7 +164,7 @@ func (s *Server) addConfluenceTools() {
 // addBitbucketTools registers all Bitbucket-related tools with the MCP server
 func (s *Server) addBitbucketTools() {
 	hasWritePermission := s.config.Bitbucket.Permissions.Write
-	
+
 	bitbucketTools.AddUserTools(s.mcpServer, s.bitbucketClient, hasWritePermission)
 	bitbucketTools.AddProjectTools(s.mcpServer, s.bitbucketClient, hasWritePermission)
 	bitbucketTools.AddBranchTools(s.mcpServer, s.bitbucketClient, hasWritePermission)
