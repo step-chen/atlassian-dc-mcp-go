@@ -1,4 +1,4 @@
-# Atlassian Data Center MCP (Management Control Plane)
+# Atlassian Data Center MCP (Model Context Protocol)
 
 This project provides a Go-based Model Context Protocol (MCP) service for managing and interacting with Atlassian Data Center products including Jira, Confluence, and Bitbucket. It allows you to manage these products programmatically through a unified interface with configurable authentication and permissions.
 
