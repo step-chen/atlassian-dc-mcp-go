@@ -284,7 +284,7 @@ func (h *Handler) getRelatedRepositoriesHandler(ctx context.Context, req *mcp.Ca
 }
 
 // AddRepositoryTools registers the repository-related tools with the MCP server
-func AddRepositoryTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWritePermission bool) {
+func AddRepositoryTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

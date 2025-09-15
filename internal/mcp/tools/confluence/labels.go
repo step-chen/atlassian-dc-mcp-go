@@ -6,6 +6,7 @@ import (
 
 	"atlassian-dc-mcp-go/internal/client/confluence"
 	"atlassian-dc-mcp-go/internal/mcp/tools"
+
 	"github.com/google/jsonschema-go/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -41,7 +42,7 @@ func (h *Handler) getLabelsHandler(ctx context.Context, req *mcp.CallToolRequest
 }
 
 // AddLabelTools registers the label-related tools with the MCP server
-func AddLabelTools(server *mcp.Server, client *confluence.ConfluenceClient, hasWritePermission bool) {
+func AddLabelTools(server *mcp.Server, client *confluence.ConfluenceClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -95,7 +96,7 @@ func AddLabelTools(server *mcp.Server, client *confluence.ConfluenceClient, hasW
 				},
 				"limit": {
 					Type:        "integer",
-					Description: "The limit of the number of labels to return",
+					Description: "The maximum number of labels to return, max 100",
 				},
 			},
 		},

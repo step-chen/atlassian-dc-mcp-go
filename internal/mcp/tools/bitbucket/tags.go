@@ -57,12 +57,12 @@ func (h *Handler) getTagHandler(ctx context.Context, req *mcp.CallToolRequest, a
 }
 
 // AddTagTools registers the tag-related tools with the MCP server
-func AddTagTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWritePermission bool) {
+func AddTagTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "bitbucket_get_tags",
-		Description: "Get tags for a repository",
+		Description: "Get tags in a repository",
 		InputSchema: &jsonschema.Schema{
 			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
@@ -76,11 +76,11 @@ func AddTagTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWrite
 				},
 				"filterText": {
 					Type:        "string",
-					Description: "Filter text to apply to the tag names",
+					Description: "Filter tags by text",
 				},
 				"orderBy": {
 					Type:        "string",
-					Description: "Field to order tags by",
+					Description: "Order tags by",
 				},
 				"start": {
 					Type:        "integer",
@@ -97,7 +97,7 @@ func AddTagTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWrite
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "bitbucket_get_tag",
-		Description: "Get a specific tag",
+		Description: "Get a specific tag in a repository",
 		InputSchema: &jsonschema.Schema{
 			Type: "object",
 			Properties: map[string]*jsonschema.Schema{

@@ -104,12 +104,12 @@ func (h *Handler) getRepositoryTasksHandler(ctx context.Context, req *mcp.CallTo
 }
 
 // AddProjectTools registers the project-related tools with the MCP server
-func AddProjectTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWritePermission bool) {
+func AddProjectTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "bitbucket_get_projects",
-		Description: "Get projects",
+		Description: "Get a list of projects",
 		InputSchema: &jsonschema.Schema{
 			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
@@ -135,7 +135,7 @@ func AddProjectTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasW
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "bitbucket_get_project",
-		Description: "Get a specific project by key",
+		Description: "Get a specific project by project key",
 		InputSchema: &jsonschema.Schema{
 			Type: "object",
 			Properties: map[string]*jsonschema.Schema{

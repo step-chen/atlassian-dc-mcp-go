@@ -56,7 +56,7 @@ func (h *Handler) getUsersHandler(ctx context.Context, req *mcp.CallToolRequest,
 }
 
 // AddUserTools registers the user-related tools with the MCP server
-func AddUserTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWritePermission bool) {
+func AddUserTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -85,7 +85,7 @@ func AddUserTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWrit
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "bitbucket_get_users",
-		Description: "Get Bitbucket users",
+		Description: "Get a list of Bitbucket users",
 		InputSchema: &jsonschema.Schema{
 			Type: "object",
 			Properties: map[string]*jsonschema.Schema{
@@ -101,13 +101,13 @@ func AddUserTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWrit
 					Type:        "string",
 					Description: "Filter users by group",
 				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of users to return",
-				},
 				"start": {
 					Type:        "integer",
-					Description: "The starting index of the returned users",
+					Description: "Start index for pagination",
+				},
+				"limit": {
+					Type:        "integer",
+					Description: "Maximum number of users to return",
 				},
 			},
 		},

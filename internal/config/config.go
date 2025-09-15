@@ -11,9 +11,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Permissions struct {
-	Write bool `mapstructure:"write"`
-}
+type Permissions map[string]bool
 
 type JiraConfig struct {
 	URL         string      `mapstructure:"url"`

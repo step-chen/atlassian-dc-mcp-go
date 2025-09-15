@@ -302,7 +302,7 @@ func (h *Handler) getDiffBetweenRevisionsForPathHandler(ctx context.Context, req
 }
 
 // AddCommitTools registers the commit-related tools with the MCP server
-func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWritePermission bool) {
+func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

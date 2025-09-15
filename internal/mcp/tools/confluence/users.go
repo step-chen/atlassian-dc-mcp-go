@@ -17,7 +17,7 @@ func (h *Handler) getCurrentUserHandler(ctx context.Context, req *mcp.CallToolRe
 }
 
 // AddUserTools registers the user-related tools with the MCP server
-func AddUserTools(server *mcp.Server, client *confluence.ConfluenceClient) {
+func AddUserTools(server *mcp.Server, client *confluence.ConfluenceClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

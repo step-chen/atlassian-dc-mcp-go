@@ -285,7 +285,7 @@ func (h *Handler) searchHandler(ctx context.Context, req *mcp.CallToolRequest, a
 }
 
 // AddContentTools registers the content-related tools with the MCP server
-func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient, hasWritePermission bool) {
+func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -584,7 +584,7 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient, ha
 	}, handler.searchHandler)
 
 	// Only register write tools if write permission is enabled
-	if hasWritePermission {
+	if permissions["confluence_create_content"] {
 		mcp.AddTool(server, &mcp.Tool{
 			Name:        "confluence_create_content",
 			Description: "Create new Confluence content such as pages or blog posts. This tool allows you to create content with a title, body, space, and optional metadata or parent page relationships.",
@@ -627,7 +627,9 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient, ha
 				Required: []string{"contentType", "title", "space", "body"},
 			},
 		}, handler.createContentHandler)
+	}
 
+	if permissions["confluence_update_content"] {
 		mcp.AddTool(server, &mcp.Tool{
 			Name:        "confluence_update_content",
 			Description: "Update existing Confluence content. This tool allows you to modify various aspects of existing content such as title, body, and other properties.",
@@ -646,7 +648,9 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient, ha
 				Required: []string{"contentID"},
 			},
 		}, handler.updateContentHandler)
+	}
 
+	if permissions["confluence_delete_content"] {
 		mcp.AddTool(server, &mcp.Tool{
 			Name:        "confluence_delete_content",
 			Description: "Delete Confluence content by ID. This tool allows you to permanently remove content from Confluence.",
@@ -661,10 +665,12 @@ func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient, ha
 				Required: []string{"contentID"},
 			},
 		}, handler.deleteContentHandler)
+	}
 
+	if permissions["confluence_add_comment"] {
 		mcp.AddTool(server, &mcp.Tool{
-			Name:        "confluence_create_content_comment",
-			Description: "Create a new comment on Confluence content. This tool allows you to add comments to existing content items.",
+			Name:        "confluence_add_comment",
+			Description: "Add a comment to Confluence content. This tool allows you to attach comments to specific content items.",
 			InputSchema: &jsonschema.Schema{
 				Type: "object",
 				Properties: map[string]*jsonschema.Schema{

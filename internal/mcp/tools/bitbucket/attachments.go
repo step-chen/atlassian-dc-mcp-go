@@ -6,6 +6,7 @@ import (
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 	"atlassian-dc-mcp-go/internal/mcp/tools"
+
 	"github.com/google/jsonschema-go/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -65,7 +66,7 @@ func (h *Handler) getAttachmentMetadataHandler(ctx context.Context, req *mcp.Cal
 }
 
 // AddAttachmentTools registers the attachment-related tools with the MCP server
-func AddAttachmentTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWritePermission bool) {
+func AddAttachmentTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

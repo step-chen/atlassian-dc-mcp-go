@@ -42,7 +42,7 @@ func (h *Handler) transitionIssueHandler(ctx context.Context, req *mcp.CallToolR
 }
 
 // AddTransitionTools registers the transition-related tools with the MCP server
-func AddTransitionTools(server *mcp.Server, client *jira.JiraClient, hasWritePermission bool) {
+func AddTransitionTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -60,7 +60,7 @@ func AddTransitionTools(server *mcp.Server, client *jira.JiraClient, hasWritePer
 		},
 	}, handler.getTransitionsHandler)
 
-	if hasWritePermission {
+	if permissions["jira_transition_issue"] {
 		mcp.AddTool(server, &mcp.Tool{
 			Name:        "jira_transition_issue",
 			Description: "Transition a Jira issue",

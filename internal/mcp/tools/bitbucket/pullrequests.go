@@ -320,7 +320,7 @@ func (h *Handler) getPullRequestsForUserHandler(ctx context.Context, req *mcp.Ca
 }
 
 // AddPullRequestTools registers the pull request-related tools with the MCP server
-func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient, hasWritePermission bool) {
+func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -619,8 +619,8 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient, 
 		},
 	}, handler.getPullRequestCommentHandler)
 
-	// Only register write tools if write permission is enabled
-	if hasWritePermission {
+	// Only register write tools if permissions allow
+	if permissions["bitbucket_merge_pull_request"] {
 		mcp.AddTool(server, &mcp.Tool{
 			Name:        "bitbucket_add_pull_request_comment",
 			Description: "Add a comment to a specific pull request. This tool allows you to add comments to pull requests for discussion and feedback.",

@@ -114,7 +114,7 @@ func (h *Handler) getSpacesByKeyHandler(ctx context.Context, req *mcp.CallToolRe
 }
 
 // AddSpaceTools registers the space-related tools with the MCP server
-func AddSpaceTools(server *mcp.Server, client *confluence.ConfluenceClient, hasWritePermission bool) {
+func AddSpaceTools(server *mcp.Server, client *confluence.ConfluenceClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

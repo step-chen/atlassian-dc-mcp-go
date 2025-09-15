@@ -32,19 +32,43 @@ jira:
   url: "https://jira.example.com"
   token: "your-jira-api-token"
   permissions:
-    # Enable/disable write operations (default: false)
-    write: false
+    # Note: READ permissions are always enabled and cannot be disabled
+    # Jira write permissions:
+    jira_create_issue: false
+    jira_update_issue: false
+    jira_delete_issue: false
+    jira_assign_issue: false
+    jira_transition_issue: false
+    jira_add_comment: false
+    jira_update_comment: false
+    jira_delete_comment: false
+    jira_add_worklog: false
 
 confluence:
   url: "https://confluence.example.com"
   token: "your-confluence-api-token"
   permissions:
-    # Enable/disable write operations (default: false)
-    write: false
+    # Note: READ permissions are always enabled and cannot be disabled
+    # Confluence write permissions:
+    confluence_create_content: false
+    confluence_update_content: false
+    confluence_delete_content: false
+    confluence_attach_file: false
 
 bitbucket:
   url: "https://bitbucket.example.com"
   token: "your-bitbucket-api-token"
   permissions:
-    # Enable/disable write operations (default: false)
-    write: false
+    # Note: READ permissions are always enabled and cannot be disabled
+    # Bitbucket write permissions:
+    bitbucket_create_project: false
+    bitbucket_update_project: false
+    bitbucket_delete_project: false
+    bitbucket_create_repository: false
+    bitbucket_update_repository: false
+    bitbucket_delete_repository: false
+    bitbucket_fork_repository: false
+    bitbucket_create_pull_request: false
+    bitbucket_update_pull_request: false
+    bitbucket_merge_pull_request: false
+    bitbucket_decline_pull_request: false

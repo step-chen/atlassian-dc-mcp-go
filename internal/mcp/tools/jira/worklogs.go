@@ -29,7 +29,7 @@ func (h *Handler) getWorklogsHandler(ctx context.Context, req *mcp.CallToolReque
 }
 
 // AddWorklogTools registers the worklog-related tools with the MCP server
-func AddWorklogTools(server *mcp.Server, client *jira.JiraClient, hasWritePermission bool) {
+func AddWorklogTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

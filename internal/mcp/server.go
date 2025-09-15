@@ -136,41 +136,41 @@ func (s *Server) addTools() {
 // addJiraTools registers all Jira-related tools with the MCP server
 func (s *Server) addJiraTools() {
 	// Check if Jira write permission is enabled
-	hasWritePermission := s.config.Jira.Permissions.Write
+	permissions := s.config.Jira.Permissions
 
-	jiraTools.AddIssueTools(s.mcpServer, s.jiraClient, hasWritePermission)
+	jiraTools.AddIssueTools(s.mcpServer, s.jiraClient, permissions)
 	jiraTools.AddBoardTools(s.mcpServer, s.jiraClient)
 	jiraTools.AddProjectTools(s.mcpServer, s.jiraClient)
-	jiraTools.AddCommentTools(s.mcpServer, s.jiraClient, hasWritePermission)
+	jiraTools.AddCommentTools(s.mcpServer, s.jiraClient, permissions)
 	jiraTools.AddIssueTypeTools(s.mcpServer, s.jiraClient)
 	jiraTools.AddPriorityTools(s.mcpServer, s.jiraClient)
-	jiraTools.AddTransitionTools(s.mcpServer, s.jiraClient, hasWritePermission)
+	jiraTools.AddTransitionTools(s.mcpServer, s.jiraClient, permissions)
 	jiraTools.AddUserTools(s.mcpServer, s.jiraClient)
-	jiraTools.AddWorklogTools(s.mcpServer, s.jiraClient, hasWritePermission)
+	jiraTools.AddWorklogTools(s.mcpServer, s.jiraClient, permissions)
 }
 
 // addConfluenceTools registers all Confluence-related tools with the MCP server
 func (s *Server) addConfluenceTools() {
 	// Check if Confluence write permission is enabled
-	hasWritePermission := s.config.Confluence.Permissions.Write
+	permissions := s.config.Confluence.Permissions
 
-	confluenceTools.AddContentTools(s.mcpServer, s.confluenceClient, hasWritePermission)
-	confluenceTools.AddSpaceTools(s.mcpServer, s.confluenceClient, hasWritePermission)
-	confluenceTools.AddChildrenTools(s.mcpServer, s.confluenceClient, hasWritePermission)
-	confluenceTools.AddLabelTools(s.mcpServer, s.confluenceClient, hasWritePermission)
-	confluenceTools.AddUserTools(s.mcpServer, s.confluenceClient)
+	confluenceTools.AddContentTools(s.mcpServer, s.confluenceClient, permissions)
+	confluenceTools.AddSpaceTools(s.mcpServer, s.confluenceClient, permissions)
+	confluenceTools.AddChildrenTools(s.mcpServer, s.confluenceClient, permissions)
+	confluenceTools.AddLabelTools(s.mcpServer, s.confluenceClient, permissions)
+	confluenceTools.AddUserTools(s.mcpServer, s.confluenceClient, permissions)
 }
 
 // addBitbucketTools registers all Bitbucket-related tools with the MCP server
 func (s *Server) addBitbucketTools() {
-	hasWritePermission := s.config.Bitbucket.Permissions.Write
+	permissions := s.config.Bitbucket.Permissions
 
-	bitbucketTools.AddUserTools(s.mcpServer, s.bitbucketClient, hasWritePermission)
-	bitbucketTools.AddProjectTools(s.mcpServer, s.bitbucketClient, hasWritePermission)
-	bitbucketTools.AddBranchTools(s.mcpServer, s.bitbucketClient, hasWritePermission)
-	bitbucketTools.AddCommitTools(s.mcpServer, s.bitbucketClient, hasWritePermission)
-	bitbucketTools.AddPullRequestTools(s.mcpServer, s.bitbucketClient, hasWritePermission)
-	bitbucketTools.AddAttachmentTools(s.mcpServer, s.bitbucketClient, hasWritePermission)
-	bitbucketTools.AddTagTools(s.mcpServer, s.bitbucketClient, hasWritePermission)
-	bitbucketTools.AddRepositoryTools(s.mcpServer, s.bitbucketClient, hasWritePermission)
+	bitbucketTools.AddUserTools(s.mcpServer, s.bitbucketClient, permissions)
+	bitbucketTools.AddProjectTools(s.mcpServer, s.bitbucketClient, permissions)
+	bitbucketTools.AddBranchTools(s.mcpServer, s.bitbucketClient, permissions)
+	bitbucketTools.AddCommitTools(s.mcpServer, s.bitbucketClient, permissions)
+	bitbucketTools.AddPullRequestTools(s.mcpServer, s.bitbucketClient, permissions)
+	bitbucketTools.AddAttachmentTools(s.mcpServer, s.bitbucketClient, permissions)
+	bitbucketTools.AddTagTools(s.mcpServer, s.bitbucketClient, permissions)
+	bitbucketTools.AddRepositoryTools(s.mcpServer, s.bitbucketClient, permissions)
 }

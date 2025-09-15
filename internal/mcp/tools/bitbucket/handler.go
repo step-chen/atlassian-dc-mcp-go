@@ -1,11 +1,10 @@
-// Package bitbucket provides MCP tools for interacting with Bitbucket.
 package bitbucket
 
 import (
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 )
 
-// Handler encapsulates all Bitbucket tool handlers
+// Handler provides a struct for storing the Bitbucket client
 type Handler struct {
 	client *bitbucket.BitbucketClient
 }

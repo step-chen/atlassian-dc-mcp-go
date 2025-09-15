@@ -248,7 +248,7 @@ func (h *Handler) setIssueEstimationForBoardHandler(ctx context.Context, req *mc
 }
 
 // AddIssueTools registers the issue-related tools with the MCP server
-func AddIssueTools(server *mcp.Server, client *jira.JiraClient, hasWritePermission bool) {
+func AddIssueTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -390,7 +390,7 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient, hasWritePermissi
 	}, handler.getAgileIssueHandler)
 
 	// Only register write tools if write permission is enabled
-	if hasWritePermission {
+	if permissions["jira_create_issue"] {
 		mcp.AddTool(server, &mcp.Tool{
 			Name:        "jira_create_issue",
 			Description: "Create a new Jira issue in the specified project with the provided details.",
@@ -421,7 +421,9 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient, hasWritePermissi
 				Required: []string{"projectKey", "summary", "issueType"},
 			},
 		}, handler.createIssueHandler)
+	}
 
+	if permissions["jira_update_issue"] {
 		mcp.AddTool(server, &mcp.Tool{
 			Name:        "jira_update_issue",
 			Description: "Update an existing Jira issue with the specified fields.",
@@ -440,7 +442,9 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient, hasWritePermissi
 				Required: []string{"issueKey", "updates"},
 			},
 		}, handler.updateIssueHandler)
+	}
 
+	if permissions["jira_create_subtask"] {
 		mcp.AddTool(server, &mcp.Tool{
 			Name:        "jira_create_subtask",
 			Description: "Create a subtask for a specific Jira issue.",
@@ -475,7 +479,9 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient, hasWritePermissi
 				Required: []string{"parentKeyOrID", "projectKey", "summary", "issueType"},
 			},
 		}, handler.createSubTaskHandler)
+	}
 
+	if permissions["jira_set_issue_estimation_for_board"] {
 		mcp.AddTool(server, &mcp.Tool{
 			Name:        "jira_set_issue_estimation_for_board",
 			Description: "Set issue estimation for board to update the estimation value for a specific issue on a board.",
@@ -498,7 +504,9 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient, hasWritePermissi
 				Required: []string{"issueIdOrKey", "boardId", "value"},
 			},
 		}, handler.setIssueEstimationForBoardHandler)
+	}
 
+	if permissions["jira_update_issue_with_options"] {
 		mcp.AddTool(server, &mcp.Tool{
 			Name:        "jira_update_issue_with_options",
 			Description: "Update an existing Jira issue with additional options for controlling the update behavior.",
@@ -521,7 +529,9 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient, hasWritePermissi
 				Required: []string{"issueKey", "updates", "options"},
 			},
 		}, handler.updateIssueWithOptionsHandler)
+	}
 
+	if permissions["jira_create_issue_with_payload"] {
 		mcp.AddTool(server, &mcp.Tool{
 			Name:        "jira_create_issue_with_payload",
 			Description: "Create a new Jira issue with a custom payload for advanced issue creation scenarios.",
@@ -540,6 +550,5 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient, hasWritePermissi
 				Required: []string{"payload"},
 			},
 		}, handler.createIssueWithPayloadHandler)
-
 	}
 }

@@ -46,7 +46,7 @@ func (h *Handler) addCommentHandler(ctx context.Context, req *mcp.CallToolReques
 }
 
 // AddCommentTools registers the comment-related tools with the MCP server
-func AddCommentTools(server *mcp.Server, client *jira.JiraClient, hasWritePermission bool) {
+func AddCommentTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -81,7 +81,7 @@ func AddCommentTools(server *mcp.Server, client *jira.JiraClient, hasWritePermis
 	}, handler.getCommentsHandler)
 
 	// Only register write tools if write permission is enabled
-	if hasWritePermission {
+	if permissions["jira_add_comment"] {
 		mcp.AddTool(server, &mcp.Tool{
 			Name:        "jira_add_comment",
 			Description: "Add a comment to a Jira issue",

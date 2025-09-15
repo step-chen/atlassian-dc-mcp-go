@@ -43,6 +43,11 @@ func (c *BitbucketClient) executeRequest(method string, pathSegments []string, q
 	return nil
 }
 
+// ExecuteRequest is a public wrapper for executeRequest method.
+func (c *BitbucketClient) ExecuteRequest(method string, pathSegments []string, queryParams url.Values, body []byte, result interface{}) error {
+	return c.executeRequest(method, pathSegments, queryParams, body, result)
+}
+
 // executeTextRequest executes an HTTP request to the Bitbucket API and returns the response as text.
 func (c *BitbucketClient) executeTextRequest(method string, pathSegments []string, queryParams url.Values, body []byte) (string, error) {
 	req, err := utils.BuildHttpRequest(method, c.Config.URL, pathSegments, queryParams, body, c.Config.Token)
