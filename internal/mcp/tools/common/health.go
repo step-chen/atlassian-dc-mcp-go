@@ -23,21 +23,11 @@ type AppServer interface {
 	GetBitbucketClient() *bitbucket.BitbucketClient
 }
 
-// getPermissionsList converts Permissions struct to a list of permission strings
-func getPermissionsList(permissions config.Permissions) []string {
-	var perms []string
-	if permissions["write"] {
-		perms = append(perms, "write")
-	}
-	return perms
-}
-
 // checkJiraHealth checks the health of the Jira service
-func checkJiraHealth(client *jira.JiraClient, permissions config.Permissions) map[string]interface{} {
+func checkJiraHealth(client *jira.JiraClient) map[string]interface{} {
 	result := make(map[string]interface{})
-	
+
 	if client != nil {
-		result["permissions"] = getPermissionsList(permissions)
 		_, err := client.GetCurrentUser()
 		if err != nil {
 			result["status"] = "error"
@@ -48,16 +38,15 @@ func checkJiraHealth(client *jira.JiraClient, permissions config.Permissions) ma
 	} else {
 		result["status"] = "disabled"
 	}
-	
+
 	return result
 }
 
 // checkConfluenceHealth checks the health of the Confluence service
-func checkConfluenceHealth(client *confluence.ConfluenceClient, permissions config.Permissions) map[string]interface{} {
+func checkConfluenceHealth(client *confluence.ConfluenceClient) map[string]interface{} {
 	result := make(map[string]interface{})
-	
+
 	if client != nil {
-		result["permissions"] = getPermissionsList(permissions)
 		_, err := client.GetCurrentUser()
 		if err != nil {
 			result["status"] = "error"
@@ -68,16 +57,15 @@ func checkConfluenceHealth(client *confluence.ConfluenceClient, permissions conf
 	} else {
 		result["status"] = "disabled"
 	}
-	
+
 	return result
 }
 
 // checkBitbucketHealth checks the health of the Bitbucket service
-func checkBitbucketHealth(client *bitbucket.BitbucketClient, permissions config.Permissions) map[string]interface{} {
+func checkBitbucketHealth(client *bitbucket.BitbucketClient) map[string]interface{} {
 	result := make(map[string]interface{})
-	
+
 	if client != nil {
-		result["permissions"] = getPermissionsList(permissions)
 		_, err := client.GetCurrentUser()
 		if err != nil {
 			result["status"] = "error"
@@ -88,14 +76,14 @@ func checkBitbucketHealth(client *bitbucket.BitbucketClient, permissions config.
 	} else {
 		result["status"] = "disabled"
 	}
-	
+
 	return result
 }
 
 // performHealthCheck executes health checks for all services and returns the status
-func performHealthCheck(cfg *config.Config, jiraClient *jira.JiraClient, confluenceClient *confluence.ConfluenceClient, bitbucketClient *bitbucket.BitbucketClient) interface{} {
+func performHealthCheck(jiraClient *jira.JiraClient, confluenceClient *confluence.ConfluenceClient, bitbucketClient *bitbucket.BitbucketClient) interface{} {
 	var wg sync.WaitGroup
-	
+
 	status := struct {
 		Jira       map[string]interface{} `json:"jira"`
 		Confluence map[string]interface{} `json:"confluence"`
@@ -110,25 +98,25 @@ func performHealthCheck(cfg *config.Config, jiraClient *jira.JiraClient, conflue
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		status.Jira = checkJiraHealth(jiraClient, cfg.Jira.Permissions)
+		status.Jira = checkJiraHealth(jiraClient)
 	}()
 
 	// Check Confluence
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		status.Confluence = checkConfluenceHealth(confluenceClient, cfg.Confluence.Permissions)
+		status.Confluence = checkConfluenceHealth(confluenceClient)
 	}()
 
 	// Check Bitbucket
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		status.Bitbucket = checkBitbucketHealth(bitbucketClient, cfg.Bitbucket.Permissions)
+		status.Bitbucket = checkBitbucketHealth(bitbucketClient)
 	}()
 
 	wg.Wait()
-	
+
 	return status
 }
 
@@ -136,13 +124,12 @@ func performHealthCheck(cfg *config.Config, jiraClient *jira.JiraClient, conflue
 func healthCheckHandler(appServer AppServer) mcp.ToolHandler {
 	return func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		result, _, err := tools.HandleToolOperation("health check", func() (interface{}, error) {
-			cfg := appServer.GetConfig()
 			jiraClient := appServer.GetJiraClient()
 			confluenceClient := appServer.GetConfluenceClient()
 			bitbucketClient := appServer.GetBitbucketClient()
-			
-			status := performHealthCheck(cfg, jiraClient, confluenceClient, bitbucketClient)
-			
+
+			status := performHealthCheck(jiraClient, confluenceClient, bitbucketClient)
+
 			return status, nil
 		})
 		return result, err
