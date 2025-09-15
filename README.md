@@ -199,22 +199,46 @@ jira:
   url: "https://jira.example.com"
   token: "your-jira-api-token"
   permissions:
-    # Enable/disable write operations (default: false)
-    write: false
+    # Note: READ permissions are always enabled and cannot be disabled
+    # Jira write permissions:
+    jira_create_issue: false
+    jira_update_issue: false
+    jira_delete_issue: false
+    jira_assign_issue: false
+    jira_transition_issue: false
+    jira_add_comment: false
+    jira_update_comment: false
+    jira_delete_comment: false
+    jira_add_worklog: false
 
 confluence:
   url: "https://confluence.example.com"
   token: "your-confluence-api-token"
   permissions:
-    # Enable/disable write operations (default: false)
-    write: false
+    # Note: READ permissions are always enabled and cannot be disabled
+    # Confluence write permissions:
+    confluence_create_content: false
+    confluence_update_content: false
+    confluence_delete_content: false
+    confluence_attach_file: false
 
 bitbucket:
   url: "https://bitbucket.example.com"
   token: "your-bitbucket-api-token"
   permissions:
-    # Enable/disable write operations (default: false)
-    write: false
+    # Note: READ permissions are always enabled and cannot be disabled
+    # Bitbucket write permissions:
+    bitbucket_create_project: false
+    bitbucket_update_project: false
+    bitbucket_delete_project: false
+    bitbucket_create_repository: false
+    bitbucket_update_repository: false
+    bitbucket_delete_repository: false
+    bitbucket_fork_repository: false
+    bitbucket_create_pull_request: false
+    bitbucket_update_pull_request: false
+    bitbucket_merge_pull_request: false
+    bitbucket_decline_pull_request: false
 
 ```
 
@@ -234,18 +258,42 @@ export MCP_LOGGING_FILE_LEVEL="debug"  # Log level for file output
 # Service configurations
 export MCP_JIRA_URL="https://jira.example.com"
 export MCP_JIRA_TOKEN="your-jira-api-token"
-export MCP_JIRA_PERMISSIONS_READ=true
-export MCP_JIRA_PERMISSIONS_WRITE=false
+# Note: READ permissions are always enabled and cannot be disabled
+# Jira write permissions:
+export MCP_JIRA_PERMISSIONS_JIRA_CREATE_ISSUE=false
+export MCP_JIRA_PERMISSIONS_JIRA_UPDATE_ISSUE=false
+export MCP_JIRA_PERMISSIONS_JIRA_DELETE_ISSUE=false
+export MCP_JIRA_PERMISSIONS_JIRA_ASSIGN_ISSUE=false
+export MCP_JIRA_PERMISSIONS_JIRA_TRANSITION_ISSUE=false
+export MCP_JIRA_PERMISSIONS_JIRA_ADD_COMMENT=false
+export MCP_JIRA_PERMISSIONS_JIRA_UPDATE_COMMENT=false
+export MCP_JIRA_PERMISSIONS_JIRA_DELETE_COMMENT=false
+export MCP_JIRA_PERMISSIONS_JIRA_ADD_WORKLOG=false
 
 export MCP_CONFLUENCE_URL="https://confluence.example.com"
 export MCP_CONFLUENCE_TOKEN="your-confluence-api-token"
-export MCP_CONFLUENCE_PERMISSIONS_READ=true
-export MCP_CONFLUENCE_PERMISSIONS_WRITE=false
+# Note: READ permissions are always enabled and cannot be disabled
+# Confluence write permissions:
+export MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_CREATE_CONTENT=false
+export MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_UPDATE_CONTENT=false
+export MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_DELETE_CONTENT=false
+export MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_ATTACH_FILE=false
 
 export MCP_BITBUCKET_URL="https://bitbucket.example.com"
 export MCP_BITBUCKET_TOKEN="your-bitbucket-api-token"
-export MCP_BITBUCKET_PERMISSIONS_READ=true
-export MCP_BITBUCKET_PERMISSIONS_WRITE=false
+# Note: READ permissions are always enabled and cannot be disabled
+# Bitbucket write permissions:
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_PROJECT=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_UPDATE_PROJECT=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DELETE_PROJECT=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_REPOSITORY=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_UPDATE_REPOSITORY=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DELETE_REPOSITORY=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_FORK_REPOSITORY=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_PULL_REQUEST=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_UPDATE_PULL_REQUEST=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_MERGE_PULL_REQUEST=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DECLINE_PULL_REQUEST=false
 ```
 
 You can also use a `.env` file to manage environment variables:
@@ -263,20 +311,44 @@ MCP_LOGGING_LEVEL="info"
 # Jira configuration
 MCP_JIRA_URL="https://jira.example.com"
 MCP_JIRA_TOKEN="your-jira-api-token"
-MCP_JIRA_PERMISSIONS_READ=true
-MCP_JIRA_PERMISSIONS_WRITE=false
+# Note: READ permissions are always enabled and cannot be disabled
+# Jira write permissions:
+MCP_JIRA_PERMISSIONS_JIRA_CREATE_ISSUE=false
+MCP_JIRA_PERMISSIONS_JIRA_UPDATE_ISSUE=false
+MCP_JIRA_PERMISSIONS_JIRA_DELETE_ISSUE=false
+MCP_JIRA_PERMISSIONS_JIRA_ASSIGN_ISSUE=false
+MCP_JIRA_PERMISSIONS_JIRA_TRANSITION_ISSUE=false
+MCP_JIRA_PERMISSIONS_JIRA_ADD_COMMENT=false
+MCP_JIRA_PERMISSIONS_JIRA_UPDATE_COMMENT=false
+MCP_JIRA_PERMISSIONS_JIRA_DELETE_COMMENT=false
+MCP_JIRA_PERMISSIONS_JIRA_ADD_WORKLOG=false
 
 # Confluence configuration
 MCP_CONFLUENCE_URL="https://confluence.example.com"
 MCP_CONFLUENCE_TOKEN="your-confluence-api-token"
-MCP_CONFLUENCE_PERMISSIONS_READ=true
-MCP_CONFLUENCE_PERMISSIONS_WRITE=false
+# Note: READ permissions are always enabled and cannot be disabled
+# Confluence write permissions:
+MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_CREATE_CONTENT=false
+MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_UPDATE_CONTENT=false
+MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_DELETE_CONTENT=false
+MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_ATTACH_FILE=false
 
 # Bitbucket configuration
 MCP_BITBUCKET_URL="https://bitbucket.example.com"
 MCP_BITBUCKET_TOKEN="your-bitbucket-api-token"
-MCP_BITBUCKET_PERMISSIONS_READ=true
-MCP_BITBUCKET_PERMISSIONS_WRITE=false
+# Note: READ permissions are always enabled and cannot be disabled
+# Bitbucket write permissions:
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_PROJECT=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_UPDATE_PROJECT=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DELETE_PROJECT=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_REPOSITORY=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_UPDATE_REPOSITORY=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DELETE_REPOSITORY=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_FORK_REPOSITORY=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_PULL_REQUEST=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_UPDATE_PULL_REQUEST=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_MERGE_PULL_REQUEST=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DECLINE_PULL_REQUEST=false
 ```
 
 Create .env file from example:
@@ -351,14 +423,25 @@ This configuration provides two ways to use the service with an AI assistant:
 
 Each service (Jira, Confluence, Bitbucket) supports fine-grained permission controls:
 - `read`: Allows read operations (always available, cannot be disabled)
-- `write`: Allows write operations (default: false)
+- Individual write permissions for each operation (default: false for all)
 
-Read operations are always available and cannot be disabled. Write operations must be explicitly enabled by setting `write: true` in the configuration.
-
-When a service is configured with `write: false`, only read endpoints will be available.
-When a service is configured with `write: true`, both read and write endpoints will be available.
+Read operations are always available and cannot be disabled. Write operations must be explicitly enabled by setting the specific permission to `true` in the configuration.
 
 Permissions are validated at startup and services with invalid configurations will be disabled.
+
+For example, to allow creating Jira issues but not deleting them:
+```yaml
+jira:
+  url: "https://jira.example.com"
+  token: "your-jira-api-token"
+  permissions:
+    # Note: READ permissions are always enabled and cannot be disabled
+    # Jira write permissions:
+    jira_create_issue: true     # Allow creating issues
+    jira_update_issue: false    # Don't allow updating issues
+    jira_delete_issue: false    # Don't allow deleting issues
+    # ... other permissions
+```
 
 ## Cleanup Script
 
