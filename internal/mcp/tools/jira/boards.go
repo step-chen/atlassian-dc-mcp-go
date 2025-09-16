@@ -6,6 +6,7 @@ import (
 
 	"atlassian-dc-mcp-go/internal/client/jira"
 	"atlassian-dc-mcp-go/internal/mcp/tools"
+
 	"github.com/google/jsonschema-go/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -123,7 +124,7 @@ func (h *Handler) getSprintIssuesHandler(ctx context.Context, req *mcp.CallToolR
 }
 
 // AddBoardTools registers the board-related tools with the MCP server
-func AddBoardTools(server *mcp.Server, client *jira.JiraClient) {
+func AddBoardTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

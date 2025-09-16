@@ -2,708 +2,464 @@ package bitbucket
 
 import (
 	"context"
-	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 	"atlassian-dc-mcp-go/internal/mcp/tools"
 
-	"github.com/google/jsonschema-go/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
+// GetCommitsInput represents the input parameters for getting commits
+type GetCommitsInput struct {
+	ProjectKey    string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug      string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	Until         string `json:"until,omitempty" jsonschema:"Filter commits until a specific time"`
+	Since         string `json:"since,omitempty" jsonschema:"Filter commits since a specific time"`
+	Path          string `json:"path,omitempty" jsonschema:"Path to filter commits by"`
+	Start         int    `json:"start,omitempty" jsonschema:"The starting index of the returned commits"`
+	Limit         int    `json:"limit,omitempty" jsonschema:"The limit of the number of commits to return"`
+	Merges        string `json:"merges,omitempty" jsonschema:"Filter merge commits"`
+	FollowRenames bool   `json:"followRenames,omitempty" jsonschema:"Follow file renames"`
+	IgnoreMissing bool   `json:"ignoreMissing,omitempty" jsonschema:"Ignore missing commits"`
+	WithCounts    bool   `json:"withCounts,omitempty" jsonschema:"Include commit counts"`
+}
+
+// GetCommitsOutput represents the output for getting commits
+type GetCommitsOutput = map[string]interface{}
+
+// GetCommitInput represents the input parameters for getting a specific commit
+type GetCommitInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	CommitId   string `json:"commitId" jsonschema:"required,The commit ID"`
+	Path       string `json:"path,omitempty" jsonschema:"The path to the file"`
+}
+
+// GetCommitOutput represents the output for getting a specific commit
+type GetCommitOutput = map[string]interface{}
+
+// GetCommitChangesInput represents the input parameters for getting changes for a specific commit
+type GetCommitChangesInput struct {
+	ProjectKey   string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug     string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	CommitId     string `json:"commitId" jsonschema:"required,The commit ID"`
+	Start        int    `json:"start,omitempty" jsonschema:"The starting index of the returned changes"`
+	Limit        int    `json:"limit,omitempty" jsonschema:"The limit of the number of changes to return"`
+	WithComments string `json:"withComments,omitempty" jsonschema:"Include comments in the response"`
+	Since        string `json:"since,omitempty" jsonschema:"The commit ID or ref to retrieve changes since"`
+}
+
+// GetCommitChangesOutput represents the output for getting changes for a specific commit
+type GetCommitChangesOutput = map[string]interface{}
+
+// GetCommitCommentsInput represents the input parameters for getting comments on a commit
+type GetCommitCommentsInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	CommitId   string `json:"commitId" jsonschema:"required,The commit ID"`
+	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned comments"`
+	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of comments to return"`
+	Path       string `json:"path,omitempty" jsonschema:"The path to the file"`
+	Since      string `json:"since,omitempty" jsonschema:"The commit ID or ref to retrieve comments since"`
+}
+
+// GetCommitCommentsOutput represents the output for getting comments on a commit
+type GetCommitCommentsOutput = map[string]interface{}
+
+// GetCommitCommentInput represents the input parameters for getting a specific comment on a commit
+type GetCommitCommentInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	CommitId   string `json:"commitId" jsonschema:"required,The commit ID"`
+	CommentId  int    `json:"commentId" jsonschema:"required,The comment ID"`
+}
+
+// GetCommitCommentOutput represents the output for getting a specific comment on a commit
+type GetCommitCommentOutput = map[string]interface{}
+
+// GetCommitDiffStatsSummaryInput represents the input parameters for getting diff statistics summary for a commit
+type GetCommitDiffStatsSummaryInput struct {
+	ProjectKey  string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug    string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	CommitId    string `json:"commitId" jsonschema:"required,The commit ID"`
+	Path        string `json:"path,omitempty" jsonschema:"The path to the file"`
+	SrcPath     string `json:"srcPath,omitempty" jsonschema:"Source path for diff"`
+	AutoSrcPath string `json:"autoSrcPath,omitempty" jsonschema:"Automatically determine source path"`
+	Whitespace  string `json:"whitespace,omitempty" jsonschema:"Whitespace handling options"`
+	Since       string `json:"since,omitempty" jsonschema:"The commit ID or ref to retrieve changes since"`
+}
+
+// GetCommitDiffStatsSummaryOutput represents the output for getting diff statistics summary for a commit
+type GetCommitDiffStatsSummaryOutput = map[string]interface{}
+
+// GetDiffBetweenCommitsInput represents the input parameters for getting diff between commits
+type GetDiffBetweenCommitsInput struct {
+	ProjectKey   string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug     string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	Path         string `json:"path,omitempty" jsonschema:"The file path"`
+	From         string `json:"from,omitempty" jsonschema:"The source commit ID or ref"`
+	To           string `json:"to,omitempty" jsonschema:"The target commit ID or ref"`
+	ContextLines int    `json:"contextLines,omitempty" jsonschema:"Number of context lines to include"`
+	SrcPath      string `json:"srcPath,omitempty" jsonschema:"Source path for comparison"`
+	Whitespace   string `json:"whitespace,omitempty" jsonschema:"Whitespace handling option"`
+	FromRepo     string `json:"fromRepo,omitempty" jsonschema:"The source repository"`
+}
+
+// GetDiffBetweenCommitsOutput represents the output for getting diff between commits
+type GetDiffBetweenCommitsOutput = map[string]interface{}
+
+// GetJiraIssueCommitsInput represents the input parameters for getting commits related to a Jira issue
+type GetJiraIssueCommitsInput struct {
+	IssueKey   string `json:"issueKey" jsonschema:"required,The Jira issue key"`
+	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned commits"`
+	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of commits to return"`
+	MaxChanges int    `json:"maxChanges,omitempty" jsonschema:"Maximum number of changes to include"`
+}
+
+// GetJiraIssueCommitsOutput represents the output for getting commits related to a Jira issue
+type GetJiraIssueCommitsOutput = map[string]interface{}
+
 // getCommitsHandler handles getting commits
-func (h *Handler) getCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get commits", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+func (h *Handler) getCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input GetCommitsInput) (*mcp.CallToolResult, GetCommitsOutput, error) {
+	commits, err := h.client.GetCommits(
+		input.ProjectKey,
+		input.RepoSlug,
+		input.Until,
+		input.Since,
+		input.Path,
+		input.Start,
+		input.Limit,
+		input.Merges,
+		input.FollowRenames,
+		input.IgnoreMissing,
+		input.WithCounts,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get commits")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(commits)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create commits result")
+		return result, nil, err
+	}
 
-		until, _ := tools.GetStringArg(args, "until")
-		since, _ := tools.GetStringArg(args, "since")
-		path, _ := tools.GetStringArg(args, "path")
-
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
-
-		merges, _ := tools.GetStringArg(args, "merges")
-
-		followRenames := tools.GetBoolArg(args, "followRenames", false)
-
-		ignoreMissing := tools.GetBoolArg(args, "ignoreMissing", false)
-
-		withCounts := tools.GetBoolArg(args, "withCounts", false)
-
-		return h.client.GetCommits(projectKey, repoSlug, until, since, path, start, limit, merges, followRenames, ignoreMissing, withCounts)
-	})
+	return result, commits, nil
 }
 
 // getCommitHandler handles getting a specific commit
-func (h *Handler) getCommitHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get commit", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+func (h *Handler) getCommitHandler(ctx context.Context, req *mcp.CallToolRequest, input GetCommitInput) (*mcp.CallToolResult, GetCommitOutput, error) {
+	commit, err := h.client.GetCommit(
+		input.ProjectKey,
+		input.RepoSlug,
+		input.CommitId,
+		input.Path,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get commit")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(commit)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create commit result")
+		return result, nil, err
+	}
 
-		commitId, ok := tools.GetStringArg(args, "commitId")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid commitId parameter")
-		}
-
-		path, _ := tools.GetStringArg(args, "path")
-
-		return h.client.GetCommit(projectKey, repoSlug, commitId, path)
-	})
+	return result, commit, nil
 }
 
 // getCommitChangesHandler handles getting changes for a specific commit
-func (h *Handler) getCommitChangesHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get commit changes", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+func (h *Handler) getCommitChangesHandler(ctx context.Context, req *mcp.CallToolRequest, input GetCommitChangesInput) (*mcp.CallToolResult, GetCommitChangesOutput, error) {
+	changes, err := h.client.GetCommitChanges(
+		input.ProjectKey,
+		input.RepoSlug,
+		input.CommitId,
+		input.Start,
+		input.Limit,
+		input.WithComments,
+		input.Since,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get commit changes")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(changes)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create commit changes result")
+		return result, nil, err
+	}
 
-		commitId, ok := tools.GetStringArg(args, "commitId")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid commitId parameter")
-		}
-
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
-
-		withComments, _ := tools.GetStringArg(args, "withComments")
-		since, _ := tools.GetStringArg(args, "since")
-
-		return h.client.GetCommitChanges(projectKey, repoSlug, commitId, start, limit, withComments, since)
-	})
+	return result, changes, nil
 }
 
 // getCommitCommentHandler handles getting a specific comment on a commit
-func (h *Handler) getCommitCommentHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get commit comment", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+func (h *Handler) getCommitCommentHandler(ctx context.Context, req *mcp.CallToolRequest, input GetCommitCommentInput) (*mcp.CallToolResult, GetCommitCommentOutput, error) {
+	comment, err := h.client.GetCommitComment(
+		input.ProjectKey,
+		input.RepoSlug,
+		input.CommitId,
+		input.CommentId,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get commit comment")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(comment)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create commit comment result")
+		return result, nil, err
+	}
 
-		commitId, ok := tools.GetStringArg(args, "commitId")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid commitId parameter")
-		}
-
-		commentId := tools.GetIntArg(args, "commentId", 0)
-		if commentId <= 0 {
-			return nil, fmt.Errorf("missing or invalid commentId parameter")
-		}
-
-		return h.client.GetCommitComment(projectKey, repoSlug, commitId, commentId)
-	})
+	return result, comment, nil
 }
 
 // getCommitCommentsHandler handles getting comments on a commit
-func (h *Handler) getCommitCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get commit comments", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+func (h *Handler) getCommitCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input GetCommitCommentsInput) (*mcp.CallToolResult, GetCommitCommentsOutput, error) {
+	comments, err := h.client.GetCommitComments(
+		input.ProjectKey,
+		input.RepoSlug,
+		input.CommitId,
+		input.Start,
+		input.Limit,
+		input.Path,
+		input.Since,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get commit comments")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(comments)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create commit comments result")
+		return result, nil, err
+	}
 
-		commitId, ok := tools.GetStringArg(args, "commitId")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid commitId parameter")
-		}
-
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
-
-		path, _ := tools.GetStringArg(args, "path")
-
-		since, _ := tools.GetStringArg(args, "since")
-
-		return h.client.GetCommitComments(projectKey, repoSlug, commitId, start, limit, path, since)
-	})
+	return result, comments, nil
 }
 
 // getCommitDiffStatsSummaryHandler handles getting diff statistics summary for a commit
-func (h *Handler) getCommitDiffStatsSummaryHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get commit diff stats summary", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+func (h *Handler) getCommitDiffStatsSummaryHandler(ctx context.Context, req *mcp.CallToolRequest, input GetCommitDiffStatsSummaryInput) (*mcp.CallToolResult, GetCommitDiffStatsSummaryOutput, error) {
+	stats, err := h.client.GetCommitDiffStatsSummary(
+		input.ProjectKey,
+		input.RepoSlug,
+		input.CommitId,
+		input.Path,
+		input.SrcPath,
+		input.AutoSrcPath,
+		input.Whitespace,
+		input.Since,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get commit diff stats summary")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(stats)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create commit diff stats summary result")
+		return result, nil, err
+	}
 
-		commitId, ok := tools.GetStringArg(args, "commitId")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid commitId parameter")
-		}
-
-		path, ok := tools.GetStringArg(args, "path")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid path parameter")
-		}
-
-		srcPath, _ := tools.GetStringArg(args, "srcPath")
-		autoSrcPath, _ := tools.GetStringArg(args, "autoSrcPath")
-		whitespace, _ := tools.GetStringArg(args, "whitespace")
-		since, _ := tools.GetStringArg(args, "since")
-
-		return h.client.GetCommitDiffStatsSummary(projectKey, repoSlug, commitId, path, srcPath, autoSrcPath, whitespace, since)
-	})
+	return result, stats, nil
 }
 
 // getDiffBetweenCommitsHandler handles getting diff between commits
-func (h *Handler) getDiffBetweenCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get diff between commits", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+func (h *Handler) getDiffBetweenCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input GetDiffBetweenCommitsInput) (*mcp.CallToolResult, GetDiffBetweenCommitsOutput, error) {
+	diff, err := h.client.GetDiffBetweenCommits(
+		input.ProjectKey,
+		input.RepoSlug,
+		input.Path,
+		input.From,
+		input.To,
+		input.ContextLines,
+		input.SrcPath,
+		input.Whitespace,
+		input.FromRepo,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get diff between commits")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(diff)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create diff between commits result")
+		return result, nil, err
+	}
 
-		path, _ := tools.GetStringArg(args, "path")
-
-		from, ok := tools.GetStringArg(args, "from")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid from parameter")
-		}
-
-		to, ok := tools.GetStringArg(args, "to")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid to parameter")
-		}
-
-		contextLines := tools.GetIntArg(args, "contextLines", 0)
-
-		srcPath, _ := tools.GetStringArg(args, "srcPath")
-		whitespace, _ := tools.GetStringArg(args, "whitespace")
-		fromRepo, _ := tools.GetStringArg(args, "fromRepo")
-
-		return h.client.GetDiffBetweenCommits(projectKey, repoSlug, path, from, to, contextLines, srcPath, whitespace, fromRepo)
-	})
+	return result, GetDiffBetweenCommitsOutput{"diff": diff}, nil
 }
 
-// getDiffBetweenRevisionsHandler handles getting diff between revisions
-func (h *Handler) getDiffBetweenRevisionsHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get diff between revisions", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
-
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
-
-		commitId, ok := tools.GetStringArg(args, "commitId")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid commitId parameter")
-		}
-
-		path, ok := tools.GetStringArg(args, "path")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid path parameter")
-		}
-
-		contextLines := tools.GetIntArg(args, "contextLines", 0)
-
-		since, _ := tools.GetStringArg(args, "since")
-		srcPath, _ := tools.GetStringArg(args, "srcPath")
-		whitespace, _ := tools.GetStringArg(args, "whitespace")
-		filter, _ := tools.GetStringArg(args, "filter")
-		autoSrcPath, _ := tools.GetStringArg(args, "autoSrcPath")
-
-		withComments, _ := tools.GetStringArg(args, "withComments")
-
-		return h.client.GetDiffBetweenRevisions(projectKey, repoSlug, commitId, path, contextLines, since, srcPath, whitespace, filter, autoSrcPath, withComments)
-	})
+// GetDiffBetweenRevisionsInput represents the input parameters for getting the diff between revisions
+type GetDiffBetweenRevisionsInput struct {
+	ProjectKey   string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug     string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	CommitId     string `json:"commitId" jsonschema:"required,The commit ID"`
+	Path         string `json:"path" jsonschema:"required,The file path"`
+	ContextLines int    `json:"contextLines,omitempty" jsonschema:"Number of context lines to include"`
+	Since        string `json:"since,omitempty" jsonschema:"Filter changes since a specific time"`
+	SrcPath      string `json:"srcPath,omitempty" jsonschema:"Source path for comparison"`
+	Whitespace   string `json:"whitespace,omitempty" jsonschema:"Whitespace handling option"`
+	Filter       string `json:"filter,omitempty" jsonschema:"Filter option"`
+	AutoSrcPath  string `json:"autoSrcPath,omitempty" jsonschema:"Automatically determine source path"`
+	WithComments string `json:"withComments,omitempty" jsonschema:"Include comments in response"`
 }
 
-// getJiraIssueCommitsHandler handles getting commits for a Jira issue
-func (h *Handler) getJiraIssueCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get Jira issue commits", func() (interface{}, error) {
-		issueKey, ok := tools.GetStringArg(args, "issueKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid issueKey parameter")
-		}
-
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
-		maxChanges := tools.GetIntArg(args, "maxChanges", 0)
-
-		return h.client.GetJiraIssueCommits(issueKey, start, limit, maxChanges)
-	})
+// GetDiffBetweenRevisionsOutput represents the output for getting the diff between revisions
+type GetDiffBetweenRevisionsOutput struct {
+	Diff string `json:"diff"`
 }
 
-// getDiffBetweenRevisionsForPathHandler handles getting diff between revisions for a path
-func (h *Handler) getDiffBetweenRevisionsForPathHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get diff between revisions for path", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+// getDiffBetweenRevisionsHandler handles getting the diff between revisions
+func (h *Handler) getDiffBetweenRevisionsHandler(ctx context.Context, req *mcp.CallToolRequest, input GetDiffBetweenRevisionsInput) (*mcp.CallToolResult, GetDiffBetweenRevisionsOutput, error) {
+	diff, err := h.client.GetDiffBetweenRevisions(
+		input.ProjectKey,
+		input.RepoSlug,
+		input.CommitId,
+		input.Path,
+		input.ContextLines,
+		input.Since,
+		input.SrcPath,
+		input.Whitespace,
+		input.Filter,
+		input.AutoSrcPath,
+		input.WithComments,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get diff between revisions")
+		return result, GetDiffBetweenRevisionsOutput{}, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(diff)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create diff between revisions result")
+		return result, GetDiffBetweenRevisionsOutput{}, err
+	}
 
-		path, ok := tools.GetStringArg(args, "path")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid path parameter")
-		}
+	return result, GetDiffBetweenRevisionsOutput{Diff: diff}, nil
+}
 
-		since, _ := tools.GetStringArg(args, "since")
-		until, _ := tools.GetStringArg(args, "until")
+// getJiraIssueCommitsHandler handles getting commits related to a Jira issue
+func (h *Handler) getJiraIssueCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input GetJiraIssueCommitsInput) (*mcp.CallToolResult, GetJiraIssueCommitsOutput, error) {
+	commits, err := h.client.GetJiraIssueCommits(
+		input.IssueKey,
+		input.Start,
+		input.Limit,
+		input.MaxChanges,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get Jira issue commits")
+		return result, nil, err
+	}
 
-		contextLines := tools.GetIntArg(args, "contextLines", 0)
+	result, err := tools.CreateToolResult(commits)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create Jira issue commits result")
+		return result, nil, err
+	}
 
-		srcPath, _ := tools.GetStringArg(args, "srcPath")
-		whitespace, _ := tools.GetStringArg(args, "whitespace")
+	return result, commits, nil
+}
 
-		return h.client.GetDiffBetweenRevisionsForPath(projectKey, repoSlug, path, since, until, contextLines, srcPath, whitespace)
-	})
+// GetDiffBetweenRevisionsForPathInput represents the input parameters for getting the diff between revisions for a specific path
+type GetDiffBetweenRevisionsForPathInput struct {
+	ProjectKey   string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug     string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	Path         string `json:"path" jsonschema:"required,The file path"`
+	Since        string `json:"since,omitempty" jsonschema:"Filter changes since a specific time"`
+	Until        string `json:"until,omitempty" jsonschema:"Filter changes until a specific time"`
+	ContextLines int    `json:"contextLines,omitempty" jsonschema:"Number of context lines to include"`
+	SrcPath      string `json:"srcPath,omitempty" jsonschema:"Source path for comparison"`
+	Whitespace   string `json:"whitespace,omitempty" jsonschema:"Whitespace handling option"`
+}
+
+// GetDiffBetweenRevisionsForPathOutput represents the output for getting the diff between revisions for a specific path
+type GetDiffBetweenRevisionsForPathOutput struct {
+	Diff string `json:"diff"`
+}
+
+// getDiffBetweenRevisionsForPathHandler handles getting the diff between revisions for a specific path
+func (h *Handler) getDiffBetweenRevisionsForPathHandler(ctx context.Context, req *mcp.CallToolRequest, input GetDiffBetweenRevisionsForPathInput) (*mcp.CallToolResult, GetDiffBetweenRevisionsForPathOutput, error) {
+	diff, err := h.client.GetDiffBetweenRevisionsForPath(
+		input.ProjectKey,
+		input.RepoSlug,
+		input.Path,
+		input.Since,
+		input.Until,
+		input.ContextLines,
+		input.SrcPath,
+		input.Whitespace,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get diff between revisions for path")
+		return result, GetDiffBetweenRevisionsForPathOutput{}, err
+	}
+
+	result, err := tools.CreateToolResult(diff)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create diff between revisions for path result")
+		return result, GetDiffBetweenRevisionsForPathOutput{}, err
+	}
+
+	return result, GetDiffBetweenRevisionsForPathOutput{Diff: diff}, nil
 }
 
 // AddCommitTools registers the commit-related tools with the MCP server
 func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetCommitsInput, GetCommitsOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_commits",
 		Description: "Get commits for a repository",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"until": {
-					Type:        "string",
-					Description: "Commit ID or ref to retrieve commits until",
-				},
-				"since": {
-					Type:        "string",
-					Description: "Commit ID or ref to retrieve commits since",
-				},
-				"path": {
-					Type:        "string",
-					Description: "Path to filter commits by",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned commits",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of commits to return",
-				},
-				"merges": {
-					Type:        "string",
-					Description: "Filter merge commits",
-				},
-				"followRenames": {
-					Type:        "boolean",
-					Description: "Follow file renames",
-				},
-				"ignoreMissing": {
-					Type:        "boolean",
-					Description: "Ignore missing commits",
-				},
-				"withCounts": {
-					Type:        "boolean",
-					Description: "Include commit counts",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug"},
-		},
 	}, handler.getCommitsHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetCommitInput, GetCommitOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_commit",
 		Description: "Get a specific commit",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"commitId": {
-					Type:        "string",
-					Description: "The commit ID to retrieve",
-				},
-				"path": {
-					Type:        "string",
-					Description: "Filter commit details by file path",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "commitId"},
-		},
 	}, handler.getCommitHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetCommitChangesInput, GetCommitChangesOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_commit_changes",
 		Description: "Get changes for a specific commit",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"commitId": {
-					Type:        "string",
-					Description: "The commit ID to retrieve changes for",
-				},
-				"since": {
-					Type:        "string",
-					Description: "Filter changes since a specific time",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned changes",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of changes to return",
-				},
-				"withComments": {
-					Type:        "boolean",
-					Description: "Include comments in response",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "commitId"},
-		},
 	}, handler.getCommitChangesHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetCommitCommentsInput, GetCommitCommentsOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_commit_comments",
 		Description: "Get comments on a commit",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"commitId": {
-					Type:        "string",
-					Description: "The commit ID",
-				},
-				"path": {
-					Type:        "string",
-					Description: "Filter comments by file path",
-				},
-				"since": {
-					Type:        "string",
-					Description: "Filter comments since a specific time",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned comments",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of comments to return",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "commitId"},
-		},
 	}, handler.getCommitCommentsHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetCommitCommentInput, GetCommitCommentOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_commit_comment",
 		Description: "Get a specific comment on a commit",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"commitId": {
-					Type:        "string",
-					Description: "The commit ID",
-				},
-				"commentId": {
-					Type:        "integer",
-					Description: "The comment ID to retrieve",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "commitId", "commentId"},
-		},
 	}, handler.getCommitCommentHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetCommitDiffStatsSummaryInput, GetCommitDiffStatsSummaryOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_commit_diff_stats_summary",
 		Description: "Get diff statistics summary for a commit",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"commitId": {
-					Type:        "string",
-					Description: "The commit ID",
-				},
-				"path": {
-					Type:        "string",
-					Description: "The file path",
-				},
-				"srcPath": {
-					Type:        "string",
-					Description: "Source path for comparison",
-				},
-				"autoSrcPath": {
-					Type:        "string",
-					Description: "Automatically determine source path",
-				},
-				"whitespace": {
-					Type:        "string",
-					Description: "Whitespace handling option",
-				},
-				"since": {
-					Type:        "string",
-					Description: "Filter changes since a specific time",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "commitId", "path"},
-		},
 	}, handler.getCommitDiffStatsSummaryHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetDiffBetweenCommitsInput, GetDiffBetweenCommitsOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_diff_between_commits",
 		Description: "Get the diff between two commits",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"path": {
-					Type:        "string",
-					Description: "The file path",
-				},
-				"from": {
-					Type:        "string",
-					Description: "The source commit ID or ref",
-				},
-				"to": {
-					Type:        "string",
-					Description: "The target commit ID or ref",
-				},
-				"contextLines": {
-					Type:        "integer",
-					Description: "Number of context lines to include",
-				},
-				"srcPath": {
-					Type:        "string",
-					Description: "Source path for comparison",
-				},
-				"whitespace": {
-					Type:        "string",
-					Description: "Whitespace handling option",
-				},
-				"fromRepo": {
-					Type:        "string",
-					Description: "The source repository",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "from", "to"},
-		},
 	}, handler.getDiffBetweenCommitsHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetDiffBetweenRevisionsInput, GetDiffBetweenRevisionsOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_diff_between_revisions",
 		Description: "Get the diff between revisions",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"commitId": {
-					Type:        "string",
-					Description: "The commit ID",
-				},
-				"path": {
-					Type:        "string",
-					Description: "The file path",
-				},
-				"contextLines": {
-					Type:        "integer",
-					Description: "Number of context lines to include",
-				},
-				"since": {
-					Type:        "string",
-					Description: "Filter changes since a specific time",
-				},
-				"srcPath": {
-					Type:        "string",
-					Description: "Source path for comparison",
-				},
-				"whitespace": {
-					Type:        "string",
-					Description: "Whitespace handling option",
-				},
-				"filter": {
-					Type:        "string",
-					Description: "Filter option",
-				},
-				"autoSrcPath": {
-					Type:        "string",
-					Description: "Automatically determine source path",
-				},
-				"withComments": {
-					Type:        "string",
-					Description: "Include comments in response",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "commitId", "path"},
-		},
 	}, handler.getDiffBetweenRevisionsHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetJiraIssueCommitsInput, GetJiraIssueCommitsOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_jira_issue_commits",
 		Description: "Get commits related to a Jira issue",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"issueKey": {
-					Type:        "string",
-					Description: "The Jira issue key",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned commits",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of commits to return",
-				},
-				"maxChanges": {
-					Type:        "integer",
-					Description: "Maximum number of changes to include",
-				},
-			},
-			Required: []string{"issueKey"},
-		},
 	}, handler.getJiraIssueCommitsHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetDiffBetweenRevisionsForPathInput, GetDiffBetweenRevisionsForPathOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_diff_between_revisions_for_path",
 		Description: "Get the diff between revisions for a specific path",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"path": {
-					Type:        "string",
-					Description: "The file path",
-				},
-				"since": {
-					Type:        "string",
-					Description: "Filter changes since a specific time",
-				},
-				"until": {
-					Type:        "string",
-					Description: "Filter changes until a specific time",
-				},
-				"contextLines": {
-					Type:        "integer",
-					Description: "Number of context lines to include",
-				},
-				"srcPath": {
-					Type:        "string",
-					Description: "Source path for comparison",
-				},
-				"whitespace": {
-					Type:        "string",
-					Description: "Whitespace handling option",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "path"},
-		},
 	}, handler.getDiffBetweenRevisionsForPathHandler)
 }

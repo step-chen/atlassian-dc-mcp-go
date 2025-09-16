@@ -5,6 +5,7 @@ import (
 
 	"atlassian-dc-mcp-go/internal/client/jira"
 	"atlassian-dc-mcp-go/internal/mcp/tools"
+
 	"github.com/google/jsonschema-go/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -25,7 +26,7 @@ func (h *Handler) getPrioritiesHandler(ctx context.Context, req *mcp.CallToolReq
 }
 
 // AddPriorityTools registers the priority-related tools with the MCP server
-func AddPriorityTools(server *mcp.Server, client *jira.JiraClient) {
+func AddPriorityTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

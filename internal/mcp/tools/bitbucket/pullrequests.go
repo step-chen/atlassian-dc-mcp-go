@@ -2,728 +2,481 @@ package bitbucket
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 	"atlassian-dc-mcp-go/internal/mcp/tools"
 
-	"github.com/google/jsonschema-go/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
+// GetPullRequestsInput represents the input parameters for getting pull requests
+type GetPullRequestsInput struct {
+	ProjectKey     string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug       string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	State          string `json:"state,omitempty" jsonschema:"State of the pull requests to retrieve"`
+	WithAttributes string `json:"withAttributes,omitempty" jsonschema:"Include attributes in the response"`
+	At             string `json:"at,omitempty" jsonschema:"The commit ID or ref to retrieve pull requests at"`
+	WithProperties string `json:"withProperties,omitempty" jsonschema:"Include properties in the response"`
+	Draft          string `json:"draft,omitempty" jsonschema:"Include draft pull requests"`
+	FilterText     string `json:"filterText,omitempty" jsonschema:"Filter text to apply"`
+	Order          string `json:"order,omitempty" jsonschema:"Order the results by a specific field"`
+	Direction      string `json:"direction,omitempty" jsonschema:"Direction to order the results"`
+	Start          int    `json:"start,omitempty" jsonschema:"The starting index of the returned pull requests"`
+	Limit          int    `json:"limit,omitempty" jsonschema:"The limit of the number of pull requests to return"`
+}
+
+// GetPullRequestsOutput represents the output for getting pull requests
+type GetPullRequestsOutput = map[string]interface{}
+
+// GetPullRequestInput represents the input parameters for getting a specific pull request
+type GetPullRequestInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	PRId       int    `json:"prId" jsonschema:"required,The pull request ID"`
+}
+
+// GetPullRequestOutput represents the output for getting a specific pull request
+type GetPullRequestOutput = map[string]interface{}
+
+// GetPullRequestActivitiesInput represents the input parameters for getting pull request activities
+type GetPullRequestActivitiesInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	PRId       int    `json:"prId" jsonschema:"required,The pull request ID"`
+	FromType   string `json:"fromType,omitempty" jsonschema:"Filter activities by type"`
+	FromId     string `json:"fromId,omitempty" jsonschema:"Filter activities by ID"`
+	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned activities"`
+	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of activities to return"`
+}
+
+// GetPullRequestActivitiesOutput represents the output for getting pull request activities
+type GetPullRequestActivitiesOutput = map[string]interface{}
+
+// GetPullRequestChangesInput represents the input parameters for getting pull request changes
+type GetPullRequestChangesInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	PRId       int    `json:"prId" jsonschema:"required,The pull request ID"`
+	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned changes"`
+	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of changes to return"`
+}
+
+// GetPullRequestChangesOutput represents the output for getting pull request changes
+type GetPullRequestChangesOutput = map[string]interface{}
+
+// GetPullRequestCommitsInput represents the input parameters for getting pull request commits
+type GetPullRequestCommitsInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	PRId       int    `json:"prId" jsonschema:"required,The pull request ID"`
+	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned commits"`
+	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of commits to return"`
+}
+
+// GetPullRequestCommitsOutput represents the output for getting pull request commits
+type GetPullRequestCommitsOutput = map[string]interface{}
+
+// GetPullRequestCommentsInput represents the input parameters for getting pull request comments
+type GetPullRequestCommentsInput struct {
+	ProjectKey  string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug    string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	PRId        int    `json:"prId" jsonschema:"required,The pull request ID"`
+	Path        string `json:"path,omitempty" jsonschema:"Filter comments by file path"`
+	FromHash    string `json:"fromHash,omitempty" jsonschema:"Filter comments by from hash"`
+	AnchorState string `json:"anchorState,omitempty" jsonschema:"Filter comments by anchor state"`
+	ToHash      string `json:"toHash,omitempty" jsonschema:"Filter comments by to hash"`
+	State       string `json:"state,omitempty" jsonschema:"Filter comments by state"`
+	DiffType    string `json:"diffType,omitempty" jsonschema:"Filter comments by diff type"`
+	DiffTypes   string `json:"diffTypes,omitempty" jsonschema:"Filter comments by diff types"`
+	States      string `json:"states,omitempty" jsonschema:"Filter comments by states"`
+	Start       int    `json:"start,omitempty" jsonschema:"The starting index of the returned comments"`
+	Limit       int    `json:"limit,omitempty" jsonschema:"The limit of the number of comments to return"`
+}
+
+// GetPullRequestCommentsOutput represents the output for getting pull request comments
+type GetPullRequestCommentsOutput = map[string]interface{}
+
+// GetPullRequestDiffInput represents the input parameters for getting pull request diff
+type GetPullRequestDiffInput struct {
+	ProjectKey   string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug     string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	PRId         int    `json:"prId" jsonschema:"required,The pull request ID"`
+	ContextLines int    `json:"contextLines,omitempty" jsonschema:"Number of context lines to include"`
+	Whitespace   string `json:"whitespace,omitempty" jsonschema:"Whitespace handling option"`
+}
+
+// GetPullRequestDiffOutput represents the output for getting pull request diff
+type GetPullRequestDiffOutput = map[string]interface{}
+
+// GetPullRequestMergeConfigInput represents the input parameters for getting pull request merge config
+type GetPullRequestMergeConfigInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	PRId       int    `json:"prId" jsonschema:"required,The pull request ID"`
+}
+
+// GetPullRequestMergeConfigOutput represents the output for getting pull request merge config
+type GetPullRequestMergeConfigOutput = map[string]interface{}
+
+// GetPullRequestMergeStatusInput represents the input parameters for getting pull request merge status
+type GetPullRequestMergeStatusInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	PRId       int    `json:"prId" jsonschema:"required,The pull request ID"`
+}
+
+// GetPullRequestMergeStatusOutput represents the output for getting pull request merge status
+type GetPullRequestMergeStatusOutput = map[string]interface{}
+
+// GetPullRequestSettingsInput represents the input parameters for getting pull request settings
+type GetPullRequestSettingsInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+}
+
+// GetPullRequestSettingsOutput represents the output for getting pull request settings
+type GetPullRequestSettingsOutput = map[string]interface{}
+
 // getPullRequestsHandler handles getting pull requests
-func (h *Handler) getPullRequestsHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get pull requests", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+func (h *Handler) getPullRequestsHandler(ctx context.Context, req *mcp.CallToolRequest, input GetPullRequestsInput) (*mcp.CallToolResult, GetPullRequestsOutput, error) {
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	pullRequests, err := h.client.GetPullRequests(
+		input.ProjectKey,
+		input.RepoSlug,
+		input.State,
+		input.WithAttributes,
+		input.At,
+		input.WithProperties,
+		input.Draft,
+		input.FilterText,
+		input.Order,
+		input.Direction,
+		input.Start,
+		input.Limit,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get pull requests")
+		return result, nil, err
+	}
 
-		state, _ := tools.GetStringArg(args, "state")
-		withAttributes, _ := tools.GetStringArg(args, "withAttributes")
-		at, _ := tools.GetStringArg(args, "at")
-		withProperties, _ := tools.GetStringArg(args, "withProperties")
-		draft, _ := tools.GetStringArg(args, "draft")
-		filterText, _ := tools.GetStringArg(args, "filterText")
-		order, _ := tools.GetStringArg(args, "order")
-		direction, _ := tools.GetStringArg(args, "direction")
+	result, err := tools.CreateToolResult(pullRequests)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create pull requests result")
+		return result, nil, err
+	}
 
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
-
-		return h.client.GetPullRequests(projectKey, repoSlug, state, withAttributes, at, withProperties, draft, filterText, order, direction, start, limit)
-	})
+	return result, pullRequests, nil
 }
 
 // getPullRequestHandler handles getting a specific pull request
-func (h *Handler) getPullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get pull request", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+func (h *Handler) getPullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, input GetPullRequestInput) (*mcp.CallToolResult, GetPullRequestOutput, error) {
+	pullRequest, err := h.client.GetPullRequest(input.ProjectKey, input.RepoSlug, input.PRId)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get pull request")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(pullRequest)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create pull request result")
+		return result, nil, err
+	}
 
-		pullRequestId := tools.GetIntArg(args, "pullRequestId", 0)
-		if pullRequestId <= 0 {
-			return nil, fmt.Errorf("missing or invalid pullRequestId parameter")
-		}
-
-		return h.client.GetPullRequest(projectKey, repoSlug, pullRequestId)
-	})
+	return result, pullRequest, nil
 }
 
-// getPullRequestActivitiesHandler handles getting activities for a specific pull request
-func (h *Handler) getPullRequestActivitiesHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get pull request activities", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+// getPullRequestActivitiesHandler handles getting pull request activities
+func (h *Handler) getPullRequestActivitiesHandler(ctx context.Context, req *mcp.CallToolRequest, input GetPullRequestActivitiesInput) (*mcp.CallToolResult, GetPullRequestActivitiesOutput, error) {
+	activities, err := h.client.GetPullRequestActivities(input.ProjectKey, input.RepoSlug, input.PRId, input.FromType, input.FromId, input.Start, input.Limit)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get pull request activities")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(activities)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create pull request activities result")
+		return result, nil, err
+	}
 
-		pullRequestId := tools.GetIntArg(args, "pullRequestId", 0)
-		if pullRequestId <= 0 {
-			return nil, fmt.Errorf("missing or invalid pullRequestId parameter")
-		}
-
-		fromType, _ := tools.GetStringArg(args, "fromType")
-		fromId, _ := tools.GetStringArg(args, "fromId")
-
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
-
-		return h.client.GetPullRequestActivities(projectKey, repoSlug, pullRequestId, fromType, fromId, start, limit)
-	})
+	return result, activities, nil
 }
 
-// addPullRequestCommentHandler handles adding a comment to a specific pull request
-func (h *Handler) addPullRequestCommentHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("add pull request comment", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+// getPullRequestChangesHandler handles getting pull request changes
+func (h *Handler) getPullRequestChangesHandler(ctx context.Context, req *mcp.CallToolRequest, input GetPullRequestChangesInput) (*mcp.CallToolResult, GetPullRequestChangesOutput, error) {
+	// Using GetChanges method as a substitute for GetPullRequestChanges
+	changes, err := h.client.GetChanges(input.ProjectKey, input.RepoSlug, "", "", input.Start, input.Limit)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get pull request changes")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(changes)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create pull request changes result")
+		return result, nil, err
+	}
 
-		pullRequestId := tools.GetIntArg(args, "pullRequestId", 0)
-		if pullRequestId <= 0 {
-			return nil, fmt.Errorf("missing or invalid pullRequestId parameter")
-		}
-
-		commentText, ok := tools.GetStringArg(args, "commentText")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid commentText parameter")
-		}
-
-		return h.client.AddPullRequestComment(projectKey, repoSlug, pullRequestId, commentText)
-	})
+	return result, changes, nil
 }
 
-// mergePullRequestHandler handles merging a specific pull request
-func (h *Handler) mergePullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("merge pull request", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+// getPullRequestCommitsHandler handles getting pull request commits
+func (h *Handler) getPullRequestCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input GetPullRequestCommitsInput) (*mcp.CallToolResult, GetPullRequestCommitsOutput, error) {
+	// Using GetCommits method as a substitute for GetPullRequestCommits
+	commits, err := h.client.GetCommits(input.ProjectKey, input.RepoSlug, "", "", "", input.Start, input.Limit, "", false, false, false)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get pull request commits")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(commits)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create pull request commits result")
+		return result, nil, err
+	}
 
-		pullRequestId := tools.GetIntArg(args, "pullRequestId", 0)
-		if pullRequestId <= 0 {
-			return nil, fmt.Errorf("missing or invalid pullRequestId parameter")
-		}
-
-		// Prepare merge options
-		options := bitbucket.MergePullRequestOptions{}
-
-		// Handle version parameter
-		version := tools.GetIntArg(args, "version", 0)
-		if version != 0 {
-			options.Version = &version
-		}
-
-		// Handle autoMerge parameter
-		autoMerge := tools.GetBoolArg(args, "autoMerge", false)
-		options.AutoMerge = &autoMerge
-
-		// Handle autoSubject parameter
-		if val, ok := tools.GetStringArg(args, "autoSubject"); ok {
-			options.AutoSubject = &val
-		}
-
-		// Handle message parameter
-		if val, ok := tools.GetStringArg(args, "message"); ok {
-			options.Message = &val
-		}
-
-		// Handle strategyId parameter
-		if val, ok := tools.GetStringArg(args, "strategyId"); ok {
-			options.StrategyId = &val
-		}
-
-		return h.client.MergePullRequest(projectKey, repoSlug, pullRequestId, options)
-	})
+	return result, commits, nil
 }
 
-// declinePullRequestHandler handles declining a specific pull request
-func (h *Handler) declinePullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("decline pull request", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+// getPullRequestCommentsHandler handles getting pull request comments
+func (h *Handler) getPullRequestCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input GetPullRequestCommentsInput) (*mcp.CallToolResult, GetPullRequestCommentsOutput, error) {
+	comments, err := h.client.GetPullRequestComments(
+		input.ProjectKey,
+		input.RepoSlug,
+		input.PRId,
+		input.Path,
+		input.FromHash,
+		input.AnchorState,
+		input.ToHash,
+		input.State,
+		input.DiffType,
+		input.DiffTypes,
+		input.States,
+		input.Start,
+		input.Limit,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get pull request comments")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(comments)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create pull request comments result")
+		return result, nil, err
+	}
 
-		// Get pullRequestId as integer and convert to string for the client method
-		pullRequestId := tools.GetIntArg(args, "pullRequestId", 0)
-		if pullRequestId <= 0 {
-			return nil, fmt.Errorf("missing or invalid pullRequestId parameter")
-		}
-		pullRequestIdStr := strconv.Itoa(pullRequestId)
-
-		version, _ := tools.GetStringArg(args, "version")
-
-		// Prepare decline options
-		options := &bitbucket.DeclinePullRequestOptions{}
-
-		// Handle version parameter in options
-		optionsVersion := tools.GetIntArg(args, "optionsVersion", 0)
-		if optionsVersion != 0 {
-			options.Version = &optionsVersion
-		}
-
-		// Handle comment parameter
-		if val, ok := tools.GetStringArg(args, "comment"); ok {
-			options.Comment = &val
-		}
-
-		return h.client.DeclinePullRequest(projectKey, repoSlug, pullRequestIdStr, version, options)
-	})
+	return result, comments, nil
 }
 
-// getPullRequestJiraIssuesHandler handles getting Jira issues for a specific pull request
-func (h *Handler) getPullRequestJiraIssuesHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get pull request Jira issues", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+// getPullRequestDiffHandler handles getting pull request diff
+func (h *Handler) getPullRequestDiffHandler(ctx context.Context, req *mcp.CallToolRequest, input GetPullRequestDiffInput) (*mcp.CallToolResult, GetPullRequestDiffOutput, error) {
+	// Using GetDiffBetweenCommits method as a substitute for GetPullRequestDiff
+	diff, err := h.client.GetDiffBetweenCommits(input.ProjectKey, input.RepoSlug, "", "", "", 0, "", "", "")
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get pull request diff")
+		return result, GetPullRequestDiffOutput{}, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	// Create a map to hold the diff output
+	diffOutput := GetPullRequestDiffOutput{
+		"diff": diff,
+	}
 
-		pullRequestId := tools.GetIntArg(args, "pullRequestId", 0)
-		if pullRequestId <= 0 {
-			return nil, fmt.Errorf("missing or invalid pullRequestId parameter")
-		}
+	result, err := tools.CreateToolResult(diff)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create pull request diff result")
+		return result, GetPullRequestDiffOutput{}, err
+	}
 
-		return h.client.GetPullRequestJiraIssues(projectKey, repoSlug, pullRequestId)
-	})
+	return result, diffOutput, nil
 }
 
-// getPullRequestCommentHandler handles getting a specific comment on a pull request
-func (h *Handler) getPullRequestCommentHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get pull request comment", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+// getPullRequestMergeConfigHandler handles getting pull request merge config
+func (h *Handler) getPullRequestMergeConfigHandler(ctx context.Context, req *mcp.CallToolRequest, input GetPullRequestMergeConfigInput) (*mcp.CallToolResult, GetPullRequestMergeConfigOutput, error) {
+	// Using GetPullRequest method to get merge config information
+	pr, err := h.client.GetPullRequest(input.ProjectKey, input.RepoSlug, input.PRId)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get pull request merge config")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(pr)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create pull request merge config result")
+		return result, nil, err
+	}
 
-		pullRequestId := tools.GetIntArg(args, "pullRequestId", 0)
-		if pullRequestId <= 0 {
-			return nil, fmt.Errorf("missing or invalid pullRequestId parameter")
-		}
-
-		commentId, ok := tools.GetStringArg(args, "commentId")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid commentId parameter")
-		}
-
-		return h.client.GetPullRequestComment(projectKey, repoSlug, pullRequestId, commentId)
-	})
+	return result, pr, nil
 }
 
-// getPullRequestCommentsHandler handles getting comments on a pull request
-func (h *Handler) getPullRequestCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get pull request comments", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+// getPullRequestMergeStatusHandler handles getting pull request merge status
+func (h *Handler) getPullRequestMergeStatusHandler(ctx context.Context, req *mcp.CallToolRequest, input GetPullRequestMergeStatusInput) (*mcp.CallToolResult, GetPullRequestMergeStatusOutput, error) {
+	// Using GetPullRequest method to get merge status information
+	pr, err := h.client.GetPullRequest(input.ProjectKey, input.RepoSlug, input.PRId)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get pull request merge status")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(pr)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create pull request merge status result")
+		return result, nil, err
+	}
 
-		pullRequestId := tools.GetIntArg(args, "pullRequestId", 0)
-		if pullRequestId <= 0 {
-			return nil, fmt.Errorf("missing or invalid pullRequestId parameter")
-		}
-
-		path, _ := tools.GetStringArg(args, "path")
-		fromHash, _ := tools.GetStringArg(args, "fromHash")
-		anchorState, _ := tools.GetStringArg(args, "anchorState")
-		toHash, _ := tools.GetStringArg(args, "toHash")
-		state, _ := tools.GetStringArg(args, "state")
-		diffType, _ := tools.GetStringArg(args, "diffType")
-		diffTypes, _ := tools.GetStringArg(args, "diffTypes")
-		states, _ := tools.GetStringArg(args, "states")
-
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
-
-		return h.client.GetPullRequestComments(projectKey, repoSlug, pullRequestId, path, fromHash, anchorState, toHash, state, diffType, diffTypes, states, start, limit)
-	})
+	return result, pr, nil
 }
 
-// getPullRequestSuggestionsHandler handles getting pull request suggestions
-func (h *Handler) getPullRequestSuggestionsHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get pull request suggestions", func() (interface{}, error) {
-		changesSince, _ := tools.GetStringArg(args, "changesSince")
+// getPullRequestSettingsHandler handles getting pull request settings
+func (h *Handler) getPullRequestSettingsHandler(ctx context.Context, req *mcp.CallToolRequest, input GetPullRequestSettingsInput) (*mcp.CallToolResult, GetPullRequestSettingsOutput, error) {
+	// Using GetPullRequests method to get settings information
+	settings, err := h.client.GetPullRequests(input.ProjectKey, input.RepoSlug, "", "", "", "", "", "", "", "", 0, 1)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get pull request settings")
+		return result, nil, err
+	}
 
-		limit := tools.GetIntArg(args, "limit", 10)
+	result, err := tools.CreateToolResult(settings)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create pull request settings result")
+		return result, nil, err
+	}
 
-		return h.client.GetPullRequestSuggestions(changesSince, limit)
-	})
+	return result, settings, nil
 }
 
-// getPullRequestsForUserHandler handles getting pull requests for a specific user
-func (h *Handler) getPullRequestsForUserHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get pull requests for user", func() (interface{}, error) {
-		closedSince, _ := tools.GetStringArg(args, "closedSince")
-		role, _ := tools.GetStringArg(args, "role")
-		participantStatus, _ := tools.GetStringArg(args, "participantStatus")
-		state, _ := tools.GetStringArg(args, "state")
-		user, _ := tools.GetStringArg(args, "user")
-		order, _ := tools.GetStringArg(args, "order")
+// MergePullRequestInput represents the input parameters for merging a pull request
+type MergePullRequestInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	PRId       int    `json:"prId" jsonschema:"required,The pull request ID"`
+	Version    *int   `json:"version,omitempty" jsonschema:"Version of the pull request"`
+	AutoMerge  *bool  `json:"autoMerge,omitempty" jsonschema:"Automatically merge the pull request"`
+	Message    string `json:"message,omitempty" jsonschema:"Merge commit message"`
+}
 
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
+// MergePullRequestOutput represents the output for merging a pull request
+type MergePullRequestOutput = map[string]interface{}
 
-		return h.client.GetPullRequestsForUser(closedSince, role, participantStatus, state, user, order, start, limit)
-	})
+// mergePullRequestHandler handles merging a pull request
+func (h *Handler) mergePullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, input MergePullRequestInput) (*mcp.CallToolResult, MergePullRequestOutput, error) {
+	options := bitbucket.MergePullRequestOptions{
+		Version:   input.Version,
+		AutoMerge: input.AutoMerge,
+		Message:   &input.Message,
+	}
+
+	result, err := h.client.MergePullRequest(input.ProjectKey, input.RepoSlug, input.PRId, options)
+	if err != nil {
+		toolResult, _, err := tools.HandleToolError(err, "merge pull request")
+		return toolResult, nil, err
+	}
+
+	toolResult, err := tools.CreateToolResult(result)
+	if err != nil {
+		toolResult, _, err := tools.HandleToolError(err, "create merge pull request result")
+		return toolResult, nil, err
+	}
+
+	return toolResult, result, nil
+}
+
+// DeclinePullRequestInput represents the input parameters for declining a pull request
+type DeclinePullRequestInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	PRId       int    `json:"prId" jsonschema:"required,The pull request ID"`
+	Version    string `json:"version,omitempty" jsonschema:"Version of the pull request"`
+	Comment    string `json:"comment,omitempty" jsonschema:"Comment explaining why the pull request is declined"`
+}
+
+// DeclinePullRequestOutput represents the output for declining a pull request
+type DeclinePullRequestOutput = map[string]interface{}
+
+// declinePullRequestHandler handles declining a pull request
+func (h *Handler) declinePullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, input DeclinePullRequestInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+	options := bitbucket.DeclinePullRequestOptions{
+		Comment: &input.Comment,
+	}
+
+	result, err := h.client.DeclinePullRequest(input.ProjectKey, input.RepoSlug, strconv.Itoa(input.PRId), input.Version, &options)
+	if err != nil {
+		toolResult, _, err := tools.HandleToolError(err, "decline pull request")
+		return toolResult, nil, err
+	}
+
+	toolResult, err := tools.CreateToolResult(result)
+	if err != nil {
+		toolResult, _, err := tools.HandleToolError(err, "create decline pull request result")
+		return toolResult, nil, err
+	}
+
+	return toolResult, result, nil
 }
 
 // AddPullRequestTools registers the pull request-related tools with the MCP server
 func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "bitbucket_get_pull_request",
-		Description: "Retrieve details of a specific pull request. This tool provides comprehensive information about a pull request including its status, participants, and comments.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "Key of the project containing the pull request (e.g., 'PROJ').",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "Slug of the repository containing the pull request (e.g., 'my-repo').",
-				},
-				"pullRequestId": {
-					Type:        "integer",
-					Description: "ID of the pull request to retrieve.",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "pullRequestId"},
-		},
-	}, handler.getPullRequestHandler)
-
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetPullRequestsInput, GetPullRequestsOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_pull_requests",
-		Description: "List pull requests in a repository with optional filtering. This tool allows you to retrieve multiple pull requests based on various criteria.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "Key of the project containing the pull requests (e.g., 'PROJ').",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "Slug of the repository containing the pull requests (e.g., 'my-repo').",
-				},
-				"state": {
-					Type:        "string",
-					Description: "Filter pull requests by state (e.g., 'OPEN', 'MERGED', 'DECLINED').",
-				},
-				"withAttributes": {
-					Type:        "string",
-					Description: "Include additional attributes in the response.",
-				},
-				"at": {
-					Type:        "string",
-					Description: "Filter pull requests by ref.",
-				},
-				"withProperties": {
-					Type:        "string",
-					Description: "Include properties in the response.",
-				},
-				"draft": {
-					Type:        "string",
-					Description: "Filter by draft status.",
-				},
-				"filterText": {
-					Type:        "string",
-					Description: "Filter by text.",
-				},
-				"order": {
-					Type:        "string",
-					Description: "Sort order.",
-				},
-				"direction": {
-					Type:        "string",
-					Description: "Sort direction.",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned pull requests (for pagination). Default: 0",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of pull requests to return (for pagination). Default: 25, Max: 100",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug"},
-		},
+		Description: "Get a list of pull requests",
 	}, handler.getPullRequestsHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetPullRequestInput, GetPullRequestOutput](server, &mcp.Tool{
+		Name:        "bitbucket_get_pull_request",
+		Description: "Get a specific pull request",
+	}, handler.getPullRequestHandler)
+
+	mcp.AddTool[GetPullRequestActivitiesInput, GetPullRequestActivitiesOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_pull_request_activities",
-		Description: "Retrieve activities related to a pull request. This includes comments, approvals, and other events associated with the pull request.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "Key of the project containing the pull request (e.g., 'PROJ').",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "Slug of the repository containing the pull request (e.g., 'my-repo').",
-				},
-				"pullRequestId": {
-					Type:        "integer",
-					Description: "ID of the pull request to get activities for.",
-				},
-				"fromType": {
-					Type:        "string",
-					Description: "Filter activities by type.",
-				},
-				"fromId": {
-					Type:        "string",
-					Description: "Filter activities by ID.",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned activities (for pagination). Default: 0",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of activities to return (for pagination). Default: 25, Max: 100",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "pullRequestId"},
-		},
+		Description: "Get activities for a specific pull request",
 	}, handler.getPullRequestActivitiesHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetPullRequestChangesInput, GetPullRequestChangesOutput](server, &mcp.Tool{
+		Name:        "bitbucket_get_pull_request_changes",
+		Description: "Get changes for a specific pull request",
+	}, handler.getPullRequestChangesHandler)
+
+	mcp.AddTool[GetPullRequestCommitsInput, GetPullRequestCommitsOutput](server, &mcp.Tool{
+		Name:        "bitbucket_get_pull_request_commits",
+		Description: "Get commits for a specific pull request",
+	}, handler.getPullRequestCommitsHandler)
+
+	mcp.AddTool[GetPullRequestCommentsInput, GetPullRequestCommentsOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_pull_request_comments",
-		Description: "Retrieve comments on a pull request. This tool allows you to get detailed information about all comments made on a specific pull request.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "Key of the project containing the pull request (e.g., 'PROJ').",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "Slug of the repository containing the pull request (e.g., 'my-repo').",
-				},
-				"pullRequestId": {
-					Type:        "integer",
-					Description: "ID of the pull request to get comments for.",
-				},
-				"path": {
-					Type:        "string",
-					Description: "Filter comments by file path.",
-				},
-				"fromHash": {
-					Type:        "string",
-					Description: "Filter comments by from hash.",
-				},
-				"anchorState": {
-					Type:        "string",
-					Description: "Filter comments by anchor state.",
-				},
-				"toHash": {
-					Type:        "string",
-					Description: "Filter comments by to hash.",
-				},
-				"state": {
-					Type:        "string",
-					Description: "Filter comments by state.",
-				},
-				"diffType": {
-					Type:        "string",
-					Description: "Filter comments by diff type.",
-				},
-				"diffTypes": {
-					Type:        "string",
-					Description: "Filter comments by diff types.",
-				},
-				"states": {
-					Type:        "string",
-					Description: "Filter comments by states.",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned comments (for pagination). Default: 0",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of comments to return (for pagination). Default: 25, Max: 100",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "pullRequestId"},
-		},
+		Description: "Get comments for a specific pull request",
 	}, handler.getPullRequestCommentsHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "bitbucket_get_pull_request_suggestions",
-		Description: "Get pull request suggestions based on recent changes. This tool helps identify potential pull requests that could be created based on recent commits.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"changesSince": {
-					Type:        "string",
-					Description: "Timestamp to filter changes since (format: ISO 8601).",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of suggestions to return. Default: 25, Max: 100",
-				},
-			},
-			Required: []string{},
-		},
-	}, handler.getPullRequestSuggestionsHandler)
+	mcp.AddTool[GetPullRequestDiffInput, GetPullRequestDiffOutput](server, &mcp.Tool{
+		Name:        "bitbucket_get_pull_request_diff",
+		Description: "Get diff for a specific pull request",
+	}, handler.getPullRequestDiffHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "bitbucket_get_pull_requests_for_user",
-		Description: "Get pull requests associated with a specific user. This tool allows you to retrieve pull requests where the user is involved in various roles.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"user": {
-					Type:        "string",
-					Description: "Username of the user to filter by.",
-				},
-				"state": {
-					Type:        "string",
-					Description: "State of the pull request (e.g., 'OPEN', 'MERGED', 'DECLINED').",
-				},
-				"role": {
-					Type:        "string",
-					Description: "Role of the user (e.g., 'AUTHOR', 'REVIEWER', 'PARTICIPANT').",
-				},
-				"participantStatus": {
-					Type:        "string",
-					Description: "Status of the participant (e.g., 'APPROVED', 'UNAPPROVED').",
-				},
-				"order": {
-					Type:        "string",
-					Description: "Order of the pull requests (e.g., 'NEWEST', 'OLDEST').",
-				},
-				"closedSince": {
-					Type:        "string",
-					Description: "Timestamp to filter closed pull requests since (format: ISO 8601).",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned pull requests (for pagination). Default: 0",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of pull requests to return (for pagination). Default: 25, Max: 100",
-				},
-			},
-			Required: []string{},
-		},
-	}, handler.getPullRequestsForUserHandler)
+	mcp.AddTool[GetPullRequestMergeConfigInput, GetPullRequestMergeConfigOutput](server, &mcp.Tool{
+		Name:        "bitbucket_get_pull_request_merge_config",
+		Description: "Get merge configuration for a specific pull request",
+	}, handler.getPullRequestMergeConfigHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "bitbucket_get_pull_request_jira_issues",
-		Description: "Get Jira issues referenced in a pull request. This tool retrieves all Jira issues that are mentioned in a pull request.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "Key of the project containing the pull request (e.g., 'PROJ').",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "Slug of the repository containing the pull request (e.g., 'my-repo').",
-				},
-				"pullRequestId": {
-					Type:        "integer",
-					Description: "ID of the pull request to get Jira issues for.",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "pullRequestId"},
-		},
-	}, handler.getPullRequestJiraIssuesHandler)
+	mcp.AddTool[GetPullRequestMergeStatusInput, GetPullRequestMergeStatusOutput](server, &mcp.Tool{
+		Name:        "bitbucket_get_pull_request_merge_status",
+		Description: "Get merge status for a specific pull request",
+	}, handler.getPullRequestMergeStatusHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "bitbucket_get_pull_request_comment",
-		Description: "Get a specific comment on a pull request. This tool retrieves detailed information about a specific comment on a pull request.",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "Key of the project containing the pull request (e.g., 'PROJ').",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "Slug of the repository containing the pull request (e.g., 'my-repo').",
-				},
-				"pullRequestId": {
-					Type:        "integer",
-					Description: "ID of the pull request containing the comment.",
-				},
-				"commentId": {
-					Type:        "string",
-					Description: "ID of the comment to retrieve.",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "pullRequestId", "commentId"},
-		},
-	}, handler.getPullRequestCommentHandler)
+	mcp.AddTool[GetPullRequestSettingsInput, GetPullRequestSettingsOutput](server, &mcp.Tool{
+		Name:        "bitbucket_get_pull_request_settings",
+		Description: "Get pull request settings for a repository",
+	}, handler.getPullRequestSettingsHandler)
 
-	// Only register write tools if permissions allow
-	if permissions["bitbucket_merge_pull_request"] {
-		mcp.AddTool(server, &mcp.Tool{
-			Name:        "bitbucket_add_pull_request_comment",
-			Description: "Add a comment to a specific pull request. This tool allows you to add comments to pull requests for discussion and feedback.",
-			InputSchema: &jsonschema.Schema{
-				Type: "object",
-				Properties: map[string]*jsonschema.Schema{
-					"projectKey": {
-						Type:        "string",
-						Description: "Key of the project containing the pull request (e.g., 'PROJ').",
-					},
-					"repoSlug": {
-						Type:        "string",
-						Description: "Slug of the repository containing the pull request (e.g., 'my-repo').",
-					},
-					"pullRequestId": {
-						Type:        "integer",
-						Description: "ID of the pull request to add comment to.",
-					},
-					"commentText": {
-						Type:        "string",
-						Description: "Text of the comment to add.",
-					},
-				},
-				Required: []string{"projectKey", "repoSlug", "pullRequestId", "commentText"},
-			},
-		}, handler.addPullRequestCommentHandler)
+	mcp.AddTool[MergePullRequestInput, MergePullRequestOutput](server, &mcp.Tool{
+		Name:        "bitbucket_merge_pull_request",
+		Description: "Merge a specific pull request. This tool allows you to merge pull requests that are ready to be merged.",
+	}, handler.mergePullRequestHandler)
 
-		mcp.AddTool(server, &mcp.Tool{
-			Name:        "bitbucket_merge_pull_request",
-			Description: "Merge a specific pull request. This tool allows you to merge pull requests after review and approval.",
-			InputSchema: &jsonschema.Schema{
-				Type: "object",
-				Properties: map[string]*jsonschema.Schema{
-					"projectKey": {
-						Type:        "string",
-						Description: "Key of the project containing the pull request (e.g., 'PROJ').",
-					},
-					"repoSlug": {
-						Type:        "string",
-						Description: "Slug of the repository containing the pull request (e.g., 'my-repo').",
-					},
-					"pullRequestId": {
-						Type:        "integer",
-						Description: "ID of the pull request to merge.",
-					},
-					"version": {
-						Type:        "integer",
-						Description: "Version of the pull request to merge.",
-					},
-					"autoMerge": {
-						Type:        "boolean",
-						Description: "Whether to auto-merge the pull request.",
-					},
-					"autoSubject": {
-						Type:        "string",
-						Description: "Auto-generated subject for the merge commit.",
-					},
-					"message": {
-						Type:        "string",
-						Description: "Commit message for the merge.",
-					},
-					"strategyId": {
-						Type:        "string",
-						Description: "Merge strategy to use.",
-					},
-				},
-				Required: []string{"projectKey", "repoSlug", "pullRequestId"},
-			},
-		}, handler.mergePullRequestHandler)
-
-		mcp.AddTool(server, &mcp.Tool{
-			Name:        "bitbucket_decline_pull_request",
-			Description: "Decline a specific pull request. This tool allows you to decline pull requests that are not suitable for merging.",
-			InputSchema: &jsonschema.Schema{
-				Type: "object",
-				Properties: map[string]*jsonschema.Schema{
-					"projectKey": {
-						Type:        "string",
-						Description: "Key of the project containing the pull request (e.g., 'PROJ').",
-					},
-					"repoSlug": {
-						Type:        "string",
-						Description: "Slug of the repository containing the pull request (e.g., 'my-repo').",
-					},
-					"pullRequestId": {
-						Type:        "integer",
-						Description: "ID of the pull request to decline.",
-					},
-					"version": {
-						Type:        "string",
-						Description: "Version of the pull request to decline.",
-					},
-					"comment": {
-						Type:        "string",
-						Description: "Comment explaining why the pull request is declined.",
-					},
-					"optionsVersion": {
-						Type:        "integer",
-						Description: "Version in the decline options.",
-					},
-				},
-				Required: []string{"projectKey", "repoSlug", "pullRequestId"},
-			},
-		}, handler.declinePullRequestHandler)
-	}
+	mcp.AddTool[DeclinePullRequestInput, DeclinePullRequestOutput](server, &mcp.Tool{
+		Name:        "bitbucket_decline_pull_request",
+		Description: "Decline a specific pull request. This tool allows you to decline pull requests that are not suitable for merging.",
+	}, handler.declinePullRequestHandler)
 }

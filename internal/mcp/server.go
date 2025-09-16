@@ -139,13 +139,13 @@ func (s *Server) addJiraTools() {
 	permissions := s.config.Jira.Permissions
 
 	jiraTools.AddIssueTools(s.mcpServer, s.jiraClient, permissions)
-	jiraTools.AddBoardTools(s.mcpServer, s.jiraClient)
-	jiraTools.AddProjectTools(s.mcpServer, s.jiraClient)
+	jiraTools.AddBoardTools(s.mcpServer, s.jiraClient, permissions)
+	jiraTools.AddProjectTools(s.mcpServer, s.jiraClient, permissions)
 	jiraTools.AddCommentTools(s.mcpServer, s.jiraClient, permissions)
-	jiraTools.AddIssueTypeTools(s.mcpServer, s.jiraClient)
-	jiraTools.AddPriorityTools(s.mcpServer, s.jiraClient)
+	jiraTools.AddIssueTypeTools(s.mcpServer, s.jiraClient, permissions)
+	jiraTools.AddPriorityTools(s.mcpServer, s.jiraClient, permissions)
 	jiraTools.AddTransitionTools(s.mcpServer, s.jiraClient, permissions)
-	jiraTools.AddUserTools(s.mcpServer, s.jiraClient)
+	jiraTools.AddUserTools(s.mcpServer, s.jiraClient, permissions)
 	jiraTools.AddWorklogTools(s.mcpServer, s.jiraClient, permissions)
 }
 

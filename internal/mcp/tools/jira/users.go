@@ -54,7 +54,7 @@ func (h *Handler) searchUsersHandler(ctx context.Context, req *mcp.CallToolReque
 }
 
 // AddUserTools registers the user-related tools with the MCP server
-func AddUserTools(server *mcp.Server, client *jira.JiraClient) {
+func AddUserTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

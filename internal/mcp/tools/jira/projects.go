@@ -6,6 +6,7 @@ import (
 
 	"atlassian-dc-mcp-go/internal/client/jira"
 	"atlassian-dc-mcp-go/internal/mcp/tools"
+
 	"github.com/google/jsonschema-go/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -36,7 +37,7 @@ func (h *Handler) getProjectsHandler(ctx context.Context, req *mcp.CallToolReque
 }
 
 // AddProjectTools registers the project-related tools with the MCP server.
-func AddProjectTools(server *mcp.Server, client *jira.JiraClient) {
+func AddProjectTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	mcp.AddTool(server, &mcp.Tool{

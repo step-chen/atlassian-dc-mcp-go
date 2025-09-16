@@ -2,645 +2,424 @@ package bitbucket
 
 import (
 	"context"
-	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 	"atlassian-dc-mcp-go/internal/mcp/tools"
 
-	"github.com/google/jsonschema-go/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// getRepositoryHandler handles getting a repository
-func (h *Handler) getRepositoryHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get repository", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
-
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
-
-		return h.client.GetRepository(projectKey, repoSlug)
-	})
+// GetRepositoryInput represents the input parameters for getting a repository
+type GetRepositoryInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
 }
+
+// GetRepositoryOutput represents the output for getting a repository
+type GetRepositoryOutput = map[string]interface{}
+
+// getRepositoryHandler handles getting a repository
+func (h *Handler) getRepositoryHandler(ctx context.Context, req *mcp.CallToolRequest, input GetRepositoryInput) (*mcp.CallToolResult, GetRepositoryOutput, error) {
+	repo, err := h.client.GetRepository(input.ProjectKey, input.RepoSlug)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get repository")
+		return result, nil, err
+	}
+
+	result, err := tools.CreateToolResult(repo)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create repository result")
+		return result, nil, err
+	}
+
+	return result, repo, nil
+}
+
+// GetRepositoriesInput represents the input parameters for getting repositories
+type GetRepositoriesInput struct {
+	ProjectKey    string `json:"projectKey" jsonschema:"required,The project key"`
+	ProjectName   string `json:"projectName,omitempty" jsonschema:"Filter repositories by project name"`
+	Name          string `json:"name,omitempty" jsonschema:"Filter repositories by name"`
+	Visibility    string `json:"visibility,omitempty" jsonschema:"Filter repositories by visibility"`
+	Permission    string `json:"permission,omitempty" jsonschema:"Filter repositories by permission"`
+	State         string `json:"state,omitempty" jsonschema:"Filter repositories by state"`
+	Archived      string `json:"archived,omitempty" jsonschema:"Filter archived repositories"`
+	Username      string `json:"username,omitempty" jsonschema:"Filter repositories by username"`
+	Start         int    `json:"start,omitempty" jsonschema:"The starting index of the returned repositories"`
+	Limit         int    `json:"limit,omitempty" jsonschema:"The limit of the number of repositories to return"`
+}
+
+// GetRepositoriesOutput represents the output for getting repositories
+type GetRepositoriesOutput = map[string]interface{}
 
 // getRepositoriesHandler handles getting repositories
-func (h *Handler) getRepositoriesHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get repositories", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+func (h *Handler) getRepositoriesHandler(ctx context.Context, req *mcp.CallToolRequest, input GetRepositoriesInput) (*mcp.CallToolResult, GetRepositoriesOutput, error) {
+	repos, err := h.client.GetRepositories(
+		input.ProjectName,
+		input.ProjectKey,
+		input.Name,
+		input.Visibility,
+		input.Permission,
+		input.State,
+		input.Archived,
+		input.Username,
+		input.Start,
+		input.Limit,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get repositories")
+		return result, nil, err
+	}
 
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
+	result, err := tools.CreateToolResult(repos)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create repositories result")
+		return result, nil, err
+	}
 
-		projectName, _ := tools.GetStringArg(args, "projectName")
-		permission, _ := tools.GetStringArg(args, "permission")
-		name, _ := tools.GetStringArg(args, "name")
-		visibility, _ := tools.GetStringArg(args, "visibility")
-		state, _ := tools.GetStringArg(args, "state")
-		archived, _ := tools.GetStringArg(args, "archived")
-		username, _ := tools.GetStringArg(args, "username")
-
-		return h.client.GetRepositories(projectName, projectKey, name, visibility, permission, state, archived, username, start, limit)
-	})
+	return result, repos, nil
 }
+
+// GetProjectRepositoriesInput represents the input parameters for getting repositories for a specific project
+type GetProjectRepositoriesInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned repositories"`
+	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of repositories to return"`
+}
+
+// GetProjectRepositoriesOutput represents the output for getting repositories for a specific project
+type GetProjectRepositoriesOutput = map[string]interface{}
 
 // getProjectRepositoriesHandler handles getting repositories for a specific project
-func (h *Handler) getProjectRepositoriesHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get project repositories", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+func (h *Handler) getProjectRepositoriesHandler(ctx context.Context, req *mcp.CallToolRequest, input GetProjectRepositoriesInput) (*mcp.CallToolResult, GetProjectRepositoriesOutput, error) {
+	repos, err := h.client.GetProjectRepositories(input.ProjectKey, input.Start, input.Limit)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get project repositories")
+		return result, nil, err
+	}
 
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
+	result, err := tools.CreateToolResult(repos)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create project repositories result")
+		return result, nil, err
+	}
 
-		return h.client.GetProjectRepositories(projectKey, start, limit)
-	})
+	return result, repos, nil
 }
 
-// getRepositoryLabelsHandler handles getting labels for a repository
-func (h *Handler) getRepositoryLabelsHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get repository labels", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
-
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
-
-		return h.client.GetRepositoryLabels(projectKey, repoSlug)
-	})
+// GetRepositoryLabelsInput represents the input parameters for getting repository labels
+type GetRepositoryLabelsInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
 }
 
-// getFileContentHandler handles getting the content of a file in a repository
-func (h *Handler) getFileContentHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get file content", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+// GetRepositoryLabelsOutput represents the output for getting repository labels
+type GetRepositoryLabelsOutput = map[string]interface{}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+// getRepositoryLabelsHandler handles getting repository labels
+func (h *Handler) getRepositoryLabelsHandler(ctx context.Context, req *mcp.CallToolRequest, input GetRepositoryLabelsInput) (*mcp.CallToolResult, GetRepositoryLabelsOutput, error) {
+	labels, err := h.client.GetRepositoryLabels(input.ProjectKey, input.RepoSlug)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get repository labels")
+		return result, nil, err
+	}
 
-		path, ok := tools.GetStringArg(args, "path")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid path parameter")
-		}
+	result, err := tools.CreateToolResult(labels)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create repository labels result")
+		return result, nil, err
+	}
 
-		at, _ := tools.GetStringArg(args, "at")
-
-		var size, typeParam, blame, noContent *bool
-
-		if val, ok := args["size"].(bool); ok {
-			size = &val
-		}
-
-		if val, ok := args["type"].(bool); ok {
-			typeParam = &val
-		}
-
-		if val, ok := args["blame"].(bool); ok {
-			blame = &val
-		}
-
-		if val, ok := args["noContent"].(bool); ok {
-			noContent = &val
-		}
-
-		return h.client.GetFileContent(projectKey, repoSlug, path, at, size, typeParam, blame, noContent)
-	})
+	return result, labels, nil
 }
 
-// getFilesHandler handles getting files in a directory of a repository
-func (h *Handler) getFilesHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get files", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
-
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
-
-		path, _ := tools.GetStringArg(args, "path")
-		at, _ := tools.GetStringArg(args, "at")
-
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
-
-		return h.client.GetFiles(projectKey, repoSlug, path, at, start, limit)
-	})
+// GetFilesInput represents the input parameters for getting files in a directory
+type GetFilesInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	Path       string `json:"path,omitempty" jsonschema:"The path to the directory"`
+	At         string `json:"at,omitempty" jsonschema:"The commit ID or ref to retrieve files at"`
+	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned files"`
+	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of files to return"`
 }
 
-// getChangesHandler handles getting changes between commits in a repository
-func (h *Handler) getChangesHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get changes", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+// GetFilesOutput represents the output for getting files in a directory
+type GetFilesOutput = map[string]interface{}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
-
-		until, _ := tools.GetStringArg(args, "until")
-		since, _ := tools.GetStringArg(args, "since")
-
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
-
-		return h.client.GetChanges(projectKey, repoSlug, until, since, limit, start)
-	})
+// GetChangesInput represents the input parameters for getting changes between commits
+type GetChangesInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	From       string `json:"from,omitempty" jsonschema:"The commit ID or ref to compare from"`
+	To         string `json:"to,omitempty" jsonschema:"The commit ID or ref to compare to"`
+	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned changes"`
+	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of changes to return"`
 }
 
-// compareChangesHandler handles comparing changes between two commits in a repository
-func (h *Handler) compareChangesHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("compare changes", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+// GetChangesOutput represents the output for getting changes between commits
+type GetChangesOutput = map[string]interface{}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
-
-		from, ok := tools.GetStringArg(args, "from")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid from parameter")
-		}
-
-		to, ok := tools.GetStringArg(args, "to")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid to parameter")
-		}
-
-		fromRepo, _ := tools.GetStringArg(args, "fromRepo")
-
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
-
-		return h.client.CompareChanges(projectKey, repoSlug, from, to, fromRepo, limit, start)
-	})
+// CompareChangesInput represents the input parameters for comparing changes between commits
+type CompareChangesInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	From       string `json:"from,omitempty" jsonschema:"The commit ID or ref to compare from"`
+	To         string `json:"to,omitempty" jsonschema:"The commit ID or ref to compare to"`
+	FromRepo   string `json:"fromRepo,omitempty" jsonschema:"The source repository"`
+	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned changes"`
+	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of changes to return"`
 }
 
-// getForksHandler handles getting forks of a specific repository
-func (h *Handler) getForksHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get forks", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+// CompareChangesOutput represents the output for comparing changes between commits
+type CompareChangesOutput = map[string]interface{}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+// GetForksInput represents the input parameters for getting forks of a repository
+type GetForksInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned forks"`
+	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of forks to return"`
+}
 
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
+// GetForksOutput represents the output for getting forks of a repository
+type GetForksOutput = map[string]interface{}
 
-		return h.client.GetForks(projectKey, repoSlug, start, limit)
-	})
+// GetReadmeInput represents the input parameters for getting the README file of a repository
+type GetReadmeInput struct {
+	ProjectKey       string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug         string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	At               string `json:"at,omitempty" jsonschema:"The commit ID or ref to retrieve the README at"`
+	Markup           string `json:"markup,omitempty" jsonschema:"Markup format for the README"`
+	HtmlEscape       string `json:"htmlEscape,omitempty" jsonschema:"HTML escape option"`
+	IncludeHeadingId string `json:"includeHeadingId,omitempty" jsonschema:"Include heading IDs"`
+	Hardwrap         string `json:"hardwrap,omitempty" jsonschema:"Hard wrap option"`
+}
+
+// GetReadmeOutput represents the output for getting the README file of a repository
+type GetReadmeOutput struct {
+	Readme string `json:"readme" jsonschema:"The README content"`
+}
+
+// GetRelatedRepositoriesInput represents the input parameters for getting related repositories
+type GetRelatedRepositoriesInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned repositories"`
+	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of repositories to return"`
+}
+
+// GetRelatedRepositoriesOutput represents the output for getting related repositories
+type GetRelatedRepositoriesOutput = map[string]interface{}
+
+// GetFileContentInput represents the input parameters for getting file content
+type GetFileContentInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	Path       string `json:"path" jsonschema:"required,The path to the file"`
+	At         string `json:"at,omitempty" jsonschema:"The commit ID or ref to retrieve the file at"`
+	Size       bool   `json:"size,omitempty" jsonschema:"Include file size information"`
+	Type       bool   `json:"type,omitempty" jsonschema:"Include file type information"`
+	Blame      bool   `json:"blame,omitempty" jsonschema:"Include blame information"`
+	NoContent  bool   `json:"noContent,omitempty" jsonschema:"Skip content retrieval"`
+}
+
+// GetFileContentOutput represents the output for getting file content
+type GetFileContentOutput struct {
+	Content string `json:"content" jsonschema:"The file content"`
+}
+
+// getFileContentHandler handles getting file content
+func (h *Handler) getFileContentHandler(ctx context.Context, req *mcp.CallToolRequest, input GetFileContentInput) (*mcp.CallToolResult, GetFileContentOutput, error) {
+	content, err := h.client.GetFileContent(
+		input.ProjectKey,
+		input.RepoSlug,
+		input.Path,
+		input.At,
+		&input.Size,
+		&input.Type,
+		&input.Blame,
+		&input.NoContent,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get file content")
+		return result, GetFileContentOutput{}, err
+	}
+
+	result, err := tools.CreateToolResult(content)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create file content result")
+		return result, GetFileContentOutput{}, err
+	}
+
+	return result, GetFileContentOutput{Content: content}, nil
+}
+
+// getFilesHandler handles getting files in a directory
+func (h *Handler) getFilesHandler(ctx context.Context, req *mcp.CallToolRequest, input GetFilesInput) (*mcp.CallToolResult, GetFilesOutput, error) {
+	files, err := h.client.GetFiles(input.ProjectKey, input.RepoSlug, input.Path, input.At, input.Start, input.Limit)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get files")
+		return result, nil, err
+	}
+
+	result, err := tools.CreateToolResult(files)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create files result")
+		return result, nil, err
+	}
+
+	return result, files, nil
+}
+
+// getChangesHandler handles getting changes between commits
+func (h *Handler) getChangesHandler(ctx context.Context, req *mcp.CallToolRequest, input GetChangesInput) (*mcp.CallToolResult, GetChangesOutput, error) {
+	changes, err := h.client.GetChanges(input.ProjectKey, input.RepoSlug, input.From, input.To, input.Start, input.Limit)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get changes")
+		return result, nil, err
+	}
+
+	result, err := tools.CreateToolResult(changes)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create changes result")
+		return result, nil, err
+	}
+
+	return result, changes, nil
+}
+
+// compareChangesHandler handles comparing changes between commits
+func (h *Handler) compareChangesHandler(ctx context.Context, req *mcp.CallToolRequest, input CompareChangesInput) (*mcp.CallToolResult, CompareChangesOutput, error) {
+	changes, err := h.client.CompareChanges(input.ProjectKey, input.RepoSlug, input.From, input.To, input.FromRepo, input.Start, input.Limit)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "compare changes")
+		return result, nil, err
+	}
+
+	result, err := tools.CreateToolResult(changes)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create compare changes result")
+		return result, nil, err
+	}
+
+	return result, changes, nil
+}
+
+// getForksHandler handles getting forks of a repository
+func (h *Handler) getForksHandler(ctx context.Context, req *mcp.CallToolRequest, input GetForksInput) (*mcp.CallToolResult, GetForksOutput, error) {
+	forks, err := h.client.GetForks(input.ProjectKey, input.RepoSlug, input.Start, input.Limit)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get forks")
+		return result, nil, err
+	}
+
+	result, err := tools.CreateToolResult(forks)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create forks result")
+		return result, nil, err
+	}
+
+	return result, forks, nil
 }
 
 // getReadmeHandler handles getting the README file of a repository
-func (h *Handler) getReadmeHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get readme", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+func (h *Handler) getReadmeHandler(ctx context.Context, req *mcp.CallToolRequest, input GetReadmeInput) (*mcp.CallToolResult, GetReadmeOutput, error) {
+	readme, err := h.client.GetReadme(
+		input.ProjectKey,
+		input.RepoSlug,
+		&input.At,
+		&input.Markup,
+		&input.HtmlEscape,
+		&input.IncludeHeadingId,
+		&input.Hardwrap,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get readme")
+		return result, GetReadmeOutput{}, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(readme)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create readme result")
+		return result, GetReadmeOutput{}, err
+	}
 
-		// Handle string parameters that can be nil
-		var at, markup, htmlEscape, includeHeadingId, hardwrap *string
-
-		if val, ok := tools.GetStringArg(args, "at"); ok {
-			at = &val
-		}
-
-		if val, ok := tools.GetStringArg(args, "markup"); ok {
-			markup = &val
-		}
-
-		if val, ok := tools.GetStringArg(args, "htmlEscape"); ok {
-			htmlEscape = &val
-		}
-
-		if val, ok := tools.GetStringArg(args, "includeHeadingId"); ok {
-			includeHeadingId = &val
-		}
-
-		if val, ok := tools.GetStringArg(args, "hardwrap"); ok {
-			hardwrap = &val
-		}
-
-		return h.client.GetReadme(projectKey, repoSlug, at, markup, htmlEscape, includeHeadingId, hardwrap)
-	})
+	return result, GetReadmeOutput{Readme: readme}, nil
 }
 
-// getRelatedRepositoriesHandler handles getting repositories related to a repository
-func (h *Handler) getRelatedRepositoriesHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get related repositories", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+// getRelatedRepositoriesHandler handles getting related repositories
+func (h *Handler) getRelatedRepositoriesHandler(ctx context.Context, req *mcp.CallToolRequest, input GetRelatedRepositoriesInput) (*mcp.CallToolResult, GetRelatedRepositoriesOutput, error) {
+	repos, err := h.client.GetRelatedRepositories(input.ProjectKey, input.RepoSlug, input.Start, input.Limit)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get related repositories")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(repos)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create related repositories result")
+		return result, nil, err
+	}
 
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
-
-		return h.client.GetRelatedRepositories(projectKey, repoSlug, start, limit)
-	})
+	return result, repos, nil
 }
 
 // AddRepositoryTools registers the repository-related tools with the MCP server
 func AddRepositoryTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetRepositoryInput, GetRepositoryOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_repository",
 		Description: "Get a specific repository",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug"},
-		},
 	}, handler.getRepositoryHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetRepositoriesInput, GetRepositoriesOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_repositories",
-		Description: "Get repositories with various filters",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"projectName": {
-					Type:        "string",
-					Description: "Filter repositories by project name",
-				},
-				"name": {
-					Type:        "string",
-					Description: "Filter repositories by name",
-				},
-				"visibility": {
-					Type:        "string",
-					Description: "Filter repositories by visibility",
-				},
-				"permission": {
-					Type:        "string",
-					Description: "Filter repositories by permission",
-				},
-				"state": {
-					Type:        "string",
-					Description: "Filter repositories by state",
-				},
-				"archived": {
-					Type:        "string",
-					Description: "Filter archived repositories",
-				},
-				"username": {
-					Type:        "string",
-					Description: "Filter repositories by username",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned repositories",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of repositories to return",
-				},
-			},
-			Required: []string{"projectKey"},
-		},
+		Description: "Get a list of repositories",
 	}, handler.getRepositoriesHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetProjectRepositoriesInput, GetProjectRepositoriesOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_project_repositories",
 		Description: "Get repositories for a specific project",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned repositories",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of repositories to return",
-				},
-			},
-			Required: []string{"projectKey"},
-		},
 	}, handler.getProjectRepositoriesHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetRepositoryLabelsInput, GetRepositoryLabelsOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_repository_labels",
 		Description: "Get labels for a specific repository",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug"},
-		},
 	}, handler.getRepositoryLabelsHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetFileContentInput, GetFileContentOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_file_content",
 		Description: "Get the content of a file in a repository",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"path": {
-					Type:        "string",
-					Description: "The path to the file",
-				},
-				"at": {
-					Type:        "string",
-					Description: "The commit ID or ref to retrieve the file at",
-				},
-				"blame": {
-					Type:        "boolean",
-					Description: "Include blame information",
-				},
-				"noContent": {
-					Type:        "boolean",
-					Description: "Skip content retrieval",
-				},
-				"size": {
-					Type:        "boolean",
-					Description: "Include file size information",
-				},
-				"type": {
-					Type:        "boolean",
-					Description: "Include file type information",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "path"},
-		},
 	}, handler.getFileContentHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetFilesInput, GetFilesOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_files",
 		Description: "Get files in a directory of a repository",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"path": {
-					Type:        "string",
-					Description: "The path to the directory",
-				},
-				"at": {
-					Type:        "string",
-					Description: "The commit ID or ref to retrieve files at",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned files",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of files to return",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug"},
-		},
 	}, handler.getFilesHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetChangesInput, GetChangesOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_changes",
 		Description: "Get changes between commits in a repository",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"since": {
-					Type:        "string",
-					Description: "The commit ID or ref to compare since",
-				},
-				"until": {
-					Type:        "string",
-					Description: "The commit ID or ref to compare until",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned changes",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of changes to return",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug"},
-		},
 	}, handler.getChangesHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[CompareChangesInput, CompareChangesOutput](server, &mcp.Tool{
 		Name:        "bitbucket_compare_changes",
 		Description: "Compare changes between two commits in a repository",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"from": {
-					Type:        "string",
-					Description: "The source commit ID or ref",
-				},
-				"to": {
-					Type:        "string",
-					Description: "The target commit ID or ref",
-				},
-				"fromRepo": {
-					Type:        "string",
-					Description: "The source repository",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned changes",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of changes to return",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "from", "to"},
-		},
 	}, handler.compareChangesHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetForksInput, GetForksOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_forks",
 		Description: "Get forks of a specific repository",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned forks",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of forks to return",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug"},
-		},
 	}, handler.getForksHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetReadmeInput, GetReadmeOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_readme",
 		Description: "Get the README file of a repository",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"at": {
-					Type:        "string",
-					Description: "The commit ID or ref to retrieve the README at",
-				},
-				"markup": {
-					Type:        "string",
-					Description: "Markup format for the response",
-				},
-				"htmlEscape": {
-					Type:        "string",
-					Description: "HTML escape option",
-				},
-				"includeHeadingId": {
-					Type:        "string",
-					Description: "Include heading IDs",
-				},
-				"hardwrap": {
-					Type:        "string",
-					Description: "Hard wrap option",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug"},
-		},
 	}, handler.getReadmeHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetRelatedRepositoriesInput, GetRelatedRepositoriesOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_related_repositories",
 		Description: "Get repositories related to a repository",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned repositories",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of repositories to return",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug"},
-		},
 	}, handler.getRelatedRepositoriesHandler)
 }

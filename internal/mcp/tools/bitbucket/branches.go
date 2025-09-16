@@ -3,189 +3,135 @@ package bitbucket
 
 import (
 	"context"
-	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 	"atlassian-dc-mcp-go/internal/mcp/tools"
 
-	"github.com/google/jsonschema-go/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// getBranchesHandler handles getting branches
-func (h *Handler) getBranchesHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get branches", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
-
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
-
-		filterText, _ := tools.GetStringArg(args, "filterText")
-		orderBy, _ := tools.GetStringArg(args, "orderBy")
-		context, _ := tools.GetStringArg(args, "context")
-		base, _ := tools.GetStringArg(args, "base")
-
-		boostMatches := tools.GetBoolArg(args, "boostMatches", false)
-
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
-
-		details := tools.GetBoolArg(args, "details", false)
-
-		return h.client.GetBranches(projectKey, repoSlug, filterText, orderBy, context, base, boostMatches, start, limit, details)
-	})
+// GetBranchesInput represents the input parameters for getting branches
+type GetBranchesInput struct {
+	ProjectKey   string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug     string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	FilterText   string `json:"filterText,omitempty" jsonschema:"Filter text to apply to the branch names"`
+	OrderBy      string `json:"orderBy,omitempty" jsonschema:"Field to order branches by"`
+	Context      string `json:"context,omitempty" jsonschema:"Context for filtering"`
+	Base         string `json:"base,omitempty" jsonschema:"Base branch for comparison"`
+	BoostMatches bool   `json:"boostMatches,omitempty" jsonschema:"Boost exact matches"`
+	Start        int    `json:"start,omitempty" jsonschema:"The starting index of the returned branches"`
+	Limit        int    `json:"limit,omitempty" jsonschema:"The limit of the number of branches to return"`
+	Details      bool   `json:"details,omitempty" jsonschema:"Include detailed branch information"`
 }
+
+// GetBranchesOutput represents the output for getting branches
+type GetBranchesOutput = map[string]interface{}
+
+// getBranchesHandler handles getting branches
+func (h *Handler) getBranchesHandler(ctx context.Context, req *mcp.CallToolRequest, input GetBranchesInput) (*mcp.CallToolResult, GetBranchesOutput, error) {
+	branches, err := h.client.GetBranches(
+		input.ProjectKey,
+		input.RepoSlug,
+		input.FilterText,
+		input.OrderBy,
+		input.Context,
+		input.Base,
+		input.BoostMatches,
+		input.Start,
+		input.Limit,
+		input.Details,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get branches")
+		return result, nil, err
+	}
+
+	result, err := tools.CreateToolResult(branches)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create branches result")
+		return result, nil, err
+	}
+
+	return result, branches, nil
+}
+
+// GetDefaultBranchInput represents the input parameters for getting the default branch
+type GetDefaultBranchInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+}
+
+// GetDefaultBranchOutput represents the output for getting the default branch
+type GetDefaultBranchOutput = map[string]interface{}
 
 // getDefaultBranchHandler handles getting the default branch
-func (h *Handler) getDefaultBranchHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get default branch", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+func (h *Handler) getDefaultBranchHandler(ctx context.Context, req *mcp.CallToolRequest, input GetDefaultBranchInput) (*mcp.CallToolResult, GetDefaultBranchOutput, error) {
+	branch, err := h.client.GetDefaultBranch(input.ProjectKey, input.RepoSlug)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get default branch")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(branch)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create default branch result")
+		return result, nil, err
+	}
 
-		return h.client.GetDefaultBranch(projectKey, repoSlug)
-	})
+	return result, branch, nil
 }
 
+// GetBranchInfoByCommitIdInput represents the input parameters for getting branch information by commit ID
+type GetBranchInfoByCommitIdInput struct {
+	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
+	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	CommitId   string `json:"commitId" jsonschema:"required,The commit ID to retrieve branch information for"`
+	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned results"`
+	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of results to return"`
+}
+
+// GetBranchInfoByCommitIdOutput represents the output for getting branch information by commit ID
+type GetBranchInfoByCommitIdOutput = map[string]interface{}
+
 // getBranchInfoByCommitIdHandler handles getting branch information by commit ID
-func (h *Handler) getBranchInfoByCommitIdHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get branch info by commit id", func() (interface{}, error) {
-		projectKey, ok := tools.GetStringArg(args, "projectKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid projectKey parameter")
-		}
+func (h *Handler) getBranchInfoByCommitIdHandler(ctx context.Context, req *mcp.CallToolRequest, input GetBranchInfoByCommitIdInput) (*mcp.CallToolResult, GetBranchInfoByCommitIdOutput, error) {
+	branchInfo, err := h.client.GetBranchInfoByCommitId(
+		input.ProjectKey,
+		input.RepoSlug,
+		input.CommitId,
+		input.Start,
+		input.Limit,
+	)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get branch info by commit id")
+		return result, nil, err
+	}
 
-		repoSlug, ok := tools.GetStringArg(args, "repoSlug")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid repoSlug parameter")
-		}
+	result, err := tools.CreateToolResult(branchInfo)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create branch info result")
+		return result, nil, err
+	}
 
-		commitId, ok := tools.GetStringArg(args, "commitId")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid commitId parameter")
-		}
-
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
-
-		return h.client.GetBranchInfoByCommitId(projectKey, repoSlug, commitId, start, limit)
-	})
+	return result, branchInfo, nil
 }
 
 // AddBranchTools registers the branch-related tools with the MCP server
 func AddBranchTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetBranchesInput, GetBranchesOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_branches",
 		Description: "Get branches for a repository",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"filterText": {
-					Type:        "string",
-					Description: "Filter text to apply to the branch names",
-				},
-				"orderBy": {
-					Type:        "string",
-					Description: "Field to order branches by",
-				},
-				"context": {
-					Type:        "string",
-					Description: "Context for filtering",
-				},
-				"base": {
-					Type:        "string",
-					Description: "Base branch for comparison",
-				},
-				"boostMatches": {
-					Type:        "boolean",
-					Description: "Boost exact matches",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned branches",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of branches to return",
-				},
-				"details": {
-					Type:        "boolean",
-					Description: "Include detailed branch information",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug"},
-		},
 	}, handler.getBranchesHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetDefaultBranchInput, GetDefaultBranchOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_default_branch",
 		Description: "Get the default branch of a repository",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug"},
-		},
 	}, handler.getDefaultBranchHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[GetBranchInfoByCommitIdInput, GetBranchInfoByCommitIdOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_branch_info_by_commit_id",
 		Description: "Get branch information by commit ID",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"projectKey": {
-					Type:        "string",
-					Description: "The project key",
-				},
-				"repoSlug": {
-					Type:        "string",
-					Description: "The repository slug",
-				},
-				"commitId": {
-					Type:        "string",
-					Description: "The commit ID to retrieve branch information for",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The starting index of the returned results",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The limit of the number of results to return",
-				},
-			},
-			Required: []string{"projectKey", "repoSlug", "commitId"},
-		},
 	}, handler.getBranchInfoByCommitIdHandler)
-
 }
