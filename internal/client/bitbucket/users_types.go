@@ -32,7 +32,6 @@ type GetUserRepositoriesInput struct {
 
 // GetUserRepositoryInput represents the input parameters for getting a specific repository for a user
 type GetUserRepositoryInput struct {
-	Username   string `json:"username" jsonschema:"required,The username"`
-	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
-	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
+	CommonInput
+	Username string `json:"username" jsonschema:"required,The username"`
 }
