@@ -9,45 +9,35 @@ import (
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// GetAttachmentInput represents the input parameters for getting an attachment
-type GetAttachmentInput struct {
-	ProjectKey   string `json:"projectKey" jsonschema:"required, the project key"`
-	RepoSlug     string `json:"repoSlug" jsonschema:"required, the repository slug"`
-	AttachmentId string `json:"attachmentId" jsonschema:"required, the attachment ID"`
-}
 
-// GetAttachmentMetadataInput represents the input parameters for getting attachment metadata
-type GetAttachmentMetadataInput struct {
-	ProjectKey   string `json:"projectKey" jsonschema:"required, the project key"`
-	RepoSlug     string `json:"repoSlug" jsonschema:"required, the repository slug"`
-	AttachmentId string `json:"attachmentId" jsonschema:"required, the attachment ID"`
-}
-
-// AttachmentOutput represents the output for an attachment
-type AttachmentOutput struct {
+// GetAttachmentOutput represents the output for an attachment
+type GetAttachmentOutput struct {
 	Content []byte `json:"content" jsonschema:"the attachment content"`
 }
 
+// GetAttachmentMetadataOutput represents the output for attachment metadata
+type GetAttachmentMetadataOutput = map[string]interface{}
+
 // getAttachmentHandler handles getting an attachment
-func (h *Handler) getAttachmentHandler(ctx context.Context, req *mcp.CallToolRequest, input GetAttachmentInput) (*mcp.CallToolResult, AttachmentOutput, error) {
-	attachment, err := h.client.GetAttachment(input.ProjectKey, input.RepoSlug, input.AttachmentId)
+func (h *Handler) getAttachmentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetAttachmentInput) (*mcp.CallToolResult, GetAttachmentOutput, error) {
+	attachment, err := h.client.GetAttachment(input)
 	if err != nil {
 		result, _, err := tools.HandleToolError(err, "get attachment")
-		return result, AttachmentOutput{}, err
+		return result, GetAttachmentOutput{}, err
 	}
 
 	result, err := tools.CreateToolResult(attachment)
 	if err != nil {
 		result, _, err := tools.HandleToolError(err, "create attachment result")
-		return result, AttachmentOutput{}, err
+		return result, GetAttachmentOutput{}, err
 	}
 
-	return result, AttachmentOutput{Content: attachment}, nil
+	return result, GetAttachmentOutput{Content: attachment}, nil
 }
 
 // getAttachmentMetadataHandler handles getting attachment metadata
-func (h *Handler) getAttachmentMetadataHandler(ctx context.Context, req *mcp.CallToolRequest, input GetAttachmentMetadataInput) (*mcp.CallToolResult, map[string]interface{}, error) {
-	metadata, err := h.client.GetAttachmentMetadata(input.ProjectKey, input.RepoSlug, input.AttachmentId)
+func (h *Handler) getAttachmentMetadataHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetAttachmentMetadataInput) (*mcp.CallToolResult, GetAttachmentMetadataOutput, error) {
+	metadata, err := h.client.GetAttachmentMetadata(input)
 	if err != nil {
 		result, _, err := tools.HandleToolError(err, "get attachment metadata")
 		return result, nil, err
@@ -66,12 +56,12 @@ func (h *Handler) getAttachmentMetadataHandler(ctx context.Context, req *mcp.Cal
 func AddAttachmentTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[GetAttachmentInput, AttachmentOutput](server, &mcp.Tool{
+	mcp.AddTool[bitbucket.GetAttachmentInput, GetAttachmentOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_attachment",
 		Description: "Get a specific attachment",
 	}, handler.getAttachmentHandler)
 
-	mcp.AddTool[GetAttachmentMetadataInput, map[string]interface{}](server, &mcp.Tool{
+	mcp.AddTool[bitbucket.GetAttachmentMetadataInput, GetAttachmentMetadataOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_attachment_metadata",
 		Description: "Get metadata for a specific attachment",
 	}, handler.getAttachmentMetadataHandler)

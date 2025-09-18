@@ -47,31 +47,3 @@ func (c *BitbucketClient) executeRequest(method string, pathSegments []string, q
 func (c *BitbucketClient) ExecuteRequest(method string, pathSegments []string, queryParams url.Values, body []byte, result interface{}) error {
 	return c.executeRequest(method, pathSegments, queryParams, body, result)
 }
-
-// executeTextRequest executes an HTTP request to the Bitbucket API and returns the response as text.
-func (c *BitbucketClient) executeTextRequest(method string, pathSegments []string, queryParams url.Values, body []byte) (string, error) {
-	req, err := utils.BuildHttpRequest(method, c.Config.URL, pathSegments, queryParams, body, c.Config.Token)
-	if err != nil {
-		return "", fmt.Errorf("failed to build request: %w", err)
-	}
-
-	req.Header.Set("Accept", "text/plain")
-
-	resp, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to send request: %w", err)
-	}
-
-	defer resp.Body.Close()
-
-	if err := utils.HandleHTTPError(resp, "bitbucket"); err != nil {
-		return "", err
-	}
-
-	content, err := utils.ReadBody(resp)
-	if err != nil {
-		return "", fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	return content, nil
-}
