@@ -13,10 +13,7 @@ import (
 // with optional filtering by name and permission.
 //
 // Parameters:
-//   - name: Filter projects by name
-//   - permission: Filter projects by permission
-//   - limit: Maximum number of results to return (default: 25)
-//   - start: Starting index for pagination (default: 0)
+//   - input: GetProjectsInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The projects data retrieved from the API
@@ -100,10 +97,7 @@ func (c *BitbucketClient) GetProjectPrimaryEnhancedEntityLink(input GetProjectPr
 // for a specific project with optional markup formatting.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - markup: Markup format for the response
-//   - limit: Maximum number of results to return (default: 25)
-//   - start: Starting index for pagination (default: 0)
+//   - input: GetProjectTasksInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The tasks data retrieved from the API
@@ -134,11 +128,7 @@ func (c *BitbucketClient) GetProjectTasks(input GetProjectTasksInput) (map[strin
 // for a specific repository with optional markup formatting.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - markup: Markup format for the response
-//   - limit: Maximum number of results to return (default: 25)
-//   - start: Starting index for pagination (default: 0)
+//   - input: GetRepositoryTasksInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The tasks data retrieved from the API

@@ -14,17 +14,7 @@ import (
 // for a specific repository with various filtering options.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - until: The commit ID or ref to retrieve commits until
-//   - since: The commit ID or ref to retrieve commits since
-//   - path: Filter commits by file path
-//   - limit: Maximum number of results to return (default: 25)
-//   - start: Starting index for pagination (default: 0)
-//   - merges: Filter merge commits
-//   - followRenames: Follow file renames
-//   - ignoreMissing: Ignore missing commits
-//   - withCounts: Include commit counts
+//   - input: GetCommitsInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The commits data retrieved from the API
@@ -61,10 +51,7 @@ func (c *BitbucketClient) GetCommits(input GetCommitsInput) (map[string]interfac
 // of a specific commit.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - commitID: The ID of the commit to retrieve
-//   - path: Filter commit details by file path
+//   - input: GetCommitInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The commit data retrieved from the API
@@ -93,13 +80,7 @@ func (c *BitbucketClient) GetCommit(input GetCommitInput) (map[string]interface{
 // made in a specific commit.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - commitID: The ID of the commit to retrieve changes for
-//   - limit: Maximum number of results to return (default: 25)
-//   - start: Starting index for pagination (default: 0)
-//   - withComments: Include comments in response
-//   - since: Filter changes since a specific time
+//   - input: GetCommitChangesInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The changes data retrieved from the API
@@ -131,14 +112,7 @@ func (c *BitbucketClient) GetCommitChanges(input GetCommitChangesInput) (map[str
 // summary for a specific commit and file path.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - commitID: The ID of the commit
-//   - path: The file path
-//   - srcPath: Source path for comparison
-//   - autoSrcPath: Automatically determine source path
-//   - whitespace: Whitespace handling option
-//   - since: Filter changes since a specific time
+//   - input: GetCommitDiffStatsSummaryInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The diff statistics summary retrieved from the API
@@ -171,15 +145,7 @@ func (c *BitbucketClient) GetCommitDiffStatsSummary(input GetCommitDiffStatsSumm
 // between two commits in a specific repository.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - path: The file path
-//   - from: The source commit ID or ref
-//   - to: The target commit ID or ref
-//   - contextLines: Number of context lines to include
-//   - srcPath: Source path for comparison
-//   - whitespace: Whitespace handling option
-//   - fromRepo: The source repository
+//   - input: GetDiffBetweenCommitsInput containing the parameters for the request
 //
 // Returns:
 //   - string: The diff content as a string
@@ -221,17 +187,7 @@ func (c *BitbucketClient) GetDiffBetweenCommits(input GetDiffBetweenCommitsInput
 // between revisions for a specific file path.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - commitID: The commit ID
-//   - path: The file path
-//   - contextLines: Number of context lines to include
-//   - since: Filter changes since a specific time
-//   - srcPath: Source path for comparison
-//   - whitespace: Whitespace handling option
-//   - filter: Filter option
-//   - autoSrcPath: Automatically determine source path
-//   - withComments: Include comments in response
+//   - input: GetDiffBetweenRevisionsInput containing the parameters for the request
 //
 // Returns:
 //   - string: The diff content as a string
@@ -267,10 +223,7 @@ func (c *BitbucketClient) GetDiffBetweenRevisions(input GetDiffBetweenRevisionsI
 // comment on a commit.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - commitID: The ID of the commit
-//   - commentID: The ID of the comment to retrieve
+//   - input: GetCommitCommentInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The comment data retrieved from the API
@@ -296,13 +249,7 @@ func (c *BitbucketClient) GetCommitComment(input GetCommitCommentInput) (map[str
 // on a specific commit with filtering options.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - commitID: The ID of the commit
-//   - limit: Maximum number of results to return (default: 25)
-//   - start: Starting index for pagination (default: 0)
-//   - path: Filter comments by file path
-//   - since: Filter comments since a specific time
+//   - input: GetCommitCommentsInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The comments data retrieved from the API
@@ -334,10 +281,7 @@ func (c *BitbucketClient) GetCommitComments(input GetCommitCommentsInput) (map[s
 // related to a specific Jira issue.
 //
 // Parameters:
-//   - issueKey: The Jira issue key
-//   - limit: Maximum number of results to return (default: 25)
-//   - start: Starting index for pagination (default: 0)
-//   - maxChanges: Maximum number of changes to include
+//   - input: GetJiraIssueCommitsInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The commits data retrieved from the API
@@ -368,14 +312,7 @@ func (c *BitbucketClient) GetJiraIssueCommits(input GetJiraIssueCommitsInput) (m
 // between revisions for a specific file path.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - path: The file path
-//   - since: Filter changes since a specific time
-//   - until: Filter changes until a specific time
-//   - contextLines: Number of context lines to include
-//   - srcPath: Source path for comparison
-//   - whitespace: Whitespace handling option
+//   - input: GetDiffBetweenRevisionsForPathInput containing the parameters for the request
 //
 // Returns:
 //   - string: The diff content as a string

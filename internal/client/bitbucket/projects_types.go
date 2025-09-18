@@ -114,14 +114,6 @@ type GetProjectRepoSettingsInput struct {
 	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
 }
 
-// GetProjectRepositoriesInput represents the input parameters for getting project repositories
-/*type GetProjectRepositoriesInput struct {
-	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
-	Name       string `json:"name,omitempty" jsonschema:"Filter repositories by name"`
-	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned repositories"`
-	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of repositories to return"`
-}*/
-
 // GetProjectRepositoryInput represents the input parameters for getting a specific project repository
 type GetProjectRepositoryInput struct {
 	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
