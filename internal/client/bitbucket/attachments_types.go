@@ -1,11 +1,5 @@
 package bitbucket
 
-// CommonInput represents common input parameters for Bitbucket operations
-type CommonInput struct {
-	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
-	RepoSlug   string `json:"repoSlug" jsonschema:"required,The repository slug"`
-}
-
 // CreateAttachmentInput represents the input parameters for creating an attachment
 type CreateAttachmentInput struct {
 	CommonInput
