@@ -15,19 +15,17 @@ type GetUserInput struct {
 
 // GetUserProjectsInput represents the input parameters for getting projects for a user
 type GetUserProjectsInput struct {
+	PaginationInput
 	Username   string `json:"username" jsonschema:"required,The username"`
 	Permission string `json:"permission,omitempty" jsonschema:"Filter projects by permission"`
-	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned projects"`
-	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of projects to return"`
 }
 
 // GetUserRepositoriesInput represents the input parameters for getting repositories for a user
 type GetUserRepositoriesInput struct {
+	PaginationInput
 	Username   string `json:"username" jsonschema:"required,The username"`
 	ProjectKey string `json:"projectKey,omitempty" jsonschema:"Filter repositories by project key"`
 	Permission string `json:"permission,omitempty" jsonschema:"Filter repositories by permission"`
-	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned repositories"`
-	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of repositories to return"`
 }
 
 // GetUserRepositoryInput represents the input parameters for getting a specific repository for a user

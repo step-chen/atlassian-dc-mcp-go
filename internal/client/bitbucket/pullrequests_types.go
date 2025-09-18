@@ -3,6 +3,7 @@ package bitbucket
 // GetPullRequestsInput represents the input parameters for getting pull requests
 type GetPullRequestsInput struct {
 	CommonInput
+	PaginationInput
 	State          string `json:"state,omitempty" jsonschema:"Filter pull requests by state"`
 	WithAttributes bool   `json:"withAttributes,omitempty" jsonschema:"Include attributes in response"`
 	At             string `json:"at,omitempty" jsonschema:"The ref to retrieve pull requests from"`
@@ -11,8 +12,6 @@ type GetPullRequestsInput struct {
 	FilterText     string `json:"filterText,omitempty" jsonschema:"Filter by text"`
 	Order          string `json:"order,omitempty" jsonschema:"Sort order"`
 	Direction      string `json:"direction,omitempty" jsonschema:"Sort direction"`
-	Start          int    `json:"start,omitempty" jsonschema:"Starting index for pagination (default: 0)"`
-	Limit          int    `json:"limit,omitempty" jsonschema:"Maximum number of results to return (default: 25)"`
 }
 
 // GetPullRequestInput represents the input parameters for getting a specific pull request
@@ -24,9 +23,8 @@ type GetPullRequestInput struct {
 // GetPullRequestActivitiesInput represents the input parameters for getting pull request activities
 type GetPullRequestActivitiesInput struct {
 	CommonInput
+	PaginationInput
 	PullRequestID int    `json:"pullRequestId" jsonschema:"required,The pull request ID"`
-	Start         int    `json:"start,omitempty" jsonschema:"The starting index of the returned activities"`
-	Limit         int    `json:"limit,omitempty" jsonschema:"The limit of the number of activities to return"`
 	FromType      string `json:"fromType,omitempty" jsonschema:"Filter activities by from type"`
 	FromId        string `json:"fromId,omitempty" jsonschema:"Filter activities by from id"`
 }
@@ -34,14 +32,14 @@ type GetPullRequestActivitiesInput struct {
 // GetPullRequestChangesInput represents the input parameters for getting pull request changes
 type GetPullRequestChangesInput struct {
 	CommonInput
+	PaginationInput
 	PullRequestID int `json:"pullRequestId" jsonschema:"required,The pull request ID"`
-	Start         int `json:"start,omitempty" jsonschema:"The starting index of the returned changes"`
-	Limit         int `json:"limit,omitempty" jsonschema:"The limit of the number of changes to return"`
 }
 
 // GetPullRequestCommentsInput represents the input parameters for getting pull request comments
 type GetPullRequestCommentsInput struct {
 	CommonInput
+	PaginationInput
 	PullRequestID int    `json:"pullRequestId" jsonschema:"required,The pull request ID"`
 	Path          string `json:"path,omitempty" jsonschema:"Filter comments by path"`
 	FromHash      string `json:"fromHash,omitempty" jsonschema:"Filter comments by from hash"`
@@ -51,16 +49,13 @@ type GetPullRequestCommentsInput struct {
 	DiffType      string `json:"diffType,omitempty" jsonschema:"Filter comments by diff type"`
 	DiffTypes     string `json:"diffTypes,omitempty" jsonschema:"Filter comments by diff types"`
 	States        string `json:"states,omitempty" jsonschema:"Filter comments by states"`
-	Start         int    `json:"start,omitempty" jsonschema:"The starting index of the returned comments"`
-	Limit         int    `json:"limit,omitempty" jsonschema:"The limit of the number of comments to return"`
 }
 
 // GetPullRequestCommitsInput represents the input parameters for getting pull request commits
 type GetPullRequestCommitsInput struct {
 	CommonInput
+	PaginationInput
 	PullRequestID int `json:"pullRequestId" jsonschema:"required,The pull request ID"`
-	Start         int `json:"start,omitempty" jsonschema:"The starting index of the returned commits"`
-	Limit         int `json:"limit,omitempty" jsonschema:"The limit of the number of commits to return"`
 }
 
 // GetPullRequestDiffInput represents the input parameters for getting pull request diff
@@ -113,9 +108,8 @@ type MergePullRequestInput struct {
 // GetPullRequestParticipantsInput represents the input parameters for getting pull request participants
 type GetPullRequestParticipantsInput struct {
 	CommonInput
+	PaginationInput
 	PullRequestID int `json:"pullRequestId" jsonschema:"required,The pull request ID"`
-	Start         int `json:"start,omitempty" jsonschema:"The starting index of the returned participants"`
-	Limit         int `json:"limit,omitempty" jsonschema:"The limit of the number of participants to return"`
 }
 
 // GetPullRequestStatusInput represents the input parameters for getting pull request status
@@ -139,14 +133,13 @@ type GetPullRequestJiraIssuesInput struct {
 
 // GetPullRequestsForUserInput represents the input parameters for getting pull requests for a specific user
 type GetPullRequestsForUserInput struct {
+	PaginationInput
 	ClosedSince       string `json:"closedSince,omitempty" jsonschema:"Filter pull requests closed since a specific time"`
 	Role              string `json:"role,omitempty" jsonschema:"Filter by user role"`
 	ParticipantStatus string `json:"participantStatus,omitempty" jsonschema:"Filter by participant status"`
 	State             string `json:"state,omitempty" jsonschema:"Filter pull requests by state"`
 	User              string `json:"user,omitempty" jsonschema:"Filter by user"`
 	Order             string `json:"order,omitempty" jsonschema:"Sort order"`
-	Start             int    `json:"start,omitempty" jsonschema:"Starting index for pagination (default: 0)"`
-	Limit             int    `json:"limit,omitempty" jsonschema:"Maximum number of results to return (default: 25)"`
 }
 
 // GetPullRequestCommentInput represents the input parameters for getting a specific comment on a pull request

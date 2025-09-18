@@ -3,11 +3,10 @@ package bitbucket
 // GetCommitsInput represents the input parameters for getting commits
 type GetCommitsInput struct {
 	CommonInput
+	PaginationInput
 	Until         string `json:"until,omitempty" jsonschema:"The commit ID or ref to retrieve commits until"`
 	Since         string `json:"since,omitempty" jsonschema:"The commit ID or ref to retrieve commits since"`
 	Path          string `json:"path,omitempty" jsonschema:"Filter commits by file path"`
-	Limit         int    `json:"limit,omitempty" jsonschema:"Maximum number of results to return (default: 25)"`
-	Start         int    `json:"start,omitempty" jsonschema:"Starting index for pagination (default: 0)"`
 	Merges        string `json:"merges,omitempty" jsonschema:"Filter merge commits"`
 	FollowRenames bool   `json:"followRenames,omitempty" jsonschema:"Follow file renames"`
 	IgnoreMissing bool   `json:"ignoreMissing,omitempty" jsonschema:"Ignore missing commits"`
@@ -24,9 +23,8 @@ type GetCommitInput struct {
 // GetCommitChangesInput represents the input parameters for getting commit changes
 type GetCommitChangesInput struct {
 	CommonInput
+	PaginationInput
 	CommitID     string `json:"commitId" jsonschema:"required,The ID of the commit to retrieve changes for"`
-	Start        int    `json:"start,omitempty" jsonschema:"Starting index for pagination (default: 0)"`
-	Limit        int    `json:"limit,omitempty" jsonschema:"Maximum number of results to return (default: 25)"`
 	WithComments string `json:"withComments,omitempty" jsonschema:"Include comments in response"`
 	Since        string `json:"since,omitempty" jsonschema:"Filter changes since a specific time"`
 }
@@ -78,18 +76,16 @@ type GetCommitCommentInput struct {
 // GetCommitCommentsInput represents the input parameters for getting commit comments
 type GetCommitCommentsInput struct {
 	CommonInput
+	PaginationInput
 	CommitID string `json:"commitId" jsonschema:"required,The ID of the commit"`
-	Limit    int    `json:"limit,omitempty" jsonschema:"Maximum number of results to return (default: 25)"`
-	Start    int    `json:"start,omitempty" jsonschema:"Starting index for pagination (default: 0)"`
 	Path     string `json:"path,omitempty" jsonschema:"Filter comments by file path"`
 	Since    string `json:"since,omitempty" jsonschema:"Filter comments since a specific time"`
 }
 
 // GetJiraIssueCommitsInput represents the input parameters for getting Jira issue commits
 type GetJiraIssueCommitsInput struct {
+	PaginationInput
 	IssueKey   string `json:"issueKey" jsonschema:"required,The Jira issue key"`
-	Limit      int    `json:"limit,omitempty" jsonschema:"Maximum number of results to return (default: 25)"`
-	Start      int    `json:"start,omitempty" jsonschema:"Starting index for pagination (default: 0)"`
 	MaxChanges int    `json:"maxChanges,omitempty" jsonschema:"Maximum number of changes to include"`
 }
 

@@ -2,10 +2,9 @@ package bitbucket
 
 // GetProjectsInput represents the input parameters for getting projects
 type GetProjectsInput struct {
+	PaginationInput
 	Name       string `json:"name,omitempty" jsonschema:"Filter projects by name"`
 	Permission string `json:"permission,omitempty" jsonschema:"Filter projects by permission"`
-	Start      int    `json:"start,omitempty" jsonschema:"Starting index for pagination (default: 0)"`
-	Limit      int    `json:"limit,omitempty" jsonschema:"Maximum number of results to return (default: 25)"`
 }
 
 // GetProjectInput represents the input parameters for getting a specific project
@@ -20,18 +19,16 @@ type GetProjectPrimaryEnhancedEntityLinkInput struct {
 
 // GetProjectTasksInput represents the input parameters for getting project tasks
 type GetProjectTasksInput struct {
+	PaginationInput
 	ProjectKey string `json:"projectKey" jsonschema:"required,The unique key of the project"`
 	Markup     string `json:"markup,omitempty" jsonschema:"Markup formatting option"`
-	Start      int    `json:"start,omitempty" jsonschema:"Starting index for pagination (default: 0)"`
-	Limit      int    `json:"limit,omitempty" jsonschema:"Maximum number of results to return (default: 25)"`
 }
 
 // GetRepositoryTasksInput represents the input parameters for getting repository tasks
 type GetRepositoryTasksInput struct {
 	CommonInput
+	PaginationInput
 	Markup string `json:"markup,omitempty" jsonschema:"Markup formatting option"`
-	Start  int    `json:"start,omitempty" jsonschema:"Starting index for pagination (default: 0)"`
-	Limit  int    `json:"limit,omitempty" jsonschema:"Maximum number of results to return (default: 25)"`
 }
 
 // GetProjectAvatarInput represents the input parameters for getting a project avatar
@@ -52,8 +49,7 @@ type GetProjectBranchModelSettingsInput struct {
 // GetProjectBranchRestrictionsInput represents the input parameters for getting project branch restrictions
 type GetProjectBranchRestrictionsInput struct {
 	CommonInput
-	Start int `json:"start,omitempty" jsonschema:"The starting index of the returned restrictions"`
-	Limit int `json:"limit,omitempty" jsonschema:"The limit of the number of restrictions to return"`
+	PaginationInput
 }
 
 // GetProjectBranchingModelInput represents the input parameters for getting project branching model
@@ -64,28 +60,25 @@ type GetProjectBranchingModelInput struct {
 // GetProjectCommitsInput represents the input parameters for getting project commits
 type GetProjectCommitsInput struct {
 	CommonInput
+	PaginationInput
 	Until  string `json:"until,omitempty" jsonschema:"Filter commits until a specific time"`
 	Since  string `json:"since,omitempty" jsonschema:"Filter commits since a specific time"`
 	Path   string `json:"path,omitempty" jsonschema:"Path to filter commits by"`
-	Start  int    `json:"start,omitempty" jsonschema:"The starting index of the returned commits"`
-	Limit  int    `json:"limit,omitempty" jsonschema:"The limit of the number of commits to return"`
 	Merges string `json:"merges,omitempty" jsonschema:"Filter merge commits"`
 }
 
 // GetProjectGroupsInput represents the input parameters for getting project groups
 type GetProjectGroupsInput struct {
+	PaginationInput
 	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
 	Filter     string `json:"filter,omitempty" jsonschema:"Filter groups by name"`
-	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned groups"`
-	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of groups to return"`
 }
 
 // GetProjectPermissionsInput represents the input parameters for getting project permissions
 type GetProjectPermissionsInput struct {
+	PaginationInput
 	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
 	Filter     string `json:"filter,omitempty" jsonschema:"Filter permissions by name"`
-	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned permissions"`
-	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of permissions to return"`
 }
 
 // GetProjectRepoHookInput represents the input parameters for getting a project repository hook
@@ -96,8 +89,7 @@ type GetProjectRepoHookInput struct {
 // GetProjectRepoHooksInput represents the input parameters for getting project repository hooks
 type GetProjectRepoHooksInput struct {
 	CommonInput
-	Start int `json:"start,omitempty" jsonschema:"The starting index of the returned hooks"`
-	Limit int `json:"limit,omitempty" jsonschema:"The limit of the number of hooks to return"`
+	PaginationInput
 }
 
 // GetProjectRepoSettingsInput represents the input parameters for getting project repository settings
@@ -118,10 +110,9 @@ type GetProjectRepositoryAvatarInput struct {
 // GetProjectRepositoryBranchesInput represents the input parameters for getting project repository branches
 type GetProjectRepositoryBranchesInput struct {
 	CommonInput
+	PaginationInput
 	Base    string `json:"base,omitempty" jsonschema:"The base branch to filter branches"`
 	Details bool   `json:"details,omitempty" jsonschema:"Include details in response"`
-	Start   int    `json:"start,omitempty" jsonschema:"The starting index of the returned branches"`
-	Limit   int    `json:"limit,omitempty" jsonschema:"The limit of the number of branches to return"`
 }
 
 // GetProjectRepositoryBranchInput represents the input parameters for getting a specific project repository branch
@@ -144,9 +135,8 @@ type GetProjectRepositoryCommitsInput struct {
 // GetProjectRepositoryTagsInput represents the input parameters for getting project repository tags
 type GetProjectRepositoryTagsInput struct {
 	CommonInput
-	Name  string `json:"name,omitempty" jsonschema:"Filter tags by name"`
-	Start int    `json:"start,omitempty" jsonschema:"The starting index of the returned tags"`
-	Limit int    `json:"limit,omitempty" jsonschema:"The limit of the number of tags to return"`
+	PaginationInput
+	Name string `json:"name,omitempty" jsonschema:"Filter tags by name"`
 }
 
 // GetProjectRepositoryTagInput represents the input parameters for getting a specific project repository tag
@@ -158,9 +148,8 @@ type GetProjectRepositoryTagInput struct {
 // GetProjectRepositoryUsersInput represents the input parameters for getting project repository users
 type GetProjectRepositoryUsersInput struct {
 	CommonInput
+	PaginationInput
 	Filter string `json:"filter,omitempty" jsonschema:"Filter users by name"`
-	Start  int    `json:"start,omitempty" jsonschema:"The starting index of the returned users"`
-	Limit  int    `json:"limit,omitempty" jsonschema:"The limit of the number of users to return"`
 }
 
 // GetProjectSettingsInput represents the input parameters for getting project settings
@@ -170,8 +159,7 @@ type GetProjectSettingsInput struct {
 
 // GetProjectUsersInput represents the input parameters for getting project users
 type GetProjectUsersInput struct {
+	PaginationInput
 	ProjectKey string `json:"projectKey" jsonschema:"required,The project key"`
 	Filter     string `json:"filter,omitempty" jsonschema:"Filter users by name"`
-	Start      int    `json:"start,omitempty" jsonschema:"The starting index of the returned users"`
-	Limit      int    `json:"limit,omitempty" jsonschema:"The limit of the number of users to return"`
 }
