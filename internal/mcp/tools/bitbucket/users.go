@@ -9,19 +9,8 @@ import (
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// GetCurrentUserOutput represents the output for getting the current user
-type GetCurrentUserOutput = map[string]interface{}
-
-// GetUserOutput represents the output for getting a user
-type GetUserOutput struct {
-	User map[string]interface{} `json:"user" jsonschema:"the user details"`
-}
-
-// GetUsersOutput represents the output for getting users
-type GetUsersOutput = map[string]interface{}
-
 // getCurrentUserHandler handles getting the current Bitbucket user
-func (h *Handler) getCurrentUserHandler(ctx context.Context, req *mcp.CallToolRequest, input struct{}) (*mcp.CallToolResult, GetCurrentUserOutput, error) {
+func (h *Handler) getCurrentUserHandler(ctx context.Context, req *mcp.CallToolRequest, input struct{}) (*mcp.CallToolResult, MapOutput, error) {
 	user, err := h.client.GetCurrentUser()
 	if err != nil {
 		result, _, err := tools.HandleToolError(err, "get current user")
@@ -55,7 +44,7 @@ func (h *Handler) getUserHandler(ctx context.Context, req *mcp.CallToolRequest, 
 }
 
 // getUsersHandler handles getting Bitbucket users
-func (h *Handler) getUsersHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetUsersInput) (*mcp.CallToolResult, GetUsersOutput, error) {
+func (h *Handler) getUsersHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetUsersInput) (*mcp.CallToolResult, MapOutput, error) {
 	users, err := h.client.GetUsers(input)
 	if err != nil {
 		result, _, err := tools.HandleToolError(err, "get users")
@@ -75,7 +64,7 @@ func (h *Handler) getUsersHandler(ctx context.Context, req *mcp.CallToolRequest,
 func AddUserTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[struct{}, GetCurrentUserOutput](server, &mcp.Tool{
+	mcp.AddTool[struct{}, MapOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_current_user",
 		Description: "Get current Bitbucket user",
 	}, handler.getCurrentUserHandler)
@@ -85,7 +74,7 @@ func AddUserTools(server *mcp.Server, client *bitbucket.BitbucketClient, permiss
 		Description: "Get a Bitbucket user",
 	}, handler.getUserHandler)
 
-	mcp.AddTool[bitbucket.GetUsersInput, GetUsersOutput](server, &mcp.Tool{
+	mcp.AddTool[bitbucket.GetUsersInput, MapOutput](server, &mcp.Tool{
 		Name:        "bitbucket_get_users",
 		Description: "Get a list of Bitbucket users",
 	}, handler.getUsersHandler)

@@ -15,9 +15,6 @@ type GetAttachmentOutput struct {
 	Content []byte `json:"content" jsonschema:"the attachment content"`
 }
 
-// GetAttachmentMetadataOutput represents the output for attachment metadata
-type GetAttachmentMetadataOutput = map[string]interface{}
-
 // getAttachmentHandler handles getting an attachment
 func (h *Handler) getAttachmentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetAttachmentInput) (*mcp.CallToolResult, GetAttachmentOutput, error) {
 	attachment, err := h.client.GetAttachment(input)
@@ -36,7 +33,7 @@ func (h *Handler) getAttachmentHandler(ctx context.Context, req *mcp.CallToolReq
 }
 
 // getAttachmentMetadataHandler handles getting attachment metadata
-func (h *Handler) getAttachmentMetadataHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetAttachmentMetadataInput) (*mcp.CallToolResult, GetAttachmentMetadataOutput, error) {
+func (h *Handler) getAttachmentMetadataHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetAttachmentMetadataInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	metadata, err := h.client.GetAttachmentMetadata(input)
 	if err != nil {
 		result, _, err := tools.HandleToolError(err, "get attachment metadata")
@@ -61,7 +58,7 @@ func AddAttachmentTools(server *mcp.Server, client *bitbucket.BitbucketClient, p
 		Description: "Get a specific attachment",
 	}, handler.getAttachmentHandler)
 
-	mcp.AddTool[bitbucket.GetAttachmentMetadataInput, GetAttachmentMetadataOutput](server, &mcp.Tool{
+	mcp.AddTool[bitbucket.GetAttachmentMetadataInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "bitbucket_get_attachment_metadata",
 		Description: "Get metadata for a specific attachment",
 	}, handler.getAttachmentMetadataHandler)

@@ -9,23 +9,9 @@ import (
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// GetProjectsOutput represents the output for getting projects
-type GetProjectsOutput = map[string]interface{}
-
-// GetProjectOutput represents the output for getting a specific project
-type GetProjectOutput = map[string]interface{}
-
-// GetProjectPrimaryEnhancedEntityLinkOutput represents the output for getting project's primary enhanced entity link
-type GetProjectPrimaryEnhancedEntityLinkOutput = map[string]interface{}
-
-// GetProjectTasksOutput represents the output for getting tasks for a specific project
-type GetProjectTasksOutput = map[string]interface{}
-
-// GetRepositoryTasksOutput represents the output for getting tasks for a specific repository
-type GetRepositoryTasksOutput = map[string]interface{}
 
 // getProjectsHandler handles getting projects
-func (h *Handler) getProjectsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetProjectsInput) (*mcp.CallToolResult, GetProjectsOutput, error) {
+func (h *Handler) getProjectsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetProjectsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	projects, err := h.client.GetProjects(input)
 	if err != nil {
 		result, _, err := tools.HandleToolError(err, "get projects")
@@ -42,7 +28,7 @@ func (h *Handler) getProjectsHandler(ctx context.Context, req *mcp.CallToolReque
 }
 
 // getProjectHandler handles getting a specific project
-func (h *Handler) getProjectHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetProjectInput) (*mcp.CallToolResult, GetProjectOutput, error) {
+func (h *Handler) getProjectHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetProjectInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	project, err := h.client.GetProject(input)
 	if err != nil {
 		result, _, err := tools.HandleToolError(err, "get project")
@@ -59,7 +45,7 @@ func (h *Handler) getProjectHandler(ctx context.Context, req *mcp.CallToolReques
 }
 
 // getProjectPrimaryEnhancedEntityLinkHandler handles getting the primary enhanced entity link for a project
-func (h *Handler) getProjectPrimaryEnhancedEntityLinkHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetProjectPrimaryEnhancedEntityLinkInput) (*mcp.CallToolResult, GetProjectPrimaryEnhancedEntityLinkOutput, error) {
+func (h *Handler) getProjectPrimaryEnhancedEntityLinkHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetProjectPrimaryEnhancedEntityLinkInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	link, err := h.client.GetProjectPrimaryEnhancedEntityLink(input)
 	if err != nil {
 		result, _, err := tools.HandleToolError(err, "get project primary enhanced entity link")
@@ -76,7 +62,7 @@ func (h *Handler) getProjectPrimaryEnhancedEntityLinkHandler(ctx context.Context
 }
 
 // getProjectTasksHandler handles getting tasks for a specific project
-func (h *Handler) getProjectTasksHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetProjectTasksInput) (*mcp.CallToolResult, GetProjectTasksOutput, error) {
+func (h *Handler) getProjectTasksHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetProjectTasksInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	tasks, err := h.client.GetProjectTasks(input)
 	if err != nil {
 		result, _, err := tools.HandleToolError(err, "get project tasks")
@@ -93,7 +79,7 @@ func (h *Handler) getProjectTasksHandler(ctx context.Context, req *mcp.CallToolR
 }
 
 // getRepositoryTasksHandler handles getting tasks for a specific repository
-func (h *Handler) getRepositoryTasksHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetRepositoryTasksInput) (*mcp.CallToolResult, GetRepositoryTasksOutput, error) {
+func (h *Handler) getRepositoryTasksHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetRepositoryTasksInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	tasks, err := h.client.GetRepositoryTasks(input)
 	if err != nil {
 		result, _, err := tools.HandleToolError(err, "get repository tasks")
@@ -113,27 +99,27 @@ func (h *Handler) getRepositoryTasksHandler(ctx context.Context, req *mcp.CallTo
 func AddProjectTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[bitbucket.GetProjectsInput, GetProjectsOutput](server, &mcp.Tool{
+	mcp.AddTool[bitbucket.GetProjectsInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "bitbucket_get_projects",
 		Description: "Get a list of projects",
 	}, handler.getProjectsHandler)
 
-	mcp.AddTool[bitbucket.GetProjectInput, GetProjectOutput](server, &mcp.Tool{
+	mcp.AddTool[bitbucket.GetProjectInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "bitbucket_get_project",
 		Description: "Get a specific project by project key",
 	}, handler.getProjectHandler)
 
-	mcp.AddTool[bitbucket.GetProjectPrimaryEnhancedEntityLinkInput, GetProjectPrimaryEnhancedEntityLinkOutput](server, &mcp.Tool{
+	mcp.AddTool[bitbucket.GetProjectPrimaryEnhancedEntityLinkInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "bitbucket_get_project_primary_enhanced_entity_link",
 		Description: "Get project's primary enhanced entity link",
 	}, handler.getProjectPrimaryEnhancedEntityLinkHandler)
 
-	mcp.AddTool[bitbucket.GetProjectTasksInput, GetProjectTasksOutput](server, &mcp.Tool{
+	mcp.AddTool[bitbucket.GetProjectTasksInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "bitbucket_get_project_tasks",
 		Description: "Get tasks for a specific project",
 	}, handler.getProjectTasksHandler)
 
-	mcp.AddTool[bitbucket.GetRepositoryTasksInput, GetRepositoryTasksOutput](server, &mcp.Tool{
+	mcp.AddTool[bitbucket.GetRepositoryTasksInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "bitbucket_get_repository_tasks",
 		Description: "Get tasks for a specific repository",
 	}, handler.getRepositoryTasksHandler)

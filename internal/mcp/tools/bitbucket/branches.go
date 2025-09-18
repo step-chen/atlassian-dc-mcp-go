@@ -10,11 +10,8 @@ import (
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// GetBranchesOutput represents the output for getting branches
-type GetBranchesOutput = map[string]interface{}
-
 // getBranchesHandler handles getting branches
-func (h *Handler) getBranchesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetBranchesInput) (*mcp.CallToolResult, GetBranchesOutput, error) {
+func (h *Handler) getBranchesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetBranchesInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	branches, err := h.client.GetBranches(input)
 	if err != nil {
 		result, _, err := tools.HandleToolError(err, "get branches")
@@ -30,11 +27,8 @@ func (h *Handler) getBranchesHandler(ctx context.Context, req *mcp.CallToolReque
 	return result, branches, nil
 }
 
-// GetDefaultBranchOutput represents the output for getting the default branch
-type GetDefaultBranchOutput = map[string]interface{}
-
 // getDefaultBranchHandler handles getting the default branch
-func (h *Handler) getDefaultBranchHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetDefaultBranchInput) (*mcp.CallToolResult, GetDefaultBranchOutput, error) {
+func (h *Handler) getDefaultBranchHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetDefaultBranchInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	branch, err := h.client.GetDefaultBranch(input)
 	if err != nil {
 		result, _, err := tools.HandleToolError(err, "get default branch")
@@ -50,11 +44,8 @@ func (h *Handler) getDefaultBranchHandler(ctx context.Context, req *mcp.CallTool
 	return result, branch, nil
 }
 
-// GetBranchInfoByCommitIdOutput represents the output for getting branch information by commit ID
-type GetBranchInfoByCommitIdOutput = map[string]interface{}
-
 // getBranchInfoByCommitIdHandler handles getting branch information by commit ID
-func (h *Handler) getBranchHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetBranchInput) (*mcp.CallToolResult, GetBranchInfoByCommitIdOutput, error) {
+func (h *Handler) getBranchHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetBranchInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	branchInfo, err := h.client.GetBranch(input)
 	if err != nil {
 		result, _, err := tools.HandleToolError(err, "get branch info by commit id")
@@ -74,17 +65,17 @@ func (h *Handler) getBranchHandler(ctx context.Context, req *mcp.CallToolRequest
 func AddBranchTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[bitbucket.GetBranchesInput, GetBranchesOutput](server, &mcp.Tool{
+	mcp.AddTool[bitbucket.GetBranchesInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "bitbucket_get_branches",
 		Description: "Get branches for a repository",
 	}, handler.getBranchesHandler)
 
-	mcp.AddTool[bitbucket.GetDefaultBranchInput, GetDefaultBranchOutput](server, &mcp.Tool{
+	mcp.AddTool[bitbucket.GetDefaultBranchInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "bitbucket_get_default_branch",
 		Description: "Get the default branch of a repository",
 	}, handler.getDefaultBranchHandler)
 
-	mcp.AddTool[bitbucket.GetBranchInput, GetBranchInfoByCommitIdOutput](server, &mcp.Tool{
+	mcp.AddTool[bitbucket.GetBranchInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "bitbucket_get_branch_info_by_commit_id",
 		Description: "Get branch information by commit ID",
 	}, handler.getBranchHandler)
