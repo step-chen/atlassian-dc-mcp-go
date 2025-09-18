@@ -132,12 +132,12 @@ func (c *BitbucketClient) MergePullRequest(input MergePullRequestInput) (map[str
 		Message:     input.Message,
 		StrategyId:  input.StrategyId,
 	}
-	
+
 	// Handle Version field separately since it's required in the original struct but optional in options
 	if input.Version != 0 {
 		options.Version = &input.Version
 	}
-	
+
 	jsonPayload, err := json.Marshal(options)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
@@ -178,7 +178,7 @@ func (c *BitbucketClient) DeclinePullRequest(input DeclinePullRequestInput) (map
 	options := DeclinePullRequestOptions{
 		Comment: input.Comment,
 	}
-	
+
 	queryParams := make(url.Values)
 	if input.Version != 0 {
 		queryParams.Set("version", strconv.Itoa(input.Version))
@@ -202,7 +202,6 @@ func (c *BitbucketClient) DeclinePullRequest(input DeclinePullRequestInput) (map
 
 	return result, nil
 }
-
 
 // GetPullRequests retrieves pull requests for a specific repository.
 //
@@ -243,7 +242,6 @@ func (c *BitbucketClient) GetPullRequests(input GetPullRequestsInput) (map[strin
 	return prs, nil
 }
 
-
 // GetPullRequestSuggestions retrieves pull request suggestions.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch pull request
@@ -274,7 +272,6 @@ func (c *BitbucketClient) GetPullRequestSuggestions(input GetPullRequestSuggesti
 	return suggestions, nil
 }
 
-
 // GetPullRequestJiraIssues retrieves Jira issues linked to a pull request.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch Jira issues
@@ -300,7 +297,6 @@ func (c *BitbucketClient) GetPullRequestJiraIssues(input GetPullRequestJiraIssue
 
 	return issues, nil
 }
-
 
 // GetPullRequestsForUser retrieves pull requests for a specific user.
 //
@@ -338,7 +334,6 @@ func (c *BitbucketClient) GetPullRequestsForUser(input GetPullRequestsForUserInp
 	return pullRequests, nil
 }
 
-
 // GetPullRequestComment retrieves a specific comment on a pull request.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch a specific
@@ -364,7 +359,6 @@ func (c *BitbucketClient) GetPullRequestComment(input GetPullRequestCommentInput
 
 	return comment, nil
 }
-
 
 // GetPullRequestComments retrieves comments on a pull request.
 //
