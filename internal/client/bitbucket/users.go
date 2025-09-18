@@ -13,7 +13,7 @@ import (
 // of the currently authenticated user.
 //
 // Returns:
-//   - map[string]interface{}: The user data retrieved from the API
+//   - map[string]interface{}: The current user data retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) GetCurrentUser() (map[string]interface{}, error) {
 	var user map[string]interface{}
@@ -33,19 +33,19 @@ func (c *BitbucketClient) GetCurrentUser() (map[string]interface{}, error) {
 // GetUser retrieves details of a specific user.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch details
-// of a user identified by their user slug.
+// of a user identified by their username.
 //
 // Parameters:
-//   - userSlug: The slug of the user to retrieve
+//   - input: GetUserInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The user data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetUser(userSlug string) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetUser(input GetUserInput) (map[string]interface{}, error) {
 	var user map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "users", userSlug},
+		[]string{"rest", "api", "latest", "users", input.Username},
 		nil,
 		nil,
 		&user,
@@ -56,29 +56,29 @@ func (c *BitbucketClient) GetUser(userSlug string) (map[string]interface{}, erro
 	return user, nil
 }
 
-// GetUsers retrieves a list of users with filtering options.
+// GetUsers retrieves a list of users.
 //
-// This function makes an HTTP GET request to the Bitbucket API to fetch users
-// with various filtering options.
+// This function makes an HTTP GET request to the Bitbucket API to fetch a list of users
+// based on the provided input parameters.
 //
 // Parameters:
-//   - filter: Text to filter users by
-//   - permission: Filter users by permission
-//   - group: Filter users by group
-//   - permissionFilters: Additional permission filters
+//   - input: GetUsersInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The users data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetUsers(filter, permission, group string, permissionFilters map[string]string) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetUsers(input GetUsersInput) (map[string]interface{}, error) {
 	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "filter", filter, "")
-	utils.SetQueryParam(queryParams, "permission", permission, "")
-	utils.SetQueryParam(queryParams, "group", group, "")
+	utils.SetQueryParam(queryParams, "filter", input.Filter, "")
+	utils.SetQueryParam(queryParams, "permission", input.Permission, "")
+	utils.SetQueryParam(queryParams, "group", input.Group, "")
 
-	for key, value := range permissionFilters {
-		if key != "" && value != "" {
-			queryParams.Set(key, value)
+	// Handle permissionFilters map
+	if input.PermissionFilters != nil {
+		for key, value := range input.PermissionFilters {
+			if key != "" && value != "" {
+				queryParams.Set(key, value)
+			}
 		}
 	}
 

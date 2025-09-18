@@ -13,126 +13,109 @@ import (
 // of a repository identified by its project key and repository slug.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
+//   - input: GetRepositoryInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The repository data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetRepository(projectKey, repoSlug string) (map[string]interface{}, error) {
-	var repo map[string]interface{}
+func (c *BitbucketClient) GetRepository(input GetRepositoryInput) (map[string]interface{}, error) {
+	var repository map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug},
 		nil,
 		nil,
-		&repo,
+		&repository,
 	); err != nil {
 		return nil, err
 	}
 
-	return repo, nil
+	return repository, nil
 }
 
-// GetRepositories retrieves repositories with various filters.
+// GetRepositories retrieves repositories based on input parameters.
 //
-// This function makes an HTTP GET request to the Bitbucket API to fetch repositories
-// with various filtering options.
+// This function makes an HTTP GET request to the Bitbucket API to retrieve
+// repositories based on the provided input parameters.
 //
 // Parameters:
-//   - projectName: Filter repositories by project name
-//   - projectKey: Filter repositories by project key
-//   - name: Filter repositories by name
-//   - visibility: Filter repositories by visibility
-//   - permission: Filter repositories by permission
-//   - state: Filter repositories by state
-//   - archived: Filter archived repositories
-//   - username: Filter repositories by username
-//   - limit: Maximum number of results to return (default: 25)
-//   - start: Starting index for pagination (default: 0)
+//   - input: GetRepositoriesInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The repositories data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetRepositories(projectName, projectKey, name, visibility, permission, state, archived, username string, start, limit int) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetRepositories(input GetRepositoriesInput) (map[string]interface{}, error) {
 	queryParams := make(url.Values)
+	utils.SetQueryParam(queryParams, "projectName", input.ProjectName, "")
+	utils.SetQueryParam(queryParams, "projectKey", input.ProjectKey, "")
+	utils.SetQueryParam(queryParams, "name", input.Name, "")
+	utils.SetQueryParam(queryParams, "visibility", input.Visibility, "")
+	utils.SetQueryParam(queryParams, "permission", input.Permission, "")
+	utils.SetQueryParam(queryParams, "state", input.State, "")
+	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	utils.SetQueryParam(queryParams, "start", input.Start, 0)
+	utils.SetQueryParam(queryParams, "archived", input.Archived, "")
 
-	utils.SetQueryParam(queryParams, "projectname", projectName, "")
-	utils.SetQueryParam(queryParams, "projectkey", projectKey, "")
-	utils.SetQueryParam(queryParams, "name", name, "")
-	utils.SetQueryParam(queryParams, "visibility", visibility, "")
-	utils.SetQueryParam(queryParams, "permission", permission, "")
-	utils.SetQueryParam(queryParams, "state", state, "")
-	utils.SetQueryParam(queryParams, "limit", limit, 0)
-	utils.SetQueryParam(queryParams, "start", start, 0)
-
-	if archived != "" {
-		queryParams.Set("archived", archived)
-	}
-
-	var repos map[string]interface{}
+	var repositories map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "repos"},
 		queryParams,
 		nil,
-		&repos,
+		&repositories,
 	); err != nil {
 		return nil, err
 	}
 
-	return repos, nil
+	return repositories, nil
 }
 
 // GetProjectRepositories retrieves repositories for a specific project.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch repositories
-// associated with a specific project.
+// for a specific project with optional filtering by name.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - limit: Maximum number of results to return (default: 25)
-//   - start: Starting index for pagination (default: 0)
+//   - input: GetProjectRepositoriesInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The repositories data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetProjectRepositories(projectKey string, start, limit int) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetProjectRepositories(input GetProjectRepositoriesInput) (map[string]interface{}, error) {
 	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "limit", limit, 0)
-	utils.SetQueryParam(queryParams, "start", start, 0)
+	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var repos map[string]interface{}
+	var repositories map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos"},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos"},
 		queryParams,
 		nil,
-		&repos,
+		&repositories,
 	); err != nil {
 		return nil, err
 	}
 
-	return repos, nil
+	return repositories, nil
 }
 
 // GetRepositoryLabels retrieves labels for a specific repository.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch labels
-// associated with a specific repository.
+// for a specific repository.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
+//   - input: GetRepositoryLabelsInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The labels data retrieved from the API
+//   - []string: The labels retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetRepositoryLabels(projectKey, repoSlug string) (map[string]interface{}, error) {
-	var labels map[string]interface{}
+func (c *BitbucketClient) GetRepositoryLabels(input GetRepositoryLabelsInput) ([]string, error) {
+	var labels []string
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "labels"},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "labels"},
 		nil,
 		nil,
 		&labels,
@@ -143,104 +126,92 @@ func (c *BitbucketClient) GetRepositoryLabels(projectKey, repoSlug string) (map[
 	return labels, nil
 }
 
-// GetFileContent retrieves the content of a file in a repository.
+// GetFileContent retrieves the content of a file from a repository.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch the content
-// of a file in a specific repository.
+// of a specific file from a repository at a given commit or branch.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - path: The path to the file
-//   - at: The commit ID or ref to retrieve the file at
-//   - size: Include file size information
-//   - typeParam: Include file type information
-//   - blame: Include blame information
-//   - noContent: Skip content retrieval
+//   - input: GetFileContentInput containing the parameters for the request
 //
 // Returns:
-//   - string: The file content as a string
+//   - []byte: The file content retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetFileContent(projectKey, repoSlug, path, at string, size, typeParam *bool, blame, noContent *bool) (string, error) {
+func (c *BitbucketClient) GetFileContent(input GetFileContentInput) ([]byte, error) {
 	queryParams := make(url.Values)
+	utils.SetQueryParam(queryParams, "at", input.At, "")
+	utils.SetQueryParam(queryParams, "size", input.Size, false)
+	utils.SetQueryParam(queryParams, "type", input.TypeParam, false)
+	utils.SetQueryParam(queryParams, "blame", input.Blame, false)
+	utils.SetQueryParam(queryParams, "noContent", input.NoContent, false)
 
-	utils.SetQueryParam(queryParams, "at", at, "")
-	utils.SetQueryParam(queryParams, "size", size, (*bool)(nil))
-	utils.SetQueryParam(queryParams, "type", typeParam, (*bool)(nil))
-	utils.SetQueryParam(queryParams, "blame", blame, (*bool)(nil))
-	utils.SetQueryParam(queryParams, "noContent", noContent, (*bool)(nil))
-
-	return c.executeTextRequest(
+	var content []byte
+	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "raw", path},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "raw", input.Path},
 		queryParams,
 		nil,
-	)
+		&content,
+	); err != nil {
+		return nil, err
+	}
+
+	return content, nil
 }
 
-// GetFiles retrieves files in a directory of a repository.
+// GetFiles retrieves a list of files from a repository.
 //
-// This function makes an HTTP GET request to the Bitbucket API to fetch files
-// in a specific directory of a repository.
+// This function makes an HTTP GET request to the Bitbucket API to fetch a list
+// of files from a specific repository at a given commit or branch.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - path: The path to the directory
-//   - at: The commit ID or ref to retrieve files at
-//   - start: Starting index for pagination (default: 0)
-//   - limit: Maximum number of results to return (default: 25)
+//   - input: GetFilesInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The files data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetFiles(projectKey, repoSlug, path, at string, start, limit int) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetFiles(input GetFilesInput) (map[string]interface{}, error) {
 	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "at", at, "")
-	utils.SetQueryParam(queryParams, "start", start, 0)
-	utils.SetQueryParam(queryParams, "limit", limit, 0)
+	utils.SetQueryParam(queryParams, "at", input.At, "")
+	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var result map[string]interface{}
+	var files map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "files", path},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "files"},
 		queryParams,
 		nil,
-		&result,
+		&files,
 	); err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return files, nil
 }
 
-// GetChanges retrieves changes between commits in a repository.
+// GetChanges retrieves changes in a repository.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch changes
-// between commits in a specific repository.
+// in a specific repository at a given commit or branch.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - until: The commit ID or ref to compare until
-//   - since: The commit ID or ref to compare since
-//   - limit: Maximum number of results to return (default: 25)
-//   - start: Starting index for pagination (default: 0)
+//   - input: GetChangesInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The changes data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetChanges(projectKey, repoSlug, until, since string, start, limit int) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetChanges(input GetChangesInput) (map[string]interface{}, error) {
 	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "until", until, "")
-	utils.SetQueryParam(queryParams, "since", since, "")
-	utils.SetQueryParam(queryParams, "limit", limit, 0)
-	utils.SetQueryParam(queryParams, "start", start, 0)
+	utils.SetQueryParam(queryParams, "until", input.Until, "")
+	utils.SetQueryParam(queryParams, "since", input.Since, "")
+	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
 	var changes map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "changes"},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "changes"},
 		queryParams,
 		nil,
 		&changes,
@@ -251,35 +222,29 @@ func (c *BitbucketClient) GetChanges(projectKey, repoSlug, until, since string, 
 	return changes, nil
 }
 
-// CompareChanges compares changes between two commits in a repository.
+// CompareChanges compares changes between two commits or branches.
 //
 // This function makes an HTTP GET request to the Bitbucket API to compare changes
-// between two commits in a specific repository.
+// between two commits or branches in a specific repository.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - from: The source commit ID or ref
-//   - to: The target commit ID or ref
-//   - fromRepo: The source repository
-//   - limit: Maximum number of results to return (default: 25)
-//   - start: Starting index for pagination (default: 0)
+//   - input: CompareChangesInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The changes data retrieved from the API
+//   - map[string]interface{}: The comparison data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) CompareChanges(projectKey, repoSlug, from, to, fromRepo string, start, limit int) (map[string]interface{}, error) {
+func (c *BitbucketClient) CompareChanges(input CompareChangesInput) (map[string]interface{}, error) {
 	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "from", from, "")
-	utils.SetQueryParam(queryParams, "to", to, "")
-	utils.SetQueryParam(queryParams, "fromRepo", fromRepo, "")
-	utils.SetQueryParam(queryParams, "limit", limit, 0)
-	utils.SetQueryParam(queryParams, "start", start, 0)
+	utils.SetQueryParam(queryParams, "from", input.From, "")
+	utils.SetQueryParam(queryParams, "to", input.To, "")
+	utils.SetQueryParam(queryParams, "fromRepo", input.FromRepo, "")
+	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
 	var changes map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "compare", "changes"},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "compare", "changes"},
 		queryParams,
 		nil,
 		&changes,
@@ -290,29 +255,26 @@ func (c *BitbucketClient) CompareChanges(projectKey, repoSlug, from, to, fromRep
 	return changes, nil
 }
 
-// GetForks retrieves forks of a specific repository.
+// GetForks retrieves forks of a repository.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch forks
 // of a specific repository.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - limit: Maximum number of results to return (default: 25)
-//   - start: Starting index for pagination (default: 0)
+//   - input: GetForksInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The forks data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetForks(projectKey, repoSlug string, start, limit int) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetForks(input GetForksInput) (map[string]interface{}, error) {
 	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "limit", limit, 0)
-	utils.SetQueryParam(queryParams, "start", start, 0)
+	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
 	var forks map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "forks"},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "forks"},
 		queryParams,
 		nil,
 		&forks,
@@ -323,125 +285,65 @@ func (c *BitbucketClient) GetForks(projectKey, repoSlug string, start, limit int
 	return forks, nil
 }
 
-// GetReadme retrieves the README file of a repository.
+// GetReadme retrieves the README file for a specific repository.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch the README
-// file of a specific repository.
+// file for a specific repository at a given commit or branch.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - at: The commit ID or ref to retrieve the README at
-//   - markup: Markup format for the response
-//   - htmlEscape: HTML escape option
-//   - includeHeadingId: Include heading IDs
-//   - hardwrap: Hard wrap option
+//   - input: GetReadmeInput containing the parameters for the request
 //
 // Returns:
-//   - string: The README content as a string
+//   - map[string]interface{}: The README data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetReadme(projectKey, repoSlug string, at, markup, htmlEscape, includeHeadingId, hardwrap *string) (string, error) {
+func (c *BitbucketClient) GetReadme(input GetReadmeInput) (map[string]interface{}, error) {
 	queryParams := make(url.Values)
+	utils.SetQueryParam(queryParams, "at", input.At, "")
+	utils.SetQueryParam(queryParams, "markup", input.Markup, "")
+	utils.SetQueryParam(queryParams, "htmlEscape", input.HtmlEscape, "")
+	utils.SetQueryParam(queryParams, "includeHeadingId", input.IncludeHeadingId, "")
+	utils.SetQueryParam(queryParams, "hardwrap", input.Hardwrap, "")
 
-	utils.SetQueryParam(queryParams, "at", at, (*string)(nil))
-	utils.SetQueryParam(queryParams, "markup", markup, (*string)(nil))
-	utils.SetQueryParam(queryParams, "htmlEscape", htmlEscape, (*string)(nil))
-	utils.SetQueryParam(queryParams, "includeHeadingId", includeHeadingId, (*string)(nil))
-	utils.SetQueryParam(queryParams, "hardwrap", hardwrap, (*string)(nil))
-
-	return c.executeTextRequest(
+	var readme map[string]interface{}
+	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "readme"},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "readme"},
 		queryParams,
 		nil,
-	)
-}
-
-// GetAttachment retrieves an attachment from a repository.
-//
-// This function makes an HTTP GET request to the Bitbucket API to fetch an attachment
-// from a specific repository.
-//
-// Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - attachmentId: The ID of the attachment to retrieve
-//
-// Returns:
-//   - []byte: The attachment content as bytes
-//   - error: An error if the request fails
-func (c *BitbucketClient) GetAttachment(projectKey, repoSlug, attachmentId string) ([]byte, error) {
-	var content []byte
-	if err := c.executeRequest(
-		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "attachments", attachmentId},
-		nil,
-		nil,
-		&content,
+		&readme,
 	); err != nil {
 		return nil, err
 	}
 
-	return content, nil
+	return readme, nil
 }
 
-// GetAttachmentMetadata retrieves metadata for an attachment.
-//
-// This function makes an HTTP GET request to the Bitbucket API to fetch metadata
-// for an attachment from a specific repository.
-//
-// Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - attachmentId: The ID of the attachment to retrieve metadata for
-//
-// Returns:
-//   - map[string]interface{}: The attachment metadata retrieved from the API
-//   - error: An error if the request fails
-func (c *BitbucketClient) GetAttachmentMetadata(projectKey, repoSlug, attachmentId string) (map[string]interface{}, error) {
-	var metadata map[string]interface{}
-	if err := c.executeRequest(
-		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "attachments", attachmentId, "metadata"},
-		nil,
-		nil,
-		&metadata,
-	); err != nil {
-		return nil, err
-	}
-
-	return metadata, nil
-}
-
-// GetRelatedRepositories retrieves repositories related to a repository.
+// GetRelatedRepositories retrieves repositories related to a specific repository.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch repositories
 // related to a specific repository.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - start: Starting index for pagination (default: 0)
-//   - limit: Maximum number of results to return (default: 25)
+//   - input: GetRelatedRepositoriesInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The related repositories data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetRelatedRepositories(projectKey, repoSlug string, start, limit int) (map[string]interface{}, error) {
-	params := url.Values{}
-	utils.SetQueryParam(params, "start", start, 0)
-	utils.SetQueryParam(params, "limit", limit, 0)
+func (c *BitbucketClient) GetRelatedRepositories(input GetRelatedRepositoriesInput) (map[string]interface{}, error) {
+	queryParams := make(url.Values)
+	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var relatedRepos map[string]interface{}
+	var repositories map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "related"},
-		params,
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "related"},
+		queryParams,
 		nil,
-		&relatedRepos,
+		&repositories,
 	); err != nil {
 		return nil, err
 	}
 
-	return relatedRepos, nil
+	return repositories, nil
 }

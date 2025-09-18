@@ -16,18 +16,16 @@ import (
 // of a pull request identified by its project key, repository slug, and pull request ID.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - pullRequestID: The ID of the pull request to retrieve
+//   - input: GetPullRequestInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The pull request data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequest(projectKey, repoSlug string, pullRequestID int) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetPullRequest(input GetPullRequestInput) (map[string]interface{}, error) {
 	var pr map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "pull-requests", strconv.Itoa(pullRequestID)},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID)},
 		nil,
 		nil,
 		&pr,
@@ -44,29 +42,23 @@ func (c *BitbucketClient) GetPullRequest(projectKey, repoSlug string, pullReques
 // for a specific pull request with optional filtering.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - pullRequestID: The ID of the pull request
-//   - fromType: Filter activities by type
-//   - fromId: Filter activities by ID
-//   - start: Starting index for pagination (default: 0)
-//   - limit: Maximum number of results to return (default: 25)
+//   - input: GetPullRequestActivitiesInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The activities data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestActivities(projectKey, repoSlug string, pullRequestID int, fromType, fromId string, start, limit int) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetPullRequestActivities(input GetPullRequestActivitiesInput) (map[string]interface{}, error) {
 	queryParams := make(url.Values)
 
-	utils.SetQueryParam(queryParams, "fromType", fromType, "")
-	utils.SetQueryParam(queryParams, "fromId", fromId, "")
-	utils.SetQueryParam(queryParams, "start", start, 0)
-	utils.SetQueryParam(queryParams, "limit", limit, 0)
+	utils.SetQueryParam(queryParams, "fromType", input.FromType, "")
+	utils.SetQueryParam(queryParams, "fromId", input.FromId, "")
+	utils.SetQueryParam(queryParams, "start", input.Start, 0)
+	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
 	var activities map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "pull-requests", strconv.Itoa(pullRequestID), "activities"},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "activities"},
 		queryParams,
 		nil,
 		&activities,
@@ -83,17 +75,14 @@ func (c *BitbucketClient) GetPullRequestActivities(projectKey, repoSlug string, 
 // to a specific pull request.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - pullRequestID: The ID of the pull request
-//   - commentText: The text of the comment to add
+//   - input: AddPullRequestCommentInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The comment data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) AddPullRequestComment(projectKey, repoSlug string, pullRequestID int, commentText string) (map[string]interface{}, error) {
+func (c *BitbucketClient) AddPullRequestComment(input AddPullRequestCommentInput) (map[string]interface{}, error) {
 	payload := map[string]interface{}{
-		"text": commentText,
+		"text": input.CommentText,
 	}
 
 	jsonPayload, err := json.Marshal(payload)
@@ -104,7 +93,7 @@ func (c *BitbucketClient) AddPullRequestComment(projectKey, repoSlug string, pul
 	var comment map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodPost,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "pull-requests", strconv.Itoa(pullRequestID), "comments"},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "comments"},
 		nil,
 		jsonPayload,
 		&comment,
@@ -130,15 +119,25 @@ type MergePullRequestOptions struct {
 // a specific pull request with optional merge options.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - pullRequestID: The ID of the pull request to merge
-//   - options: The merge options
+//   - input: MergePullRequestInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The merge result data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) MergePullRequest(projectKey, repoSlug string, pullRequestID int, options MergePullRequestOptions) (map[string]interface{}, error) {
+func (c *BitbucketClient) MergePullRequest(input MergePullRequestInput) (map[string]interface{}, error) {
+	// Create options struct from input fields that are merge options
+	options := MergePullRequestOptions{
+		AutoMerge:   input.AutoMerge,
+		AutoSubject: input.AutoSubject,
+		Message:     input.Message,
+		StrategyId:  input.StrategyId,
+	}
+	
+	// Handle Version field separately since it's required in the original struct but optional in options
+	if input.Version != 0 {
+		options.Version = &input.Version
+	}
+	
 	jsonPayload, err := json.Marshal(options)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
@@ -147,7 +146,7 @@ func (c *BitbucketClient) MergePullRequest(projectKey, repoSlug string, pullRequ
 	var result map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodPost,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "pull-requests", strconv.Itoa(pullRequestID), "merge"},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "merge"},
 		nil,
 		jsonPayload,
 		&result,
@@ -161,7 +160,6 @@ func (c *BitbucketClient) MergePullRequest(projectKey, repoSlug string, pullRequ
 // DeclinePullRequestOptions represents the options for declining a pull request.
 type DeclinePullRequestOptions struct {
 	Comment *string `json:"comment,omitempty"`
-	Version *int    `json:"version,omitempty"`
 }
 
 // DeclinePullRequest declines a specific pull request.
@@ -170,19 +168,20 @@ type DeclinePullRequestOptions struct {
 // a specific pull request with optional decline options.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - pullRequestID: The ID of the pull request to decline
-//   - version: The version of the pull request
-//   - options: The decline options
+//   - input: DeclinePullRequestInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The decline result data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) DeclinePullRequest(projectKey, repoSlug, pullRequestID string, version string, options *DeclinePullRequestOptions) (map[string]interface{}, error) {
+func (c *BitbucketClient) DeclinePullRequest(input DeclinePullRequestInput) (map[string]interface{}, error) {
+	// Create options struct from input fields that are decline options
+	options := DeclinePullRequestOptions{
+		Comment: input.Comment,
+	}
+	
 	queryParams := make(url.Values)
-	if version != "" {
-		queryParams.Set("version", version)
+	if input.Version != 0 {
+		queryParams.Set("version", strconv.Itoa(input.Version))
 	}
 
 	jsonPayload, err := json.Marshal(options)
@@ -193,7 +192,7 @@ func (c *BitbucketClient) DeclinePullRequest(projectKey, repoSlug, pullRequestID
 	var result map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodPost,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "pull-requests", pullRequestID, "decline"},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "decline"},
 		queryParams,
 		jsonPayload,
 		&result,
@@ -204,46 +203,36 @@ func (c *BitbucketClient) DeclinePullRequest(projectKey, repoSlug, pullRequestID
 	return result, nil
 }
 
+
 // GetPullRequests retrieves pull requests for a specific repository.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch pull requests
 // for a specific repository with various filtering options.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - state: Filter pull requests by state
-//   - withAttributes: Include attributes in response
-//   - at: Filter pull requests by ref
-//   - withProperties: Include properties in response
-//   - draft: Filter by draft status
-//   - filterText: Filter by text
-//   - order: Sort order
-//   - direction: Sort direction
-//   - limit: Maximum number of results to return (default: 25)
-//   - start: Starting index for pagination (default: 0)
+//   - input: GetPullRequestsInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The pull requests data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequests(projectKey, repoSlug, state, withAttributes, at, withProperties, draft, filterText, order, direction string, start, limit int) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetPullRequests(input GetPullRequestsInput) (map[string]interface{}, error) {
 	queryParams := make(url.Values)
 
-	utils.SetQueryParam(queryParams, "state", state, "")
-	utils.SetQueryParam(queryParams, "withAttributes", withAttributes, "")
-	utils.SetQueryParam(queryParams, "at", at, "")
-	utils.SetQueryParam(queryParams, "withProperties", withProperties, "")
-	utils.SetQueryParam(queryParams, "draft", draft, "")
-	utils.SetQueryParam(queryParams, "filterText", filterText, "")
-	utils.SetQueryParam(queryParams, "order", order, "")
-	utils.SetQueryParam(queryParams, "direction", direction, "")
-	utils.SetQueryParam(queryParams, "limit", limit, 0)
-	utils.SetQueryParam(queryParams, "start", start, 0)
+	utils.SetQueryParam(queryParams, "state", input.State, "")
+	utils.SetQueryParam(queryParams, "withAttributes", strconv.FormatBool(input.WithAttributes), "")
+	utils.SetQueryParam(queryParams, "at", input.At, "")
+	utils.SetQueryParam(queryParams, "withProperties", strconv.FormatBool(input.WithProperties), "")
+	utils.SetQueryParam(queryParams, "draft", input.Draft, "")
+	utils.SetQueryParam(queryParams, "filterText", input.FilterText, "")
+	utils.SetQueryParam(queryParams, "order", input.Order, "")
+	utils.SetQueryParam(queryParams, "direction", input.Direction, "")
+	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
 	var prs map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "pull-requests"},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests"},
 		queryParams,
 		nil,
 		&prs,
@@ -254,22 +243,22 @@ func (c *BitbucketClient) GetPullRequests(projectKey, repoSlug, state, withAttri
 	return prs, nil
 }
 
+
 // GetPullRequestSuggestions retrieves pull request suggestions.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch pull request
 // suggestions based on changes since a specific commit.
 //
 // Parameters:
-//   - changesSince: The commit ID or ref to compare since
-//   - limit: Maximum number of results to return (default: 25)
+//   - input: GetPullRequestSuggestionsInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The suggestions data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestSuggestions(changesSince string, limit int) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetPullRequestSuggestions(input GetPullRequestSuggestionsInput) (map[string]interface{}, error) {
 	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "changesSince", changesSince, "")
-	utils.SetQueryParam(queryParams, "limit", limit, 0)
+	utils.SetQueryParam(queryParams, "changesSince", input.ChangesSince, "")
+	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
 	var suggestions map[string]interface{}
 	if err := c.executeRequest(
@@ -285,24 +274,23 @@ func (c *BitbucketClient) GetPullRequestSuggestions(changesSince string, limit i
 	return suggestions, nil
 }
 
+
 // GetPullRequestJiraIssues retrieves Jira issues linked to a pull request.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch Jira issues
 // linked to a specific pull request.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - pullRequestID: The ID of the pull request
+//   - input: GetPullRequestJiraIssuesInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The Jira issues data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestJiraIssues(projectKey, repoSlug string, pullRequestID int) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetPullRequestJiraIssues(input GetPullRequestJiraIssuesInput) (map[string]interface{}, error) {
 	var issues map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "jira", "latest", "projects", projectKey, "repos", repoSlug, "pull-requests", strconv.Itoa(pullRequestID), "issues"},
+		[]string{"rest", "jira", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "issues"},
 		nil,
 		nil,
 		&issues,
@@ -313,34 +301,28 @@ func (c *BitbucketClient) GetPullRequestJiraIssues(projectKey, repoSlug string, 
 	return issues, nil
 }
 
+
 // GetPullRequestsForUser retrieves pull requests for a specific user.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch pull requests
 // for a specific user with various filtering options.
 //
 // Parameters:
-//   - closedSince: Filter pull requests closed since a specific time
-//   - role: Filter by user role
-//   - participantStatus: Filter by participant status
-//   - state: Filter pull requests by state
-//   - user: Filter by user
-//   - order: Sort order
-//   - start: Starting index for pagination (default: 0)
-//   - limit: Maximum number of results to return (default: 25)
+//   - input: GetPullRequestsForUserInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The pull requests data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestsForUser(closedSince string, role string, participantStatus string, state string, user string, order string, start int, limit int) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetPullRequestsForUser(input GetPullRequestsForUserInput) (map[string]interface{}, error) {
 	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "closedSince", closedSince, "")
-	utils.SetQueryParam(queryParams, "role", role, "")
-	utils.SetQueryParam(queryParams, "participantStatus", participantStatus, "")
-	utils.SetQueryParam(queryParams, "state", state, "")
-	utils.SetQueryParam(queryParams, "user", user, "")
-	utils.SetQueryParam(queryParams, "order", order, "")
-	utils.SetQueryParam(queryParams, "start", start, 0)
-	utils.SetQueryParam(queryParams, "limit", limit, 0)
+	utils.SetQueryParam(queryParams, "closedSince", input.ClosedSince, "")
+	utils.SetQueryParam(queryParams, "role", input.Role, "")
+	utils.SetQueryParam(queryParams, "participantStatus", input.ParticipantStatus, "")
+	utils.SetQueryParam(queryParams, "state", input.State, "")
+	utils.SetQueryParam(queryParams, "user", input.User, "")
+	utils.SetQueryParam(queryParams, "order", input.Order, "")
+	utils.SetQueryParam(queryParams, "start", input.Start, 0)
+	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
 	var pullRequests map[string]interface{}
 	if err := c.executeRequest(
@@ -356,25 +338,23 @@ func (c *BitbucketClient) GetPullRequestsForUser(closedSince string, role string
 	return pullRequests, nil
 }
 
+
 // GetPullRequestComment retrieves a specific comment on a pull request.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch a specific
 // comment on a pull request.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - pullRequestID: The ID of the pull request
-//   - commentID: The ID of the comment to retrieve
+//   - input: GetPullRequestCommentInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The comment data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestComment(projectKey, repoSlug string, pullRequestID int, commentID string) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetPullRequestComment(input GetPullRequestCommentInput) (map[string]interface{}, error) {
 	var comment map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "pull-requests", strconv.Itoa(pullRequestID), "comments", commentID},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "comments", input.CommentID},
 		nil,
 		nil,
 		&comment,
@@ -385,47 +365,36 @@ func (c *BitbucketClient) GetPullRequestComment(projectKey, repoSlug string, pul
 	return comment, nil
 }
 
+
 // GetPullRequestComments retrieves comments on a pull request.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch comments
 // on a pull request with various filtering options.
 //
 // Parameters:
-//   - projectKey: The unique key of the project
-//   - repoSlug: The repository slug
-//   - pullRequestID: The ID of the pull request
-//   - path: Filter comments by file path
-//   - fromHash: Filter comments by from hash
-//   - anchorState: Filter comments by anchor state
-//   - toHash: Filter comments by to hash
-//   - state: Filter comments by state
-//   - diffType: Filter comments by diff type
-//   - diffTypes: Filter comments by diff types
-//   - states: Filter comments by states
-//   - limit: Maximum number of results to return (default: 25)
-//   - start: Starting index for pagination (default: 0)
+//   - input: GetPullRequestCommentsInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The comments data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestComments(projectKey, repoSlug string, pullRequestID int, path, fromHash, anchorState, toHash, state, diffType, diffTypes, states string, start, limit int) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetPullRequestComments(input GetPullRequestCommentsInput) (map[string]interface{}, error) {
 	queryParams := make(url.Values)
 
-	utils.SetRequiredPathQueryParam(queryParams, path)
-	utils.SetQueryParam(queryParams, "fromHash", fromHash, "")
-	utils.SetQueryParam(queryParams, "anchorState", anchorState, "")
-	utils.SetQueryParam(queryParams, "toHash", toHash, "")
-	utils.SetQueryParam(queryParams, "state", state, "")
-	utils.SetQueryParam(queryParams, "diffType", diffType, "")
-	utils.SetQueryParam(queryParams, "diffTypes", diffTypes, "")
-	utils.SetQueryParam(queryParams, "states", states, "")
-	utils.SetQueryParam(queryParams, "limit", limit, 0)
-	utils.SetQueryParam(queryParams, "start", start, 0)
+	utils.SetRequiredPathQueryParam(queryParams, input.Path)
+	utils.SetQueryParam(queryParams, "fromHash", input.FromHash, "")
+	utils.SetQueryParam(queryParams, "anchorState", input.AnchorState, "")
+	utils.SetQueryParam(queryParams, "toHash", input.ToHash, "")
+	utils.SetQueryParam(queryParams, "state", input.State, "")
+	utils.SetQueryParam(queryParams, "diffType", input.DiffType, "")
+	utils.SetQueryParam(queryParams, "diffTypes", input.DiffTypes, "")
+	utils.SetQueryParam(queryParams, "states", input.States, "")
+	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
 	var comments map[string]interface{}
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", projectKey, "repos", repoSlug, "pull-requests", strconv.Itoa(pullRequestID), "comments"},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "comments"},
 		queryParams,
 		nil,
 		&comments,
