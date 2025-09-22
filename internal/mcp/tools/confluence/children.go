@@ -2,166 +2,80 @@ package confluence
 
 import (
 	"context"
-	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/confluence"
 	"atlassian-dc-mcp-go/internal/mcp/tools"
-	"github.com/google/jsonschema-go/jsonschema"
+
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // getContentChildrenHandler handles getting content children
-func (h *Handler) getContentChildrenHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get content children", func() (interface{}, error) {
-		contentID, ok := tools.GetStringArg(args, "contentID")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid contentID parameter")
-		}
+func (h *Handler) getContentChildrenHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentChildrenInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+	children, err := h.client.GetContentChildren(input)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get content children")
+		return result, nil, err
+	}
 
-		expand := tools.GetStringSliceArg(args, "expand")
+	result, err := tools.CreateToolResult(children)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create content children result")
+		return result, nil, err
+	}
 
-		parentVersion, _ := tools.GetStringArg(args, "parentVersion")
-
-		return h.client.GetContentChildren(contentID, expand, parentVersion)
-	})
+	return result, children, nil
 }
 
 // getContentChildrenByTypeHandler handles getting content children by type
-func (h *Handler) getContentChildrenByTypeHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get content children by type", func() (interface{}, error) {
-		contentID, ok := tools.GetStringArg(args, "contentID")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid contentID parameter")
-		}
+func (h *Handler) getContentChildrenByTypeHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentChildrenByTypeInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+	children, err := h.client.GetContentChildrenByType(input)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get content children by type")
+		return result, nil, err
+	}
 
-		childType, ok := tools.GetStringArg(args, "childType")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid childType parameter")
-		}
+	result, err := tools.CreateToolResult(children)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create content children by type result")
+		return result, nil, err
+	}
 
-		expand := tools.GetStringSliceArg(args, "expand")
-
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
-
-		orderBy, _ := tools.GetStringArg(args, "orderBy")
-
-		return h.client.GetContentChildrenByType(contentID, childType, expand, start, limit, orderBy)
-	})
+	return result, children, nil
 }
 
 // getContentCommentsHandler handles getting content comments
-func (h *Handler) getContentCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get content comments", func() (interface{}, error) {
-		contentID, ok := tools.GetStringArg(args, "contentID")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid contentID parameter")
-		}
+func (h *Handler) getContentCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentCommentsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+	comments, err := h.client.GetContentComments(input)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get content comments")
+		return result, nil, err
+	}
 
-		expand := tools.GetStringSliceArg(args, "expand")
+	result, err := tools.CreateToolResult(comments)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create content comments result")
+		return result, nil, err
+	}
 
-		parentVersion, _ := tools.GetStringArg(args, "parentVersion")
-
-		start := tools.GetIntArg(args, "start", 0)
-		limit := tools.GetIntArg(args, "limit", 10)
-
-		return h.client.GetContentComments(contentID, expand, parentVersion, start, limit)
-	})
+	return result, comments, nil
 }
 
 // AddChildrenTools registers the children-related tools with the MCP server
 func AddChildrenTools(server *mcp.Server, client *confluence.ConfluenceClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[confluence.GetContentChildrenInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "confluence_get_content_children",
 		Description: "Get content children",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"contentID": {
-					Type:        "string",
-					Description: "The content ID",
-				},
-				"expand": {
-					Type:        "array",
-					Items:       &jsonschema.Schema{Type: "string"},
-					Description: "Fields to expand in the results",
-				},
-				"parentVersion": {
-					Type:        "string",
-					Description: "The parent version",
-				},
-			},
-			Required: []string{"contentID"},
-		},
 	}, handler.getContentChildrenHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[confluence.GetContentChildrenByTypeInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "confluence_get_content_children_by_type",
 		Description: "Get content children by type",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"contentID": {
-					Type:        "string",
-					Description: "The content ID",
-				},
-				"childType": {
-					Type:        "string",
-					Description: "The child type",
-				},
-				"expand": {
-					Type:        "array",
-					Items:       &jsonschema.Schema{Type: "string"},
-					Description: "Fields to expand in the results",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The start index for pagination",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The maximum number of results to return",
-				},
-				"orderBy": {
-					Type:        "string",
-					Description: "The order by field",
-				},
-			},
-			Required: []string{"contentID", "childType"},
-		},
 	}, handler.getContentChildrenByTypeHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[confluence.GetContentCommentsInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "confluence_get_content_comments",
 		Description: "Get content comments",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"contentID": {
-					Type:        "string",
-					Description: "The content ID",
-				},
-				"expand": {
-					Type:        "array",
-					Items:       &jsonschema.Schema{Type: "string"},
-					Description: "Fields to expand in the results",
-				},
-				"parentVersion": {
-					Type:        "string",
-					Description: "The parent version",
-				},
-				"start": {
-					Type:        "integer",
-					Description: "The start index for pagination",
-				},
-				"limit": {
-					Type:        "integer",
-					Description: "The maximum number of results to return",
-				},
-			},
-			Required: []string{"contentID"},
-		},
 	}, handler.getContentCommentsHandler)
 }

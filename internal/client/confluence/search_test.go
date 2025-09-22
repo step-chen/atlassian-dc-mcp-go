@@ -51,7 +51,17 @@ func TestSearch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.Search(tt.cqlQuery, "", "", tt.expand, tt.start, tt.limit, false)
+			// 使用新的结构体参数方式
+			input := SearchInput{
+				CQL:    tt.cqlQuery,
+				Expand: tt.expand,
+				PaginationInput: PaginationInput{
+					Start: tt.start,
+					Limit: tt.limit,
+				},
+				IncludeArchivedSpaces: false,
+			}
+			result, err := client.Search(input)
 
 			if tt.expectError {
 				assert.Error(t, err)

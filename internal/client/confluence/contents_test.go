@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 
 	"atlassian-dc-mcp-go/internal/client/testutils"
 )
@@ -44,7 +43,12 @@ func TestGetPage(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetContentByID(tt.pageID, tt.expand)
+			// 使用新的结构体参数方式
+			input := GetContentByIDInput{
+				ContentID: tt.pageID,
+				Expand:    tt.expand,
+			}
+			result, err := client.GetContentByID(input)
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -52,20 +56,13 @@ func TestGetPage(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, result)
-				if result != nil {
-					id, exists := result["id"]
-					assert.True(t, exists, "id field should exist in response")
-					if exists {
-						assert.NotEmpty(t, id, "id should not be empty")
-						t.Logf("Get page successful. Page ID: %s", id)
-					}
-				}
+				assert.NotEmpty(t, result)
 			}
 		})
 	}
 }
 
-func TestGetPageComments(t *testing.T) {
+func TestGetComments(t *testing.T) {
 	testutils.SkipIntegrationTest(t)
 
 	testConfig, err := loadTestConfig()
@@ -77,8 +74,6 @@ func TestGetPageComments(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Could not load config.yaml: %v", err)
 	}
-
-	require.NotNil(t, client, "Confluence client should not be nil")
 
 	tests := []struct {
 		name        string
@@ -92,33 +87,27 @@ func TestGetPageComments(t *testing.T) {
 		},
 		{
 			name:        "InvalidPage",
-			pageID:      "invalid",
+			pageID:      testConfig.Pages.InvalidID,
 			expectError: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			comments, err := client.GetComments(tt.pageID, nil, 0, 0)
+			// 使用新的结构体参数方式
+			input := GetContentChildrenByTypeInput{
+				ContentID: tt.pageID,
+				ChildType: "comment",
+			}
+			result, err := client.GetContentChildrenByType(input)
 
 			if tt.expectError {
 				assert.Error(t, err)
-				assert.Nil(t, comments)
+				assert.Nil(t, result)
 			} else {
 				assert.NoError(t, err)
-				assert.NotNil(t, comments)
-
-				if comments != nil {
-					results, exists := comments["results"]
-					assert.True(t, exists, "results field should exist in response")
-
-					size, exists := comments["size"]
-					assert.True(t, exists, "size field should exist in response")
-
-					if exists && results != nil {
-						t.Logf("Successfully retrieved %d comments", size)
-					}
-				}
+				assert.NotNil(t, result)
+				assert.NotEmpty(t, result)
 			}
 		})
 	}

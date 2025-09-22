@@ -10,26 +10,20 @@ import (
 // Search searches for content based on CQL.
 //
 // Parameters:
-//   - cql: The CQL query string
-//   - cqlcontext: The context for the CQL query
-//   - excerpt: The excerpt format
-//   - expand: Fields to expand in the response
-//   - start: Starting index for pagination
-//   - limit: Maximum number of results to return
-//   - includeArchivedSpaces: Whether to include archived spaces in the search
+//   - input: SearchInput containing the parameters for the request
 //
 // Returns:
 //   - map[string]interface{}: The search results
 //   - error: An error if the request fails
-func (c *ConfluenceClient) Search(cql, cqlcontext, excerpt string, expand []string, start, limit int, includeArchivedSpaces bool) (map[string]interface{}, error) {
+func (c *ConfluenceClient) Search(input SearchInput) (map[string]interface{}, error) {
 	params := url.Values{}
-	utils.SetQueryParam(params, "cql", cql, "")
-	utils.SetQueryParam(params, "cqlcontext", cqlcontext, "")
-	utils.SetQueryParam(params, "excerpt", excerpt, "")
-	utils.SetQueryParam(params, "start", start, 0)
-	utils.SetQueryParam(params, "limit", limit, 0)
-	utils.SetQueryParam(params, "includeArchivedSpaces", strconv.FormatBool(includeArchivedSpaces), "")
-	utils.SetQueryParam(params, "expand", expand, []string{})
+	utils.SetQueryParam(params, "cql", input.CQL, "")
+	utils.SetQueryParam(params, "cqlcontext", input.CQLContext, "")
+	utils.SetQueryParam(params, "excerpt", input.Excerpt, "")
+	utils.SetQueryParam(params, "start", input.Start, 0)
+	utils.SetQueryParam(params, "limit", input.Limit, 0)
+	utils.SetQueryParam(params, "includeArchivedSpaces", strconv.FormatBool(input.IncludeArchivedSpaces), "")
+	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 
 	var result map[string]interface{}
 	if err := c.executeRequest("GET", []string{"rest", "api", "search"}, params, nil, &result); err != nil {

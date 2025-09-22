@@ -2,6 +2,9 @@ package confluence
 
 // GetCurrentUser retrieves details of the current user.
 //
+// Parameters:
+//   - input: Empty input struct (no parameters required)
+//
 // Returns:
 //   - map[string]interface{}: The current user data
 //   - error: An error if the request fails
