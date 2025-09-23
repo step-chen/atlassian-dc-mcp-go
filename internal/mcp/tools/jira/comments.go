@@ -2,9 +2,9 @@ package jira
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -13,34 +13,20 @@ import (
 func (h *Handler) getCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetCommentsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	comments, err := h.client.GetComments(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get comments")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get comments failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(comments)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create comments result")
-		return result, nil, err
-	}
-
-	return result, comments, nil
+	return nil, comments, nil
 }
 
 // addCommentHandler handles adding a comment to a Jira issue
 func (h *Handler) addCommentHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.AddCommentInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	comment, err := h.client.AddComment(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "add comment")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("add comment failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(comment)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create comment result")
-		return result, nil, err
-	}
-
-	return result, comment, nil
+	return nil, comment, nil
 }
 
 // AddCommentTools registers the comment-related tools with the MCP server

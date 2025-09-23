@@ -2,9 +2,9 @@ package bitbucket
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -19,34 +19,20 @@ type GetAttachmentOutput struct {
 func (h *Handler) getAttachmentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetAttachmentInput) (*mcp.CallToolResult, GetAttachmentOutput, error) {
 	attachment, err := h.client.GetAttachment(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get attachment")
-		return result, GetAttachmentOutput{}, err
+		return nil, GetAttachmentOutput{}, fmt.Errorf("get attachment failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(attachment)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create attachment result")
-		return result, GetAttachmentOutput{}, err
-	}
-
-	return result, GetAttachmentOutput{Content: attachment}, nil
+	return nil, GetAttachmentOutput{Content: attachment}, nil
 }
 
 // getAttachmentMetadataHandler handles getting attachment metadata
 func (h *Handler) getAttachmentMetadataHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetAttachmentMetadataInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	metadata, err := h.client.GetAttachmentMetadata(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get attachment metadata")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get attachment metadata failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(metadata)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create attachment metadata result")
-		return result, nil, err
-	}
-
-	return result, metadata, nil
+	return nil, metadata, nil
 }
 
 // AddAttachmentTools registers the attachment-related tools with the MCP server

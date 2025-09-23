@@ -2,9 +2,9 @@ package jira
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -13,17 +13,10 @@ import (
 func (h *Handler) getWorklogsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetWorklogsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	worklogs, err := h.client.GetWorklogs(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get worklogs")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get worklogs failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(worklogs)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create worklogs result")
-		return result, nil, err
-	}
-
-	return result, worklogs, nil
+	return nil, worklogs, nil
 }
 
 // AddWorklogTools registers the worklog-related tools with the MCP server

@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/confluence"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -15,225 +14,134 @@ import (
 func (h *Handler) getContentHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	content, err := h.client.GetContent(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get content")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get content failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(content)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create content result")
-		return result, nil, err
-	}
-
-	return result, content, nil
+	return nil, content, nil
 }
 
 // searchContentHandler handles searching Confluence content
 func (h *Handler) searchContentHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.SearchContentInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	content, err := h.client.SearchContent(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "search content")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("search content failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(content)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create search result")
-		return result, nil, err
-	}
-
-	return result, content, nil
+	return nil, content, nil
 }
 
 // getContentByIDHandler handles getting Confluence content by ID
 func (h *Handler) getContentByIDHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentByIDInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	content, err := h.client.GetContentByID(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get content by ID")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get content by ID failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(content)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create content by ID result")
-		return result, nil, err
-	}
-
-	return result, content, nil
+	return nil, content, nil
 }
 
 // createContentHandler handles creating Confluence content
 func (h *Handler) createContentHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.CreateContentInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	content, err := h.client.CreateContent(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create content")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("create content failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(content)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create content result")
-		return result, nil, err
-	}
-
-	return result, content, nil
+	return nil, content, nil
 }
 
 // updateContentHandler handles updating Confluence content
 func (h *Handler) updateContentHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.UpdateContentInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	content, err := h.client.UpdateContent(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "update content")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("update content failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(content)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create update result")
-		return result, nil, err
-	}
-
-	return result, content, nil
+	return nil, content, nil
 }
 
 // deleteContentHandler handles deleting Confluence content
 func (h *Handler) deleteContentHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.DeleteContentInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	err := h.client.DeleteContent(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "delete content")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("delete content failed: %w", err)
 	}
 
 	response := map[string]interface{}{
 		"message": fmt.Sprintf("Successfully deleted content with ID: %s", input.ContentID),
 	}
 
-	result, err := tools.CreateToolResult(response)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create delete result")
-		return result, nil, err
-	}
-
-	return result, response, nil
+	return nil, response, nil
 }
 
 // getContentHistoryHandler handles getting Confluence content history
 func (h *Handler) getContentHistoryHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentHistoryInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	history, err := h.client.GetContentHistory(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get content history")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get content history failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(history)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create history result")
-		return result, nil, err
-	}
-
-	return result, history, nil
+	return nil, history, nil
 }
 
 // getAttachmentsHandler handles getting attachments for Confluence content
 func (h *Handler) getAttachmentsHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetAttachmentsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	attachments, err := h.client.GetAttachments(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get attachments")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get attachments failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(attachments)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create attachments result")
-		return result, nil, err
-	}
-
-	return result, attachments, nil
+	return nil, attachments, nil
 }
 
 // getExtractedTextHandler handles getting extracted text from Confluence attachment
 func (h *Handler) getExtractedTextHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetExtractedTextInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	extractedText, err := h.client.GetExtractedText(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get extracted text")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get extracted text failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(extractedText)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create extracted text result")
-		return result, nil, err
-	}
-
-	return result, extractedText, nil
+	return nil, extractedText, nil
 }
 
 // getContentLabelsHandler handles getting labels for Confluence content
 func (h *Handler) getContentLabelsHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentLabelsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	labels, err := h.client.GetContentLabels(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get content labels")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get content labels failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(labels)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create labels result")
-		return result, nil, err
-	}
-
-	return result, labels, nil
+	return nil, labels, nil
 }
 
 // scanContentBySpaceKeyHandler handles scanning Confluence content by space key
 func (h *Handler) scanContentBySpaceKeyHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.ScanContentBySpaceKeyInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	content, err := h.client.ScanContentBySpaceKey(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "scan content by space key")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("scan content by space key failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(content)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create scan content result")
-		return result, nil, err
-	}
-
-	return result, content, nil
+	return nil, content, nil
 }
 
 // searchHandler handles searching Confluence content using the Search API
 func (h *Handler) searchHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.SearchInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	content, err := h.client.Search(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "search")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("search failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(content)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create search result")
-		return result, nil, err
-	}
-
-	return result, content, nil
+	return nil, content, nil
 }
 
 // addCommentHandler handles adding a comment to Confluence content
 func (h *Handler) addCommentHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.AddCommentInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	comment, err := h.client.AddComment(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "add comment")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("add comment failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(comment)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create comment result")
-		return result, nil, err
-	}
-
-	return result, comment, nil
+	return nil, comment, nil
 }
 
 // AddContentTools registers the content-related tools with the MCP server

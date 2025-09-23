@@ -2,9 +2,9 @@ package confluence
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/confluence"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	"github.com/google/jsonschema-go/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
@@ -14,17 +14,10 @@ import (
 func (h *Handler) getCurrentUserHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.EmptyInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	user, err := h.client.GetCurrentUser()
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get current user")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get current user failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(user)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create current user result")
-		return result, nil, err
-	}
-
-	return result, user, nil
+	return nil, user, nil
 }
 
 // AddUserTools registers the user-related tools with the MCP server

@@ -2,97 +2,61 @@ package bitbucket
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
-
 
 // getProjectsHandler handles getting projects
 func (h *Handler) getProjectsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetProjectsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	projects, err := h.client.GetProjects(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get projects")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get projects failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(projects)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create projects result")
-		return result, nil, err
-	}
-
-	return result, projects, nil
+	return nil, projects, nil
 }
 
 // getProjectHandler handles getting a specific project
 func (h *Handler) getProjectHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetProjectInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	project, err := h.client.GetProject(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get project")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get project failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(project)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create project result")
-		return result, nil, err
-	}
-
-	return result, project, nil
+	return nil, project, nil
 }
 
 // getProjectPrimaryEnhancedEntityLinkHandler handles getting the primary enhanced entity link for a project
 func (h *Handler) getProjectPrimaryEnhancedEntityLinkHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetProjectPrimaryEnhancedEntityLinkInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	link, err := h.client.GetProjectPrimaryEnhancedEntityLink(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get project primary enhanced entity link")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get project primary enhanced entity link failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(link)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create project primary enhanced entity link result")
-		return result, nil, err
-	}
-
-	return result, link, nil
+	return nil, link, nil
 }
 
 // getProjectTasksHandler handles getting tasks for a specific project
 func (h *Handler) getProjectTasksHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetProjectTasksInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	tasks, err := h.client.GetProjectTasks(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get project tasks")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get project tasks failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(tasks)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create project tasks result")
-		return result, nil, err
-	}
-
-	return result, tasks, nil
+	return nil, tasks, nil
 }
 
 // getRepositoryTasksHandler handles getting tasks for a specific repository
 func (h *Handler) getRepositoryTasksHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetRepositoryTasksInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	tasks, err := h.client.GetRepositoryTasks(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get repository tasks")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get repository tasks failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(tasks)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create repository tasks result")
-		return result, nil, err
-	}
-
-	return result, tasks, nil
+	return nil, tasks, nil
 }
 
 // AddProjectTools registers the project-related tools with the MCP server

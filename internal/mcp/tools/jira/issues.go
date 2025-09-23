@@ -3,9 +3,9 @@ package jira
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -14,51 +14,30 @@ import (
 func (h *Handler) getIssueHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetIssueInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	issue, err := h.client.GetIssue(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get issue")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get issue failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(issue)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create issue result")
-		return result, nil, err
-	}
-
-	return result, issue, nil
+	return nil, issue, nil
 }
 
 // createIssueHandler creates a new Jira issue.
 func (h *Handler) createIssueHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.CreateIssueInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	issue, err := h.client.CreateIssue(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create issue")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("create issue failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(issue)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create issue result")
-		return result, nil, err
-	}
-
-	return result, issue, nil
+	return nil, issue, nil
 }
 
 // searchIssuesHandler searches for Jira issues using a JQL query.
 func (h *Handler) searchIssuesHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.SearchIssuesInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	issues, err := h.client.SearchIssues(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "search issues")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("search issues failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(issues)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create search issues result")
-		return result, nil, err
-	}
-
-	return result, issues, nil
+	return nil, issues, nil
 }
 
 // AddIssueTools registers the issue-related tools with the MCP server

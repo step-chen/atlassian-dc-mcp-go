@@ -2,52 +2,47 @@ package jira
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
+// GetSubtasksResult represents the result structure for getSubtasksHandler
+type GetSubtasksResult struct {
+	Subtasks []map[string]interface{} `json:"subtasks"`
+}
+
 // getSubtasksHandler handles getting subtasks for a Jira issue
-func (h *Handler) getSubtasksHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetSubtasksInput) (*mcp.CallToolResult, []map[string]interface{}, error) {
+func (h *Handler) getSubtasksHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetSubtasksInput) (*mcp.CallToolResult, GetSubtasksResult, error) {
 	subtasks, err := h.client.GetSubtasks(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get subtasks")
-		return result, nil, err
+		return nil, GetSubtasksResult{}, fmt.Errorf("get subtasks failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(subtasks)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create subtasks result")
-		return result, nil, err
+	result := GetSubtasksResult{
+		Subtasks: subtasks,
 	}
 
-	return result, subtasks, nil
+	return nil, result, nil
 }
 
 // createSubTaskHandler handles creating a subtask for a Jira issue
 func (h *Handler) createSubTaskHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.CreateSubTaskInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	subtask, err := h.client.CreateSubTask(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create subtask")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("create subtask failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(subtask)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create subtask result")
-		return result, nil, err
-	}
-
-	return result, subtask, nil
+	return nil, subtask, nil
 }
 
 // AddSubtaskTools registers the subtask-related tools with the MCP server
 func AddSubtaskTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[jira.GetSubtasksInput, []map[string]interface{}](server, &mcp.Tool{
+	mcp.AddTool[jira.GetSubtasksInput, GetSubtasksResult](server, &mcp.Tool{
 		Name:        "jira_get_subtasks",
 		Description: "Get subtasks for a Jira issue",
 	}, handler.getSubtasksHandler)

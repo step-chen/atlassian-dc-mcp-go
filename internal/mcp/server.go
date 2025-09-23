@@ -147,6 +147,7 @@ func (s *Server) addJiraTools() {
 	jiraTools.AddTransitionTools(s.mcpServer, s.jiraClient, permissions)
 	jiraTools.AddUserTools(s.mcpServer, s.jiraClient, permissions)
 	jiraTools.AddWorklogTools(s.mcpServer, s.jiraClient, permissions)
+	jiraTools.AddSubtaskTools(s.mcpServer, s.jiraClient, permissions)
 }
 
 // addConfluenceTools registers all Confluence-related tools with the MCP server

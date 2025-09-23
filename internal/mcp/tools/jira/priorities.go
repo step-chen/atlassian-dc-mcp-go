@@ -2,9 +2,9 @@ package jira
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -13,21 +13,14 @@ import (
 func (h *Handler) getPrioritiesHandler(ctx context.Context, req *mcp.CallToolRequest, input struct{}) (*mcp.CallToolResult, map[string]interface{}, error) {
 	priorities, err := h.client.GetPriorities()
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get priorities")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get priorities failed: %w", err)
 	}
 
 	resultMap := map[string]interface{}{
 		"priorities": priorities,
 	}
 
-	result, err := tools.CreateToolResult(resultMap)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create priorities result")
-		return result, nil, err
-	}
-
-	return result, resultMap, nil
+	return nil, resultMap, nil
 }
 
 // AddPriorityTools registers the priority-related tools with the MCP server

@@ -2,9 +2,9 @@ package bitbucket
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -13,170 +13,100 @@ import (
 func (h *Handler) getCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitsInput) (*mcp.CallToolResult, MapOutput, error) {
 	commits, err := h.client.GetCommits(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get commits")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get commits failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(commits)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create commits result")
-		return result, nil, err
-	}
-
-	return result, commits, nil
+	return nil, commits, nil
 }
 
 // getCommitHandler handles getting a specific commit
 func (h *Handler) getCommitHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitInput) (*mcp.CallToolResult, MapOutput, error) {
 	commit, err := h.client.GetCommit(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get commit")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get commit failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(commit)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create commit result")
-		return result, nil, err
-	}
-
-	return result, commit, nil
+	return nil, commit, nil
 }
 
 // getCommitChangesHandler handles getting changes for a specific commit
 func (h *Handler) getCommitChangesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitChangesInput) (*mcp.CallToolResult, MapOutput, error) {
 	changes, err := h.client.GetCommitChanges(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get commit changes")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get commit changes failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(changes)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create commit changes result")
-		return result, nil, err
-	}
-
-	return result, changes, nil
+	return nil, changes, nil
 }
 
 // getCommitCommentHandler handles getting a specific comment on a commit
 func (h *Handler) getCommitCommentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitCommentInput) (*mcp.CallToolResult, MapOutput, error) {
 	comment, err := h.client.GetCommitComment(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get commit comment")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get commit comment failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(comment)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create commit comment result")
-		return result, nil, err
-	}
-
-	return result, comment, nil
+	return nil, comment, nil
 }
 
 // getCommitCommentsHandler handles getting comments on a commit
 func (h *Handler) getCommitCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitCommentsInput) (*mcp.CallToolResult, MapOutput, error) {
 	comments, err := h.client.GetCommitComments(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get commit comments")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get commit comments failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(comments)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create commit comments result")
-		return result, nil, err
-	}
-
-	return result, comments, nil
+	return nil, comments, nil
 }
 
 // getCommitDiffStatsSummaryHandler handles getting diff statistics summary for a commit
 func (h *Handler) getCommitDiffStatsSummaryHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitDiffStatsSummaryInput) (*mcp.CallToolResult, MapOutput, error) {
 	stats, err := h.client.GetCommitDiffStatsSummary(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get commit diff stats summary")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get commit diff stats summary failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(stats)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create commit diff stats summary result")
-		return result, nil, err
-	}
-
-	return result, stats, nil
+	return nil, stats, nil
 }
 
 // getDiffBetweenCommitsHandler handles getting diff between commits
 func (h *Handler) getDiffBetweenCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetDiffBetweenCommitsInput) (*mcp.CallToolResult, DiffOutput, error) {
 	diff, err := h.client.GetDiffBetweenCommits(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get diff between commits")
-		return result, DiffOutput{}, err
+		return nil, DiffOutput{}, fmt.Errorf("get diff between commits failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(diff)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create diff between commits result")
-		return result, DiffOutput{}, err
-	}
-
-	return result, DiffOutput{Diff: diff}, nil
+	return nil, DiffOutput{Diff: diff}, nil
 }
 
 // getDiffBetweenRevisionsHandler handles getting the diff between revisions
 func (h *Handler) getDiffBetweenRevisionsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetDiffBetweenRevisionsInput) (*mcp.CallToolResult, DiffOutput, error) {
 	diff, err := h.client.GetDiffBetweenRevisions(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get diff between revisions")
-		return result, DiffOutput{}, err
+		return nil, DiffOutput{}, fmt.Errorf("get diff between revisions failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(diff)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create diff between revisions result")
-		return result, DiffOutput{}, err
-	}
-
-	return result, DiffOutput{Diff: diff}, nil
+	return nil, DiffOutput{Diff: diff}, nil
 }
 
 // getJiraIssueCommitsHandler handles getting commits related to a Jira issue
 func (h *Handler) getJiraIssueCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetJiraIssueCommitsInput) (*mcp.CallToolResult, MapOutput, error) {
 	commits, err := h.client.GetJiraIssueCommits(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get Jira issue commits")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get Jira issue commits failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(commits)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create Jira issue commits result")
-		return result, nil, err
-	}
-
-	return result, commits, nil
+	return nil, commits, nil
 }
 
 // getDiffBetweenRevisionsForPathHandler handles getting the diff between revisions for a specific path
 func (h *Handler) getDiffBetweenRevisionsForPathHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetDiffBetweenRevisionsForPathInput) (*mcp.CallToolResult, DiffOutput, error) {
 	diff, err := h.client.GetDiffBetweenRevisionsForPath(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get diff between revisions for path")
-		return result, DiffOutput{}, err
+		return nil, DiffOutput{}, fmt.Errorf("get diff between revisions for path failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(diff)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create diff between revisions for path result")
-		return result, DiffOutput{}, err
-	}
-
-	return result, DiffOutput{Diff: diff}, nil
+	return nil, DiffOutput{Diff: diff}, nil
 }
 
 // AddCommitTools registers the commit-related tools with the MCP server

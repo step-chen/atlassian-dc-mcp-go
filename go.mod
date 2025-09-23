@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/fsnotify/fsnotify v1.9.0
-	github.com/google/jsonschema-go v0.2.3
+	github.com/google/jsonschema-go v0.3.0
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.0

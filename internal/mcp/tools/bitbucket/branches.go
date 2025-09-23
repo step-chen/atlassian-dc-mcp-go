@@ -3,9 +3,9 @@ package bitbucket
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -14,51 +14,30 @@ import (
 func (h *Handler) getBranchesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetBranchesInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	branches, err := h.client.GetBranches(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get branches")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get branches failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(branches)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create branches result")
-		return result, nil, err
-	}
-
-	return result, branches, nil
+	return nil, branches, nil
 }
 
 // getDefaultBranchHandler handles getting the default branch
 func (h *Handler) getDefaultBranchHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetDefaultBranchInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	branch, err := h.client.GetDefaultBranch(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get default branch")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get default branch failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(branch)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create default branch result")
-		return result, nil, err
-	}
-
-	return result, branch, nil
+	return nil, branch, nil
 }
 
 // getBranchInfoByCommitIdHandler handles getting branch information by commit ID
 func (h *Handler) getBranchHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetBranchInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	branchInfo, err := h.client.GetBranch(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get branch info by commit id")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get branch info by commit id failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(branchInfo)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create branch info result")
-		return result, nil, err
-	}
-
-	return result, branchInfo, nil
+	return nil, branchInfo, nil
 }
 
 // AddBranchTools registers the branch-related tools with the MCP server

@@ -2,9 +2,9 @@ package jira
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -13,119 +13,70 @@ import (
 func (h *Handler) getBoardsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetBoardsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	boards, err := h.client.GetBoards(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get boards")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get boards failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(boards)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create boards result")
-		return result, nil, err
-	}
-
-	return result, boards, nil
+	return nil, boards, nil
 }
 
 // getBoardHandler handles getting a Jira board
 func (h *Handler) getBoardHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetBoardInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	board, err := h.client.GetBoard(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get board")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get board failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(board)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create board result")
-		return result, nil, err
-	}
-
-	return result, board, nil
+	return nil, board, nil
 }
 
 // getBoardBacklogHandler handles getting backlog for a Jira board
 func (h *Handler) getBoardBacklogHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetBoardBacklogInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	backlog, err := h.client.GetBoardBacklog(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get board backlog")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get board backlog failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(backlog)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create board backlog result")
-		return result, nil, err
-	}
-
-	return result, backlog, nil
+	return nil, backlog, nil
 }
 
 // getBoardEpicsHandler handles getting epics for a Jira board
 func (h *Handler) getBoardEpicsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetBoardEpicsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	epics, err := h.client.GetBoardEpics(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get board epics")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get board epics failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(epics)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create board epics result")
-		return result, nil, err
-	}
-
-	return result, epics, nil
+	return nil, epics, nil
 }
 
 // getBoardSprintsHandler handles getting sprints for a Jira board
 func (h *Handler) getBoardSprintsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetBoardSprintsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	sprints, err := h.client.GetBoardSprints(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get board sprints")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get board sprints failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(sprints)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create board sprints result")
-		return result, nil, err
-	}
-
-	return result, sprints, nil
+	return nil, sprints, nil
 }
 
 // getSprintHandler handles getting a Jira sprint
 func (h *Handler) getSprintHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetSprintInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	sprint, err := h.client.GetSprint(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get sprint")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get sprint failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(sprint)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create sprint result")
-		return result, nil, err
-	}
-
-	return result, sprint, nil
+	return nil, sprint, nil
 }
 
 // getSprintIssuesHandler handles getting issues for a Jira sprint
 func (h *Handler) getSprintIssuesHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetSprintIssuesInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	issues, err := h.client.GetSprintIssues(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get sprint issues")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get sprint issues failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(issues)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create sprint issues result")
-		return result, nil, err
-	}
-
-	return result, issues, nil
+	return nil, issues, nil
 }
 
 // AddBoardTools registers the board-related tools with the MCP server

@@ -2,9 +2,9 @@ package jira
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -13,38 +13,24 @@ import (
 func (h *Handler) getProjectHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetProjectInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	project, err := h.client.GetProject(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get project")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get project failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(project)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create project result")
-		return result, nil, err
-	}
-
-	return result, project, nil
+	return nil, project, nil
 }
 
 // getProjectsHandler handles getting all Jira projects with optional filters and expansions.
 func (h *Handler) getProjectsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetAllProjectsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	projects, err := h.client.GetAllProjects(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get projects")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get projects failed: %w", err)
 	}
 
 	wrappedResult := map[string]interface{}{
 		"projects": projects,
 	}
 
-	result, err := tools.CreateToolResult(wrappedResult)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create wrapped projects result")
-		return result, nil, err
-	}
-
-	return result, wrappedResult, nil
+	return nil, wrappedResult, nil
 }
 
 // AddProjectTools registers the project-related tools with the MCP server.

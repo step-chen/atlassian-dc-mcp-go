@@ -2,9 +2,9 @@ package jira
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -13,72 +13,44 @@ import (
 func (h *Handler) getCurrentUserHandler(ctx context.Context, req *mcp.CallToolRequest, input struct{}) (*mcp.CallToolResult, map[string]interface{}, error) {
 	user, err := h.client.GetCurrentUser()
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get current user")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get current user failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(user)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create current user result")
-		return result, nil, err
-	}
-
-	return result, user, nil
+	return nil, user, nil
 }
 
 // getUserByNameHandler handles getting user by username
 func (h *Handler) getUserByNameHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetUserByNameInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	user, err := h.client.GetUserByName(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get user by name")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get user by name failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(user)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create user by name result")
-		return result, nil, err
-	}
-
-	return result, user, nil
+	return nil, user, nil
 }
 
 // getUserByKeyHandler handles getting user by key
 func (h *Handler) getUserByKeyHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetUserByKeyInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	user, err := h.client.GetUserByKey(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get user by key")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get user by key failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(user)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create user by key result")
-		return result, nil, err
-	}
-
-	return result, user, nil
+	return nil, user, nil
 }
 
 // searchUsersHandler handles searching users
 func (h *Handler) searchUsersHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.SearchUsersInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	users, err := h.client.SearchUsers(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "search users")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("search users failed: %w", err)
 	}
 
 	wrappedResult := map[string]interface{}{
 		"users": users,
 	}
 
-	result, err := tools.CreateToolResult(wrappedResult)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create wrapped search users result")
-		return result, nil, err
-	}
-
-	return result, wrappedResult, nil
+	return nil, wrappedResult, nil
 }
 
 // AddUserTools registers the user-related tools with the MCP server

@@ -2,9 +2,9 @@ package confluence
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/confluence"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -13,51 +13,30 @@ import (
 func (h *Handler) getContentChildrenHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentChildrenInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	children, err := h.client.GetContentChildren(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get content children")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get content children failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(children)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create content children result")
-		return result, nil, err
-	}
-
-	return result, children, nil
+	return nil, children, nil
 }
 
 // getContentChildrenByTypeHandler handles getting content children by type
 func (h *Handler) getContentChildrenByTypeHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentChildrenByTypeInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	children, err := h.client.GetContentChildrenByType(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get content children by type")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get content children by type failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(children)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create content children by type result")
-		return result, nil, err
-	}
-
-	return result, children, nil
+	return nil, children, nil
 }
 
 // getContentCommentsHandler handles getting content comments
 func (h *Handler) getContentCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentCommentsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	comments, err := h.client.GetContentComments(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get content comments")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get content comments failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(comments)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create content comments result")
-		return result, nil, err
-	}
-
-	return result, comments, nil
+	return nil, comments, nil
 }
 
 // AddChildrenTools registers the children-related tools with the MCP server

@@ -2,9 +2,9 @@ package jira
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -13,35 +13,21 @@ import (
 func (h *Handler) getTransitionsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetTransitionsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	transitions, err := h.client.GetTransitions(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get transitions")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get transitions failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(transitions)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create transitions result")
-		return result, nil, err
-	}
-
-	return result, transitions, nil
+	return nil, transitions, nil
 }
 
 // transitionIssueHandler handles transitioning a Jira issue
 func (h *Handler) transitionIssueHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.TransitionIssueInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	err := h.client.TransitionIssue(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "transition issue")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("transition issue failed: %w", err)
 	}
 
 	resultMap := map[string]interface{}{"success": true}
-	result, err := tools.CreateToolResult(resultMap)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create transition result")
-		return result, nil, err
-	}
-
-	return result, resultMap, nil
+	return nil, resultMap, nil
 }
 
 // AddTransitionTools registers the transition-related tools with the MCP server

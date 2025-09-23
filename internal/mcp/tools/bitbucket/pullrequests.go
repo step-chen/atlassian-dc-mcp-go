@@ -2,9 +2,9 @@ package bitbucket
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -13,51 +13,30 @@ import (
 func (h *Handler) getPullRequestsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestsInput) (*mcp.CallToolResult, MapOutput, error) {
 	pullRequests, err := h.client.GetPullRequests(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get pull requests")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get pull requests failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(pullRequests)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create pull requests result")
-		return result, nil, err
-	}
-
-	return result, pullRequests, nil
+	return nil, pullRequests, nil
 }
 
 // getPullRequestHandler handles getting a specific pull request
 func (h *Handler) getPullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestInput) (*mcp.CallToolResult, MapOutput, error) {
 	pullRequest, err := h.client.GetPullRequest(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get pull request")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get pull request failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(pullRequest)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create pull request result")
-		return result, nil, err
-	}
-
-	return result, pullRequest, nil
+	return nil, pullRequest, nil
 }
 
 // getPullRequestActivitiesHandler handles getting pull request activities
 func (h *Handler) getPullRequestActivitiesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestActivitiesInput) (*mcp.CallToolResult, MapOutput, error) {
 	activities, err := h.client.GetPullRequestActivities(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get pull request activities")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get pull request activities failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(activities)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create pull request activities result")
-		return result, nil, err
-	}
-
-	return result, activities, nil
+	return nil, activities, nil
 }
 
 // getPullRequestCommitsHandler handles getting pull request commits
@@ -65,34 +44,20 @@ func (h *Handler) getPullRequestCommitsHandler(ctx context.Context, req *mcp.Cal
 	// Using GetCommits method as a substitute for GetPullRequestCommits
 	commits, err := h.client.GetCommits(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get pull request commits")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get pull request commits failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(commits)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create pull request commits result")
-		return result, nil, err
-	}
-
-	return result, commits, nil
+	return nil, commits, nil
 }
 
 // getPullRequestCommentsHandler handles getting pull request comments
 func (h *Handler) getPullRequestCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestCommentsInput) (*mcp.CallToolResult, MapOutput, error) {
 	comments, err := h.client.GetPullRequestComments(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get pull request comments")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get pull request comments failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(comments)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create pull request comments result")
-		return result, nil, err
-	}
-
-	return result, comments, nil
+	return nil, comments, nil
 }
 
 // getPullRequestDiffHandler handles getting pull request diff
@@ -100,51 +65,30 @@ func (h *Handler) getPullRequestDiffHandler(ctx context.Context, req *mcp.CallTo
 	// Using GetDiffBetweenCommits method as a substitute for GetPullRequestDiff
 	diff, err := h.client.GetDiffBetweenCommits(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get pull request diff")
-		return result, DiffOutput{}, err
+		return nil, DiffOutput{}, fmt.Errorf("get pull request diff failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(diff)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create pull request diff result")
-		return result, DiffOutput{}, err
-	}
-
-	return result, DiffOutput{Diff: diff}, nil
+	return nil, DiffOutput{Diff: diff}, nil
 }
 
 // mergePullRequestHandler handles merging a pull request
 func (h *Handler) mergePullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.MergePullRequestInput) (*mcp.CallToolResult, MapOutput, error) {
 	result, err := h.client.MergePullRequest(input)
 	if err != nil {
-		toolResult, _, err := tools.HandleToolError(err, "merge pull request")
-		return toolResult, nil, err
+		return nil, nil, fmt.Errorf("merge pull request failed: %w", err)
 	}
 
-	toolResult, err := tools.CreateToolResult(result)
-	if err != nil {
-		toolResult, _, err := tools.HandleToolError(err, "create merge pull request result")
-		return toolResult, nil, err
-	}
-
-	return toolResult, result, nil
+	return nil, result, nil
 }
 
 // declinePullRequestHandler handles declining a pull request
 func (h *Handler) declinePullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.DeclinePullRequestInput) (*mcp.CallToolResult, MapOutput, error) {
 	result, err := h.client.DeclinePullRequest(input)
 	if err != nil {
-		toolResult, _, err := tools.HandleToolError(err, "decline pull request")
-		return toolResult, nil, err
+		return nil, nil, fmt.Errorf("decline pull request failed: %w", err)
 	}
 
-	toolResult, err := tools.CreateToolResult(result)
-	if err != nil {
-		toolResult, _, err := tools.HandleToolError(err, "create decline pull request result")
-		return toolResult, nil, err
-	}
-
-	return toolResult, result, nil
+	return nil, result, nil
 }
 
 // AddPullRequestTools registers the pull request-related tools with the MCP server

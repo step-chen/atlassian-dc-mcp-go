@@ -2,9 +2,9 @@ package confluence
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/confluence"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -13,34 +13,20 @@ import (
 func (h *Handler) getRelatedLabelsHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetRelatedLabelsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	labels, err := h.client.GetRelatedLabels(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get related labels")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get related labels failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(labels)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create related labels result")
-		return result, nil, err
-	}
-
-	return result, labels, nil
+	return nil, labels, nil
 }
 
 // getLabelsHandler handles getting labels
 func (h *Handler) getLabelsHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetLabelsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	labels, err := h.client.GetLabels(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get labels")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get labels failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(labels)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create labels result")
-		return result, nil, err
-	}
-
-	return result, labels, nil
+	return nil, labels, nil
 }
 
 // AddLabelTools registers the label-related tools with the MCP server

@@ -2,9 +2,9 @@ package bitbucket
 
 import (
 	"context"
+	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
-	"atlassian-dc-mcp-go/internal/mcp/tools"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -13,51 +13,30 @@ import (
 func (h *Handler) getCurrentUserHandler(ctx context.Context, req *mcp.CallToolRequest, input struct{}) (*mcp.CallToolResult, MapOutput, error) {
 	user, err := h.client.GetCurrentUser()
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get current user")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get current user failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(user)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create current user result")
-		return result, nil, err
-	}
-
-	return result, user, nil
+	return nil, user, nil
 }
 
 // getUserHandler handles getting a user
 func (h *Handler) getUserHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetUserInput) (*mcp.CallToolResult, GetUserOutput, error) {
 	user, err := h.client.GetUser(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get user")
-		return result, GetUserOutput{}, err
+		return nil, GetUserOutput{}, fmt.Errorf("get user failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(user)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create user result")
-		return result, GetUserOutput{}, err
-	}
-
-	return result, GetUserOutput{User: user}, nil
+	return nil, GetUserOutput{User: user}, nil
 }
 
 // getUsersHandler handles getting Bitbucket users
 func (h *Handler) getUsersHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetUsersInput) (*mcp.CallToolResult, MapOutput, error) {
 	users, err := h.client.GetUsers(input)
 	if err != nil {
-		result, _, err := tools.HandleToolError(err, "get users")
-		return result, nil, err
+		return nil, nil, fmt.Errorf("get users failed: %w", err)
 	}
 
-	result, err := tools.CreateToolResult(users)
-	if err != nil {
-		result, _, err := tools.HandleToolError(err, "create users result")
-		return result, nil, err
-	}
-
-	return result, users, nil
+	return nil, users, nil
 }
 
 // AddUserTools registers the user-related tools with the MCP server
