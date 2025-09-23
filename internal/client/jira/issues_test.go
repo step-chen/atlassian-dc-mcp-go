@@ -41,7 +41,10 @@ func TestGetIssue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetIssue(tt.issueKey, nil)
+			result, err := client.GetIssue(GetIssueInput{
+				IssueKey: tt.issueKey,
+				Fields:   nil,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -96,7 +99,9 @@ func TestGetTransitions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetTransitions(tt.issueKey)
+			result, err := client.GetTransitions(GetTransitionsInput{
+				IssueKey: tt.issueKey,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -109,7 +114,8 @@ func TestGetTransitions(t *testing.T) {
 					transitions, exists := result["transitions"]
 					assert.True(t, exists, "transitions field should exist in response")
 					if exists {
-						t.Logf("Get transitions successful. Number of transitions: %d", len(transitions.([]interface{})))
+						assert.NotNil(t, transitions, "transitions should not be nil")
+						t.Logf("Get transitions successful. Issue key: %s Transitions found: %d", tt.issueKey, len(transitions.([]any)))
 					}
 				}
 			}
@@ -151,7 +157,9 @@ func TestGetSubtasks(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetSubtasks(tt.issueKey)
+			result, err := client.GetSubtasks(GetSubtasksInput{
+				IssueKey: tt.issueKey,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -159,11 +167,9 @@ func TestGetSubtasks(t *testing.T) {
 			} else {
 				if err == nil {
 					assert.NotNil(t, result)
-					if result != nil {
-						t.Logf("Get subtasks successful. Number of subtasks: %d", len(result))
-					}
+					t.Logf("Get subtasks successful. Issue key: %s Subtasks found: %d", tt.issueKey, len(result))
 				} else {
-					t.Logf("Get subtasks completed. Error (may be expected): %v", err)
+					t.Logf("Get subtasks failed. Issue key: %s Error: %v", tt.issueKey, err)
 				}
 			}
 		})
@@ -221,7 +227,12 @@ func TestGetAgileIssue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetAgileIssue(tt.issueIdOrKey, tt.expand, tt.fields, tt.updateHistory)
+			result, err := client.GetAgileIssue(GetAgileIssueInput{
+				IssueIdOrKey:  tt.issueIdOrKey,
+				Expand:        tt.expand,
+				Fields:        tt.fields,
+				UpdateHistory: tt.updateHistory,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -234,26 +245,11 @@ func TestGetAgileIssue(t *testing.T) {
 						assert.True(t, exists, "key field should exist in response")
 						if exists {
 							assert.NotEmpty(t, key, "key should not be empty")
-							t.Logf("Get agile issue successful. Issue key: %s", key)
-						}
-
-						fields, fieldsExist := result["fields"]
-						if fieldsExist {
-							if fieldsMap, ok := fields.(map[string]interface{}); ok {
-								if sprint, sprintExists := fieldsMap["sprint"]; sprintExists {
-									t.Logf("Sprint field found: %v", sprint)
-								}
-								if closedSprints, closedSprintsExists := fieldsMap["closedSprints"]; closedSprintsExists {
-									t.Logf("ClosedSprints field found: %v", closedSprints)
-								}
-								if epic, epicExists := fieldsMap["epic"]; epicExists {
-									t.Logf("Epic field found: %v", epic)
-								}
-							}
+							t.Logf("Get agile issue successful. Issue ID or key: %s", key)
 						}
 					}
 				} else {
-					t.Logf("Get agile issue completed. Error (may be expected): %v", err)
+					t.Logf("Get agile issue failed. Issue ID or key: %s Error: %v", tt.issueIdOrKey, err)
 				}
 			}
 		})
@@ -297,7 +293,10 @@ func TestGetIssueEstimationForBoard(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetIssueEstimationForBoard(tt.issueKey, tt.boardId)
+			result, err := client.GetIssueEstimationForBoard(GetIssueEstimationForBoardInput{
+				IssueIdOrKey: tt.issueKey,
+				BoardId:      tt.boardId,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)

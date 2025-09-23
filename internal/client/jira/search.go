@@ -10,47 +10,41 @@ import (
 // SearchIssues searches for issues using JQL.
 //
 // Parameters:
-//   - jql: The JQL query string
-//   - projectKeyOrId: The project key or ID to filter by
-//   - orderBy: The field to order results by
-//   - statuses: The statuses to filter by
-//   - maxResults: The maximum number of issues to return per page
-//   - startAt: The index of the first item to return
-//   - fields: The list of fields to return for each issue
+//   - input: SearchIssuesInput containing jql, projectKeyOrId, orderBy, statuses, maxResults, startAt, and fields
 //
 // Returns:
 //   - map[string]any: The search results
 //   - error: An error if the request fails
-func (c *JiraClient) SearchIssues(jql, projectKeyOrId, orderBy string, statuses []string, maxResults, startAt int, fields []string) (map[string]any, error) {
+func (c *JiraClient) SearchIssues(input SearchIssuesInput) (map[string]any, error) {
 
-	finalJQL := jql
+	finalJQL := input.JQL
 	if finalJQL == "" {
 		var jqlParts []string
-		if projectKeyOrId != "" {
-			jqlParts = append(jqlParts, fmt.Sprintf("project = '%s'", projectKeyOrId))
+		if input.ProjectKeyOrId != "" {
+			jqlParts = append(jqlParts, fmt.Sprintf("project = '%s'", input.ProjectKeyOrId))
 		}
-		if len(statuses) > 0 {
-			quotedStatuses := make([]string, len(statuses))
-			for i, s := range statuses {
+		if len(input.Statuses) > 0 {
+			quotedStatuses := make([]string, len(input.Statuses))
+			for i, s := range input.Statuses {
 				quotedStatuses[i] = fmt.Sprintf("'%s'", s)
 			}
 			jqlParts = append(jqlParts, fmt.Sprintf("status in (%s)", strings.Join(quotedStatuses, ", ")))
 		}
 		finalJQL = strings.Join(jqlParts, " AND ")
 
-		if orderBy != "" {
-			finalJQL = fmt.Sprintf("%s ORDER BY %s", finalJQL, orderBy)
+		if input.OrderBy != "" {
+			finalJQL = fmt.Sprintf("%s ORDER BY %s", finalJQL, input.OrderBy)
 		}
 	}
 
 	payload := map[string]any{
 		"jql":        finalJQL,
-		"maxResults": maxResults,
-		"startAt":    startAt,
+		"maxResults": input.MaxResults,
+		"startAt":    input.StartAt,
 	}
 
-	if len(fields) > 0 {
-		payload["fields"] = fields
+	if len(input.Fields) > 0 {
+		payload["fields"] = input.Fields
 	}
 
 	jsonPayload, err := json.Marshal(payload)

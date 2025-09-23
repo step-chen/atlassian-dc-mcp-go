@@ -2,103 +2,61 @@ package jira
 
 import (
 	"context"
-	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
 	"atlassian-dc-mcp-go/internal/mcp/tools"
-	"github.com/google/jsonschema-go/jsonschema"
+
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // getCommentsHandler handles getting comments for a Jira issue
-func (h *Handler) getCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get comments", func() (interface{}, error) {
-		issueKey, ok := tools.GetStringArg(args, "issueKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid issueKey parameter")
-		}
+func (h *Handler) getCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetCommentsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+	comments, err := h.client.GetComments(input)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get comments")
+		return result, nil, err
+	}
 
-		startAt := tools.GetIntArg(args, "startAt", 0)
-		maxResults := tools.GetIntArg(args, "maxResults", 50)
+	result, err := tools.CreateToolResult(comments)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create comments result")
+		return result, nil, err
+	}
 
-		expand, _ := tools.GetStringArg(args, "expand")
-		orderBy, _ := tools.GetStringArg(args, "orderBy")
-
-		return h.client.GetComments(issueKey, startAt, maxResults, expand, orderBy)
-	})
+	return result, comments, nil
 }
 
 // addCommentHandler handles adding a comment to a Jira issue
-func (h *Handler) addCommentHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("add comment", func() (interface{}, error) {
-		issueKey, ok := tools.GetStringArg(args, "issueKey")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid issueKey parameter")
-		}
+func (h *Handler) addCommentHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.AddCommentInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+	comment, err := h.client.AddComment(input)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "add comment")
+		return result, nil, err
+	}
 
-		comment, ok := tools.GetStringArg(args, "comment")
-		if !ok {
-			return nil, fmt.Errorf("missing or invalid comment parameter")
-		}
+	result, err := tools.CreateToolResult(comment)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create comment result")
+		return result, nil, err
+	}
 
-		return h.client.AddComment(issueKey, comment)
-	})
+	return result, comment, nil
 }
 
 // AddCommentTools registers the comment-related tools with the MCP server
 func AddCommentTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[jira.GetCommentsInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "jira_get_comments",
 		Description: "Get comments for a Jira issue",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"issueKey": {
-					Type:        "string",
-					Description: "The key of the issue to get comments for",
-				},
-				"startAt": {
-					Type:        "integer",
-					Description: "The starting index of the returned comments",
-				},
-				"maxResults": {
-					Type:        "integer",
-					Description: "The maximum number of comments to return",
-				},
-				"expand": {
-					Type:        "string",
-					Description: "Fields to expand in the response",
-				},
-				"orderBy": {
-					Type:        "string",
-					Description: "Field to order comments by",
-				},
-			},
-			Required: []string{"issueKey"},
-		},
 	}, handler.getCommentsHandler)
 
 	// Only register write tools if write permission is enabled
 	if permissions["jira_add_comment"] {
-		mcp.AddTool(server, &mcp.Tool{
+		mcp.AddTool[jira.AddCommentInput, map[string]interface{}](server, &mcp.Tool{
 			Name:        "jira_add_comment",
 			Description: "Add a comment to a Jira issue",
-			InputSchema: &jsonschema.Schema{
-				Type: "object",
-				Properties: map[string]*jsonschema.Schema{
-					"issueKey": {
-						Type:        "string",
-						Description: "The key of the issue to add a comment to",
-					},
-					"comment": {
-						Type:        "string",
-						Description: "The text content of the comment to add",
-					},
-				},
-				Required: []string{"issueKey", "comment"},
-			},
 		}, handler.addCommentHandler)
 	}
 }

@@ -62,7 +62,17 @@ func TestSearchIssues(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.SearchIssues(tt.jql, tt.projectKey, tt.orderBy, tt.statuses, tt.maxResults, tt.startAt, tt.fields)
+			result, err := client.SearchIssues(SearchIssuesInput{
+				JQL:            tt.jql,
+				ProjectKeyOrId: tt.projectKey,
+				OrderBy:        tt.orderBy,
+				Statuses:       tt.statuses,
+				PaginationInput: PaginationInput{
+					MaxResults: tt.maxResults,
+					StartAt:    tt.startAt,
+				},
+				Fields: tt.fields,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -76,7 +86,7 @@ func TestSearchIssues(t *testing.T) {
 						t.Logf("%s successful. Issues found: %v", tt.description, len(issues.([]any)))
 					}
 				} else {
-					t.Logf("%s completed. Error (may be expected): %v", tt.description, err)
+					t.Logf("%s failed. Error: %v", tt.description, err)
 				}
 			}
 		})

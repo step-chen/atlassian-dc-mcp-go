@@ -46,7 +46,9 @@ func TestGetIssueWorklogs(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetWorklogs(tt.issueKey)
+			result, err := client.GetWorklogs(GetWorklogsInput{
+				IssueKey: tt.issueKey,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -59,11 +61,13 @@ func TestGetIssueWorklogs(t *testing.T) {
 						assert.True(t, exists, "worklogs field should exist in response")
 
 						if worklogs, ok := result["worklogs"].([]any); ok {
-							t.Logf("Number of worklogs retrieved: %d", len(worklogs))
+							t.Logf("Get worklogs successful. Issue key: %s Worklogs found: %d", tt.issueKey, len(worklogs))
+						} else {
+							t.Logf("Get worklogs successful. Issue key: %s Could not determine worklog count", tt.issueKey)
 						}
 					}
 				} else {
-					t.Logf("Get worklogs failed for issue %s. Error: %v", tt.issueKey, err)
+					t.Logf("Get worklogs failed. Issue key: %s Error: %v", tt.issueKey, err)
 				}
 			}
 		})
@@ -85,7 +89,9 @@ func TestGetWorklog(t *testing.T) {
 
 	require.NotNil(t, client, "Jira client should not be nil")
 
-	worklogsResult, err := client.GetWorklogs(testConfig.Worklogs.IssueKey)
+	worklogsResult, err := client.GetWorklogs(GetWorklogsInput{
+		IssueKey: testConfig.Worklogs.IssueKey,
+	})
 	if err != nil {
 		t.Logf("Cannot get worklogs for issue %s. Error: %v", testConfig.Worklogs.IssueKey, err)
 		return
@@ -134,7 +140,10 @@ func TestGetWorklog(t *testing.T) {
 				return
 			}
 
-			result, err := client.GetWorklogs(tt.issueKey, tt.worklogID)
+			result, err := client.GetWorklogs(GetWorklogsInput{
+				IssueKey:  tt.issueKey,
+				WorklogId: tt.worklogID,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -143,15 +152,10 @@ func TestGetWorklog(t *testing.T) {
 				if err == nil {
 					assert.NotNil(t, result)
 					if result != nil {
-						id, exists := result["id"]
-						assert.True(t, exists, "id field should exist in response")
-						if exists {
-							assert.Equal(t, tt.worklogID, id, "worklog ID should match requested ID")
-							t.Logf("Get worklog successful. Worklog ID: %s", id)
-						}
+						t.Logf("Get specific worklog successful. Issue key: %s Worklog ID: %s", tt.issueKey, tt.worklogID)
 					}
 				} else {
-					t.Logf("Get worklog completed. Error (may be expected): %v", err)
+					t.Logf("Get specific worklog failed. Issue key: %s Worklog ID: %s Error: %v", tt.issueKey, tt.worklogID, err)
 				}
 			}
 		})

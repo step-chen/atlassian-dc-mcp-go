@@ -2,120 +2,106 @@ package jira
 
 import (
 	"context"
-	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
 	"atlassian-dc-mcp-go/internal/mcp/tools"
 
-	"github.com/google/jsonschema-go/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // getCurrentUserHandler handles getting current user
-func (h *Handler) getCurrentUserHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	return tools.HandleToolOperation("get current user", func() (interface{}, error) {
-		return h.client.GetCurrentUser()
-	})
+func (h *Handler) getCurrentUserHandler(ctx context.Context, req *mcp.CallToolRequest, input struct{}) (*mcp.CallToolResult, map[string]interface{}, error) {
+	user, err := h.client.GetCurrentUser()
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get current user")
+		return result, nil, err
+	}
+
+	result, err := tools.CreateToolResult(user)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create current user result")
+		return result, nil, err
+	}
+
+	return result, user, nil
 }
 
 // getUserByNameHandler handles getting user by username
-func (h *Handler) getUserByNameHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	username, ok := tools.GetStringArg(args, "username")
-	if !ok {
-		return nil, nil, fmt.Errorf("missing or invalid username parameter")
+func (h *Handler) getUserByNameHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetUserByNameInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+	user, err := h.client.GetUserByName(input)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get user by name")
+		return result, nil, err
 	}
 
-	return tools.HandleToolOperation("get user by name", func() (interface{}, error) {
-		return h.client.GetUserByName(username)
-	})
+	result, err := tools.CreateToolResult(user)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create user by name result")
+		return result, nil, err
+	}
+
+	return result, user, nil
 }
 
 // getUserByKeyHandler handles getting user by key
-func (h *Handler) getUserByKeyHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	key, ok := tools.GetStringArg(args, "key")
-	if !ok {
-		return nil, nil, fmt.Errorf("missing or invalid key parameter")
+func (h *Handler) getUserByKeyHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetUserByKeyInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+	user, err := h.client.GetUserByKey(input)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "get user by key")
+		return result, nil, err
 	}
 
-	return tools.HandleToolOperation("get user by key", func() (interface{}, error) {
-		return h.client.GetUserByKey(key)
-	})
+	result, err := tools.CreateToolResult(user)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create user by key result")
+		return result, nil, err
+	}
+
+	return result, user, nil
 }
 
 // searchUsersHandler handles searching users
-func (h *Handler) searchUsersHandler(ctx context.Context, req *mcp.CallToolRequest, args map[string]interface{}) (*mcp.CallToolResult, map[string]interface{}, error) {
-	query, _ := tools.GetStringArg(args, "query")
-	startAt := tools.GetIntArg(args, "startAt", 0)
-	maxResults := tools.GetIntArg(args, "maxResults", 50)
+func (h *Handler) searchUsersHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.SearchUsersInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+	users, err := h.client.SearchUsers(input)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "search users")
+		return result, nil, err
+	}
 
-	return tools.HandleToolOperation("search users", func() (interface{}, error) {
-		return h.client.SearchUsers(query, startAt, maxResults)
-	})
+	wrappedResult := map[string]interface{}{
+		"users": users,
+	}
+
+	result, err := tools.CreateToolResult(wrappedResult)
+	if err != nil {
+		result, _, err := tools.HandleToolError(err, "create wrapped search users result")
+		return result, nil, err
+	}
+
+	return result, wrappedResult, nil
 }
 
 // AddUserTools registers the user-related tools with the MCP server
 func AddUserTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[struct{}, map[string]interface{}](server, &mcp.Tool{
 		Name:        "jira_get_current_user",
-		Description: "Get current Jira user",
-		InputSchema: &jsonschema.Schema{
-			Type:       "object",
-			Properties: map[string]*jsonschema.Schema{},
-		},
+		Description: "Get the current user",
 	}, handler.getCurrentUserHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[jira.GetUserByNameInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "jira_get_user_by_name",
-		Description: "Get a Jira user by username",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"username": {
-					Type:        "string",
-					Description: "The username of the user to retrieve",
-				},
-			},
-			Required: []string{"username"},
-		},
+		Description: "Get user by username",
 	}, handler.getUserByNameHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[jira.GetUserByKeyInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "jira_get_user_by_key",
-		Description: "Get a Jira user by key",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"key": {
-					Type:        "string",
-					Description: "The key of the user to retrieve",
-				},
-			},
-			Required: []string{"key"},
-		},
+		Description: "Get user by key",
 	}, handler.getUserByKeyHandler)
 
-	mcp.AddTool(server, &mcp.Tool{
+	mcp.AddTool[jira.SearchUsersInput, map[string]interface{}](server, &mcp.Tool{
 		Name:        "jira_search_users",
-		Description: "Search for Jira users",
-		InputSchema: &jsonschema.Schema{
-			Type: "object",
-			Properties: map[string]*jsonschema.Schema{
-				"query": {
-					Type:        "string",
-					Description: "Search query string",
-				},
-				"startAt": {
-					Type:        "integer",
-					Description: "Starting index for results",
-				},
-				"maxResults": {
-					Type:        "integer",
-					Description: "Maximum number of results to return",
-				},
-			},
-			Required: []string{"query"},
-		},
+		Description: "Search for users",
 	}, handler.searchUsersHandler)
 }

@@ -7,18 +7,17 @@ import (
 // GetWorklogs retrieves worklogs for a specific issue.
 //
 // Parameters:
-//   - issueKey: The key of the issue
-//   - worklogId: Optional worklog ID to retrieve a specific worklog
+//   - input: GetWorklogsInput containing issueKey and optional worklogId
 //
 // Returns:
 //   - map[string]any: The worklogs data
 //   - error: An error if the request fails
-func (c *JiraClient) GetWorklogs(issueKey string, worklogId ...string) (map[string]any, error) {
+func (c *JiraClient) GetWorklogs(input GetWorklogsInput) (map[string]any, error) {
 
-	pathSegments := []string{"rest", "api", "2", "issue", issueKey, "worklog"}
+	pathSegments := []string{"rest", "api", "2", "issue", input.IssueKey, "worklog"}
 
-	if len(worklogId) > 0 && worklogId[0] != "" {
-		pathSegments = append(pathSegments, worklogId[0])
+	if input.WorklogId != "" {
+		pathSegments = append(pathSegments, input.WorklogId)
 	}
 
 	var worklogs map[string]any

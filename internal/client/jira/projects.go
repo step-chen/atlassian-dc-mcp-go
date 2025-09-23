@@ -15,9 +15,9 @@ import (
 // Returns:
 //   - map[string]any: The project data
 //   - error: An error if the request fails
-func (c *JiraClient) GetProject(projectKey string) (map[string]any, error) {
+func (c *JiraClient) GetProject(input GetProjectInput) (map[string]any, error) {
 	var project map[string]any
-	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "project", projectKey}, nil, nil, &project)
+	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "project", input.ProjectKey}, nil, nil, &project)
 	if err != nil {
 		return nil, err
 	}
@@ -36,13 +36,13 @@ func (c *JiraClient) GetProject(projectKey string) (map[string]any, error) {
 // Returns:
 //   - []map[string]any: The projects data
 //   - error: An error if the request fails
-func (c *JiraClient) GetAllProjects(expand string, recent int, includeArchived, browseArchive bool) ([]map[string]any, error) {
+func (c *JiraClient) GetAllProjects(input GetAllProjectsInput) ([]map[string]any, error) {
 
 	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "expand", expand, "")
-	utils.SetQueryParam(queryParams, "recent", recent, 0)
-	utils.SetQueryParam(queryParams, "includeArchived", includeArchived, false)
-	utils.SetQueryParam(queryParams, "browseArchive", browseArchive, false)
+	utils.SetQueryParam(queryParams, "expand", input.Expand, "")
+	utils.SetQueryParam(queryParams, "recent", input.Recent, 0)
+	utils.SetQueryParam(queryParams, "includeArchived", input.IncludeArchived, false)
+	utils.SetQueryParam(queryParams, "browseArchive", input.BrowseArchive, false)
 
 	var projects []map[string]any
 	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "project"}, queryParams, nil, &projects)

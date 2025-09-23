@@ -55,9 +55,13 @@ func TestGetUser(t *testing.T) {
 
 			switch tt.testType {
 			case "byname":
-				result, err = client.GetUserByName(tt.username)
+				result, err = client.GetUserByName(GetUserByNameInput{
+					Username: tt.username,
+				})
 			case "bykey":
-				result, err = client.GetUserByKey(tt.userKey)
+				result, err = client.GetUserByKey(GetUserByKeyInput{
+					Key: tt.userKey,
+				})
 			}
 
 			if tt.expectError {
@@ -88,7 +92,13 @@ func TestSearchUsers(t *testing.T) {
 	}
 
 	t.Run("SearchUsers", func(t *testing.T) {
-		result, err := client.SearchUsers(testConfig.Users.SearchQuery, 0, 10)
+		result, err := client.SearchUsers(SearchUsersInput{
+			Query: testConfig.Users.SearchQuery,
+			PaginationInput: PaginationInput{
+				StartAt:    0,
+				MaxResults: 10,
+			},
+		})
 
 		if err == nil {
 			assert.NotNil(t, result)

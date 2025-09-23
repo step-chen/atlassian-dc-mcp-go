@@ -55,7 +55,15 @@ func TestGetComments(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetComments(tt.issueKey, tt.startAt, tt.maxResults, tt.orderBy, tt.expand)
+			result, err := client.GetComments(GetCommentsInput{
+				IssueKey: tt.issueKey,
+				PaginationInput: PaginationInput{
+					StartAt:    tt.startAt,
+					MaxResults: tt.maxResults,
+				},
+				Expand:  tt.expand,
+				OrderBy: tt.orderBy,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -72,7 +80,7 @@ func TestGetComments(t *testing.T) {
 						}
 					}
 				} else {
-					t.Logf("Get comments completed. Error (may be expected): %v", err)
+					t.Logf("Get comments failed. Issue key: %s Error: %v", tt.issueKey, err)
 				}
 			}
 		})

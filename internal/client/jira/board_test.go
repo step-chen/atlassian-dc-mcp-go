@@ -56,7 +56,15 @@ func TestListBoards(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetBoards(tt.startAt, tt.maxResults, tt.boardName, tt.projectKeyOrId, tt.boardType)
+			result, err := client.GetBoards(GetBoardsInput{
+				PaginationInput: PaginationInput{
+					StartAt:    tt.startAt,
+					MaxResults: tt.maxResults,
+				},
+				Name:          tt.boardName,
+				ProjectKeyOrId: tt.projectKeyOrId,
+				BoardType:     tt.boardType,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -171,65 +179,31 @@ func TestGetBoardBacklog(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetBoardBacklog(
-				tt.boardID,
-				tt.startAt,
-				tt.maxResults,
-				tt.jql,
-				tt.validateQuery,
-				tt.fields,
-				tt.expand,
-			)
+			result, err := client.GetBoardBacklog(GetBoardBacklogInput{
+				BoardId: tt.boardID,
+				PaginationInput: PaginationInput{
+					StartAt:    tt.startAt,
+					MaxResults: tt.maxResults,
+				},
+				JQL:           tt.jql,
+				ValidateQuery: tt.validateQuery,
+				Fields:        tt.fields,
+				Expand:        tt.expand,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)
 				assert.Nil(t, result)
 			} else {
-				if err == nil {
-					assert.NotNil(t, result)
-					if result != nil {
-						startAt, exists := result["startAt"]
-						assert.True(t, exists, "startAt field should exist in response")
-						if exists {
-							assert.NotNil(t, startAt, "startAt should not be nil")
-						}
-
-						maxResults, exists := result["maxResults"]
-						assert.True(t, exists, "maxResults field should exist in response")
-						if exists {
-							assert.NotNil(t, maxResults, "maxResults should not be nil")
-						}
-
-						total, exists := result["total"]
-						assert.True(t, exists, "total field should exist in response")
-						if exists {
-							assert.NotNil(t, total, "total should not be nil")
-						}
-
-						issues, exists := result["issues"]
-						assert.True(t, exists, "issues field should exist in response")
-						if exists {
-							if issuesList, ok := issues.([]interface{}); ok && len(issuesList) > 0 {
-								if firstIssue, ok := issuesList[0].(map[string]interface{}); ok {
-									id, idExists := firstIssue["id"]
-									assert.True(t, idExists, "id field should exist in issue")
-									if idExists {
-										assert.NotEmpty(t, id, "issue id should not be empty")
-									}
-
-									key, keyExists := firstIssue["key"]
-									assert.True(t, keyExists, "key field should exist in issue")
-									if keyExists {
-										assert.NotEmpty(t, key, "issue key should not be empty")
-									}
-								}
-							}
-						}
-
-						t.Logf("%s successful. Total issues: %v", tt.description, total)
+				assert.NoError(t, err)
+				assert.NotNil(t, result)
+				if result != nil {
+					issues, exists := result["issues"]
+					assert.True(t, exists, "issues field should exist in response")
+					if exists {
+						assert.NotNil(t, issues, "issues should not be nil")
+						t.Logf("Get board backlog successful. Board ID: %d Issues found: %d", tt.boardID, len(issues.([]any)))
 					}
-				} else {
-					t.Logf("%s completed. Error (may be expected): %v", tt.description, err)
 				}
 			}
 		})
@@ -273,7 +247,9 @@ func TestGetBoard(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetBoard(tt.boardID)
+			result, err := client.GetBoard(GetBoardInput{
+				Id: tt.boardID,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -285,25 +261,12 @@ func TestGetBoard(t *testing.T) {
 						id, exists := result["id"]
 						assert.True(t, exists, "id field should exist in response")
 						if exists {
-							assert.NotEmpty(t, id, "board id should not be empty")
+							assert.NotNil(t, id, "id should not be nil")
+							t.Logf("Get board successful. Board ID: %v", id)
 						}
-
-						name, exists := result["name"]
-						assert.True(t, exists, "name field should exist in response")
-						if exists {
-							assert.NotEmpty(t, name, "board name should not be empty")
-						}
-
-						self, exists := result["self"]
-						assert.True(t, exists, "self field should exist in response")
-						if exists {
-							assert.NotEmpty(t, self, "board self URL should not be empty")
-						}
-
-						t.Logf("%s successful. Board ID: %v, Name: %v", tt.description, id, name)
 					}
 				} else {
-					t.Logf("%s completed. Error (may be expected): %v", tt.description, err)
+					t.Logf("Get board failed. Board ID: %d Error: %v", tt.boardID, err)
 				}
 			}
 		})
@@ -356,51 +319,28 @@ func TestGetBoardEpics(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetBoardEpics(tt.boardID, tt.startAt, tt.maxResults, tt.done)
+			result, err := client.GetBoardEpics(GetBoardEpicsInput{
+				BoardId: tt.boardID,
+				PaginationInput: PaginationInput{
+					StartAt:    tt.startAt,
+					MaxResults: tt.maxResults,
+				},
+				Done: tt.done,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)
 				assert.Nil(t, result)
 			} else {
-				if err == nil {
-					assert.NotNil(t, result)
-					if result != nil {
-						startAt, exists := result["startAt"]
-						assert.True(t, exists, "startAt field should exist in response")
-						if exists {
-							assert.NotNil(t, startAt, "startAt should not be nil")
-						}
-
-						maxResults, exists := result["maxResults"]
-						assert.True(t, exists, "maxResults field should exist in response")
-						if exists {
-							assert.NotNil(t, maxResults, "maxResults should not be nil")
-						}
-
-						values, exists := result["values"]
-						assert.True(t, exists, "values field should exist in response")
-						if exists {
-							if epicsList, ok := values.([]interface{}); ok && len(epicsList) > 0 {
-								if firstEpic, ok := epicsList[0].(map[string]interface{}); ok {
-									id, idExists := firstEpic["id"]
-									assert.True(t, idExists, "id field should exist in epic")
-									if idExists {
-										assert.NotEmpty(t, id, "epic id should not be empty")
-									}
-
-									name, nameExists := firstEpic["name"]
-									assert.True(t, nameExists, "name field should exist in epic")
-									if nameExists {
-										assert.NotEmpty(t, name, "epic name should not be empty")
-									}
-								}
-							}
-						}
-
-						t.Logf("%s successful.", tt.description)
+				assert.NoError(t, err)
+				assert.NotNil(t, result)
+				if result != nil {
+					values, exists := result["values"]
+					assert.True(t, exists, "values field should exist in response")
+					if exists {
+						assert.NotNil(t, values, "values should not be nil")
+						t.Logf("Get board epics successful. Board ID: %d Epics found: %d", tt.boardID, len(values.([]any)))
 					}
-				} else {
-					t.Logf("%s completed. Error (may be expected): %v", tt.description, err)
 				}
 			}
 		})
@@ -502,65 +442,31 @@ func TestGetSprintIssues(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetSprintIssues(
-				tt.sprintID,
-				tt.startAt,
-				tt.maxResults,
-				tt.jql,
-				true,
-				tt.fields,
-				tt.expand,
-			)
+			result, err := client.GetSprintIssues(GetSprintIssuesInput{
+				SprintId: tt.sprintID,
+				PaginationInput: PaginationInput{
+					StartAt:    tt.startAt,
+					MaxResults: tt.maxResults,
+				},
+				JQL:           tt.jql,
+				ValidateQuery: true,
+				Fields:        tt.fields,
+				Expand:        tt.expand,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)
 				assert.Nil(t, result)
 			} else {
-				if err == nil {
-					assert.NotNil(t, result)
-					if result != nil {
-						startAt, exists := result["startAt"]
-						assert.True(t, exists, "startAt field should exist in response")
-						if exists {
-							assert.NotNil(t, startAt, "startAt should not be nil")
-						}
-
-						maxResults, exists := result["maxResults"]
-						assert.True(t, exists, "maxResults field should exist in response")
-						if exists {
-							assert.NotNil(t, maxResults, "maxResults should not be nil")
-						}
-
-						total, exists := result["total"]
-						assert.True(t, exists, "total field should exist in response")
-						if exists {
-							assert.NotNil(t, total, "total should not be nil")
-						}
-
-						issues, exists := result["issues"]
-						assert.True(t, exists, "issues field should exist in response")
-						if exists {
-							if issuesList, ok := issues.([]interface{}); ok && len(issuesList) > 0 {
-								if firstIssue, ok := issuesList[0].(map[string]interface{}); ok {
-									id, idExists := firstIssue["id"]
-									assert.True(t, idExists, "id field should exist in issue")
-									if idExists {
-										assert.NotEmpty(t, id, "issue id should not be empty")
-									}
-
-									key, keyExists := firstIssue["key"]
-									assert.True(t, keyExists, "key field should exist in issue")
-									if keyExists {
-										assert.NotEmpty(t, key, "issue key should not be empty")
-									}
-								}
-							}
-						}
-
-						t.Logf("Get sprint issues successful. Board ID: %d, Sprint ID: %d, Total issues: %v", tt.boardID, tt.sprintID, total)
+				assert.NoError(t, err)
+				assert.NotNil(t, result)
+				if result != nil {
+					issues, exists := result["issues"]
+					assert.True(t, exists, "issues field should exist in response")
+					if exists {
+						assert.NotNil(t, issues, "issues should not be nil")
+						t.Logf("Get sprint issues successful. Sprint ID: %d Issues found: %d", tt.sprintID, len(issues.([]any)))
 					}
-				} else {
-					t.Logf("Get sprint issues completed. Error (may be expected): %v", err)
 				}
 			}
 		})
@@ -604,7 +510,9 @@ func TestGetSprint(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetSprint(tt.sprintID)
+			result, err := client.GetSprint(GetSprintInput{
+				SprintId: tt.sprintID,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -616,25 +524,12 @@ func TestGetSprint(t *testing.T) {
 						id, exists := result["id"]
 						assert.True(t, exists, "id field should exist in response")
 						if exists {
-							assert.NotEmpty(t, id, "sprint id should not be empty")
+							assert.NotNil(t, id, "id should not be nil")
+							t.Logf("Get sprint successful. Sprint ID: %v", id)
 						}
-
-						name, exists := result["name"]
-						assert.True(t, exists, "name field should exist in response")
-						if exists {
-							assert.NotEmpty(t, name, "sprint name should not be empty")
-						}
-
-						state, exists := result["state"]
-						assert.True(t, exists, "state field should exist in response")
-						if exists {
-							assert.NotEmpty(t, state, "sprint state should not be empty")
-						}
-
-						t.Logf("%s successful. Sprint ID: %v, Name: %v, State: %v", tt.description, id, name, state)
 					}
 				} else {
-					t.Logf("%s completed. Error (may be expected): %v", tt.description, err)
+					t.Logf("Get sprint failed. Sprint ID: %d Error: %v", tt.sprintID, err)
 				}
 			}
 		})

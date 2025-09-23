@@ -41,7 +41,9 @@ func TestGetProject(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetProject(tt.projectKey)
+			result, err := client.GetProject(GetProjectInput{
+				ProjectKey: tt.projectKey,
+			})
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -51,9 +53,9 @@ func TestGetProject(t *testing.T) {
 				assert.NotNil(t, result)
 				if result != nil {
 					key, exists := result["key"]
-					assert.True(t, exists)
+					assert.True(t, exists, "key field should exist in response")
 					if exists {
-						assert.Equal(t, tt.projectKey, key)
+						assert.Equal(t, tt.projectKey, key, "project key should match")
 						t.Logf("Get project successful. Project key: %s", key)
 					}
 				}
@@ -73,7 +75,12 @@ func TestGetAllProjects(t *testing.T) {
 	require.NotNil(t, client, "Jira client should not be nil")
 
 	t.Run("GetAllProjects", func(t *testing.T) {
-		result, err := client.GetAllProjects("", 0, false, false)
+		result, err := client.GetAllProjects(GetAllProjectsInput{
+			Expand:         "",
+			Recent:         0,
+			IncludeArchived: false,
+			BrowseArchive:  false,
+		})
 
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
@@ -82,9 +89,9 @@ func TestGetAllProjects(t *testing.T) {
 			if len(result) > 0 {
 				key, exists := result[0]["key"]
 				assert.True(t, exists, "key field should exist in first project response")
-				assert.NotEmpty(t, key, "project key should not be empty")
+				assert.NotEmpty(t, key, "key should not be empty")
+				t.Logf("Get all projects successful. Projects found: %d First project key: %s", len(result), key)
 			}
-			t.Logf("Get all projects successful. Found %d projects", len(result))
 		}
 	})
 }

@@ -12,25 +12,21 @@ import (
 // GetComments retrieves comments for a specific issue.
 //
 // Parameters:
-//   - issueKey: The key of the issue
-//   - startAt: The index of the first item to return
-//   - maxResults: The maximum number of items to return per page
-//   - expand: Use expand to include additional information about comments
-//   - orderBy: Ordering of comments by creation date
+//   - input: GetCommentsInput containing issueKey, startAt, maxResults, expand, and orderBy
 //
 // Returns:
 //   - map[string]any: The comments data
 //   - error: An error if the request fails
-func (c *JiraClient) GetComments(issueKey string, startAt, maxResults int, expand, orderBy string) (map[string]any, error) {
+func (c *JiraClient) GetComments(input GetCommentsInput) (map[string]any, error) {
 
 	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "startAt", startAt, 0)
-	utils.SetQueryParam(queryParams, "maxResults", maxResults, 0)
-	utils.SetQueryParam(queryParams, "expand", expand, "")
-	utils.SetQueryParam(queryParams, "orderBy", orderBy, "")
+	utils.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
+	utils.SetQueryParam(queryParams, "maxResults", input.MaxResults, 0)
+	utils.SetQueryParam(queryParams, "expand", input.Expand, "")
+	utils.SetQueryParam(queryParams, "orderBy", input.OrderBy, "")
 
 	var comments map[string]any
-	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "issue", issueKey, "comment"}, queryParams, nil, &comments)
+	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "issue", input.IssueKey, "comment"}, queryParams, nil, &comments)
 	if err != nil {
 		return nil, err
 	}
@@ -41,16 +37,15 @@ func (c *JiraClient) GetComments(issueKey string, startAt, maxResults int, expan
 // AddComment adds a comment to a specific issue.
 //
 // Parameters:
-//   - issueKey: The key of the issue
-//   - comment: The comment text to add
+//   - input: AddCommentInput containing issueKey and comment
 //
 // Returns:
 //   - map[string]any: The added comment data
 //   - error: An error if the request fails
-func (c *JiraClient) AddComment(issueKey, comment string) (map[string]any, error) {
+func (c *JiraClient) AddComment(input AddCommentInput) (map[string]any, error) {
 
 	payload := map[string]any{
-		"body": comment,
+		"body": input.Comment,
 	}
 
 	jsonPayload, err := json.Marshal(payload)
@@ -59,7 +54,7 @@ func (c *JiraClient) AddComment(issueKey, comment string) (map[string]any, error
 	}
 
 	var result map[string]any
-	err = c.executeRequest(http.MethodPost, []string{"rest", "api", "2", "issue", issueKey, "comment"}, nil, jsonPayload, &result)
+	err = c.executeRequest(http.MethodPost, []string{"rest", "api", "2", "issue", input.IssueKey, "comment"}, nil, jsonPayload, &result)
 	if err != nil {
 		return nil, err
 	}
