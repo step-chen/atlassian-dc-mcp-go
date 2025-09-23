@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -83,38 +84,11 @@ func (h *Handler) getSprintIssuesHandler(ctx context.Context, req *mcp.CallToolR
 func AddBoardTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[jira.GetBoardsInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_boards",
-		Description: "Get Jira boards with optional filters",
-	}, handler.getBoardsHandler)
-
-	mcp.AddTool[jira.GetBoardInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_board",
-		Description: "Get a specific Jira board by its ID",
-	}, handler.getBoardHandler)
-
-	mcp.AddTool[jira.GetBoardBacklogInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_board_backlog",
-		Description: "Get backlog issues for a Jira board",
-	}, handler.getBoardBacklogHandler)
-
-	mcp.AddTool[jira.GetBoardEpicsInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_board_epics",
-		Description: "Get epics associated with a Jira board",
-	}, handler.getBoardEpicsHandler)
-
-	mcp.AddTool[jira.GetBoardSprintsInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_board_sprints",
-		Description: "Get sprints associated with a Jira board",
-	}, handler.getBoardSprintsHandler)
-
-	mcp.AddTool[jira.GetSprintInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_sprint",
-		Description: "Get a specific Jira sprint by its ID",
-	}, handler.getSprintHandler)
-
-	mcp.AddTool[jira.GetSprintIssuesInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_sprint_issues",
-		Description: "Get issues in a specific Jira sprint",
-	}, handler.getSprintIssuesHandler)
+	utils.RegisterTool[jira.GetBoardsInput, map[string]interface{}](server, "jira_get_boards", "Get Jira boards with optional filters", handler.getBoardsHandler)
+	utils.RegisterTool[jira.GetBoardInput, map[string]interface{}](server, "jira_get_board", "Get a specific Jira board by its ID", handler.getBoardHandler)
+	utils.RegisterTool[jira.GetBoardBacklogInput, map[string]interface{}](server, "jira_get_board_backlog", "Get backlog issues for a Jira board", handler.getBoardBacklogHandler)
+	utils.RegisterTool[jira.GetBoardEpicsInput, map[string]interface{}](server, "jira_get_board_epics", "Get epics associated with a Jira board", handler.getBoardEpicsHandler)
+	utils.RegisterTool[jira.GetBoardSprintsInput, map[string]interface{}](server, "jira_get_board_sprints", "Get sprints associated with a Jira board", handler.getBoardSprintsHandler)
+	utils.RegisterTool[jira.GetSprintInput, map[string]interface{}](server, "jira_get_sprint", "Get a specific Jira sprint by its ID", handler.getSprintHandler)
+	utils.RegisterTool[jira.GetSprintIssuesInput, map[string]interface{}](server, "jira_get_sprint_issues", "Get issues in a specific Jira sprint", handler.getSprintIssuesHandler)
 }

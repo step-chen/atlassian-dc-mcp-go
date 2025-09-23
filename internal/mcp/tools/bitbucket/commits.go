@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -113,53 +114,14 @@ func (h *Handler) getDiffBetweenRevisionsForPathHandler(ctx context.Context, req
 func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[bitbucket.GetCommitsInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_commits",
-		Description: "Get commits for a repository",
-	}, handler.getCommitsHandler)
-
-	mcp.AddTool[bitbucket.GetCommitInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_commit",
-		Description: "Get a specific commit",
-	}, handler.getCommitHandler)
-
-	mcp.AddTool[bitbucket.GetCommitChangesInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_commit_changes",
-		Description: "Get changes for a specific commit",
-	}, handler.getCommitChangesHandler)
-
-	mcp.AddTool[bitbucket.GetCommitCommentsInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_commit_comments",
-		Description: "Get comments on a commit",
-	}, handler.getCommitCommentsHandler)
-
-	mcp.AddTool[bitbucket.GetCommitCommentInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_commit_comment",
-		Description: "Get a specific comment on a commit",
-	}, handler.getCommitCommentHandler)
-
-	mcp.AddTool[bitbucket.GetCommitDiffStatsSummaryInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_commit_diff_stats_summary",
-		Description: "Get diff statistics summary for a commit",
-	}, handler.getCommitDiffStatsSummaryHandler)
-
-	mcp.AddTool[bitbucket.GetDiffBetweenCommitsInput, DiffOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_diff_between_commits",
-		Description: "Get the diff between two commits",
-	}, handler.getDiffBetweenCommitsHandler)
-
-	mcp.AddTool[bitbucket.GetDiffBetweenRevisionsInput, DiffOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_diff_between_revisions",
-		Description: "Get the diff between revisions",
-	}, handler.getDiffBetweenRevisionsHandler)
-
-	mcp.AddTool[bitbucket.GetJiraIssueCommitsInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_jira_issue_commits",
-		Description: "Get commits related to a Jira issue",
-	}, handler.getJiraIssueCommitsHandler)
-
-	mcp.AddTool[bitbucket.GetDiffBetweenRevisionsForPathInput, DiffOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_diff_between_revisions_for_path",
-		Description: "Get the diff between revisions for a specific path",
-	}, handler.getDiffBetweenRevisionsForPathHandler)
+	utils.RegisterTool[bitbucket.GetCommitsInput, MapOutput](server, "bitbucket_get_commits", "Get commits for a repository", handler.getCommitsHandler)
+	utils.RegisterTool[bitbucket.GetCommitInput, MapOutput](server, "bitbucket_get_commit", "Get a specific commit", handler.getCommitHandler)
+	utils.RegisterTool[bitbucket.GetCommitChangesInput, MapOutput](server, "bitbucket_get_commit_changes", "Get changes for a specific commit", handler.getCommitChangesHandler)
+	utils.RegisterTool[bitbucket.GetCommitCommentsInput, MapOutput](server, "bitbucket_get_commit_comments", "Get comments on a commit", handler.getCommitCommentsHandler)
+	utils.RegisterTool[bitbucket.GetCommitCommentInput, MapOutput](server, "bitbucket_get_commit_comment", "Get a specific comment on a commit", handler.getCommitCommentHandler)
+	utils.RegisterTool[bitbucket.GetCommitDiffStatsSummaryInput, MapOutput](server, "bitbucket_get_commit_diff_stats_summary", "Get diff statistics summary for a commit", handler.getCommitDiffStatsSummaryHandler)
+	utils.RegisterTool[bitbucket.GetDiffBetweenCommitsInput, DiffOutput](server, "bitbucket_get_diff_between_commits", "Get the diff between two commits", handler.getDiffBetweenCommitsHandler)
+	utils.RegisterTool[bitbucket.GetDiffBetweenRevisionsInput, DiffOutput](server, "bitbucket_get_diff_between_revisions", "Get the diff between revisions", handler.getDiffBetweenRevisionsHandler)
+	utils.RegisterTool[bitbucket.GetJiraIssueCommitsInput, MapOutput](server, "bitbucket_get_jira_issue_commits", "Get commits related to a Jira issue", handler.getJiraIssueCommitsHandler)
+	utils.RegisterTool[bitbucket.GetDiffBetweenRevisionsForPathInput, DiffOutput](server, "bitbucket_get_diff_between_revisions_for_path", "Get the diff between revisions for a specific path", handler.getDiffBetweenRevisionsForPathHandler)
 }

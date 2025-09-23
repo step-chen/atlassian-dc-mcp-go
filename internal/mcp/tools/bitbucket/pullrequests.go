@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -95,47 +96,18 @@ func (h *Handler) declinePullRequestHandler(ctx context.Context, req *mcp.CallTo
 func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[bitbucket.GetPullRequestsInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_pull_requests",
-		Description: "Get a list of pull requests",
-	}, handler.getPullRequestsHandler)
-
-	mcp.AddTool[bitbucket.GetPullRequestInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_pull_request",
-		Description: "Get a specific pull request",
-	}, handler.getPullRequestHandler)
-
-	mcp.AddTool[bitbucket.GetPullRequestActivitiesInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_pull_request_activities",
-		Description: "Get activities for a specific pull request",
-	}, handler.getPullRequestActivitiesHandler)
-
-	mcp.AddTool[bitbucket.GetCommitsInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_pull_request_commits",
-		Description: "Get commits for a specific pull request",
-	}, handler.getPullRequestCommitsHandler)
-
-	mcp.AddTool[bitbucket.GetPullRequestCommentsInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_pull_request_comments",
-		Description: "Get comments for a specific pull request",
-	}, handler.getPullRequestCommentsHandler)
-
-	mcp.AddTool[bitbucket.GetDiffBetweenCommitsInput, DiffOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_pull_request_diff",
-		Description: "Get diff of a pull request",
-	}, handler.getPullRequestDiffHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestsInput, MapOutput](server, "bitbucket_get_pull_requests", "Get a list of pull requests", handler.getPullRequestsHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestInput, MapOutput](server, "bitbucket_get_pull_request", "Get a specific pull request", handler.getPullRequestHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestActivitiesInput, MapOutput](server, "bitbucket_get_pull_request_activities", "Get activities for a specific pull request", handler.getPullRequestActivitiesHandler)
+	utils.RegisterTool[bitbucket.GetCommitsInput, MapOutput](server, "bitbucket_get_pull_request_commits", "Get commits for a specific pull request", handler.getPullRequestCommitsHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestCommentsInput, MapOutput](server, "bitbucket_get_pull_request_comments", "Get comments for a specific pull request", handler.getPullRequestCommentsHandler)
+	utils.RegisterTool[bitbucket.GetDiffBetweenCommitsInput, DiffOutput](server, "bitbucket_get_pull_request_diff", "Get diff of a pull request", handler.getPullRequestDiffHandler)
 
 	if permissions["bitbucket_merge_pull_request"] {
-		mcp.AddTool[bitbucket.MergePullRequestInput, MapOutput](server, &mcp.Tool{
-			Name:        "bitbucket_merge_pull_request",
-			Description: "Merge a pull request",
-		}, handler.mergePullRequestHandler)
+		utils.RegisterTool[bitbucket.MergePullRequestInput, MapOutput](server, "bitbucket_merge_pull_request", "Merge a pull request", handler.mergePullRequestHandler)
 	}
 
 	if permissions["bitbucket_decline_pull_request"] {
-		mcp.AddTool[bitbucket.DeclinePullRequestInput, MapOutput](server, &mcp.Tool{
-			Name:        "bitbucket_decline_pull_request",
-			Description: "Decline a pull request",
-		}, handler.declinePullRequestHandler)
+		utils.RegisterTool[bitbucket.DeclinePullRequestInput, MapOutput](server, "bitbucket_decline_pull_request", "Decline a pull request", handler.declinePullRequestHandler)
 	}
 }

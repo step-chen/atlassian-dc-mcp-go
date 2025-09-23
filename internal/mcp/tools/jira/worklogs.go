@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -23,8 +24,5 @@ func (h *Handler) getWorklogsHandler(ctx context.Context, req *mcp.CallToolReque
 func AddWorklogTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[jira.GetWorklogsInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_worklogs",
-		Description: "Get worklogs for a Jira issue or a specific worklog by ID",
-	}, handler.getWorklogsHandler)
+	utils.RegisterTool[jira.GetWorklogsInput, map[string]interface{}](server, "jira_get_worklogs", "Get worklogs for a Jira issue or a specific worklog by ID", handler.getWorklogsHandler)
 }

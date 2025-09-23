@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -39,13 +40,6 @@ func (h *Handler) getAttachmentMetadataHandler(ctx context.Context, req *mcp.Cal
 func AddAttachmentTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[bitbucket.GetAttachmentInput, GetAttachmentOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_attachment",
-		Description: "Get a specific attachment",
-	}, handler.getAttachmentHandler)
-
-	mcp.AddTool[bitbucket.GetAttachmentMetadataInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "bitbucket_get_attachment_metadata",
-		Description: "Get metadata for a specific attachment",
-	}, handler.getAttachmentMetadataHandler)
+	utils.RegisterTool[bitbucket.GetAttachmentInput, GetAttachmentOutput](server, "bitbucket_get_attachment", "Get a specific attachment", handler.getAttachmentHandler)
+	utils.RegisterTool[bitbucket.GetAttachmentMetadataInput, map[string]interface{}](server, "bitbucket_get_attachment_metadata", "Get metadata for a specific attachment", handler.getAttachmentMetadataHandler)
 }

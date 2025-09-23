@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -44,18 +45,7 @@ func (h *Handler) getBranchHandler(ctx context.Context, req *mcp.CallToolRequest
 func AddBranchTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[bitbucket.GetBranchesInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "bitbucket_get_branches",
-		Description: "Get branches for a repository",
-	}, handler.getBranchesHandler)
-
-	mcp.AddTool[bitbucket.GetDefaultBranchInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "bitbucket_get_default_branch",
-		Description: "Get the default branch of a repository",
-	}, handler.getDefaultBranchHandler)
-
-	mcp.AddTool[bitbucket.GetBranchInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "bitbucket_get_branch_info_by_commit_id",
-		Description: "Get branch information by commit ID",
-	}, handler.getBranchHandler)
+	utils.RegisterTool[bitbucket.GetBranchesInput, map[string]interface{}](server, "bitbucket_get_branches", "Get branches for a repository", handler.getBranchesHandler)
+	utils.RegisterTool[bitbucket.GetDefaultBranchInput, map[string]interface{}](server, "bitbucket_get_default_branch", "Get the default branch of a repository", handler.getDefaultBranchHandler)
+	utils.RegisterTool[bitbucket.GetBranchInput, map[string]interface{}](server, "bitbucket_get_branch_info_by_commit_id", "Get branch information by commit ID", handler.getBranchHandler)
 }

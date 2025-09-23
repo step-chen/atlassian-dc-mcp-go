@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -63,28 +64,9 @@ func (h *Handler) getRepositoryTasksHandler(ctx context.Context, req *mcp.CallTo
 func AddProjectTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[bitbucket.GetProjectsInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "bitbucket_get_projects",
-		Description: "Get a list of projects",
-	}, handler.getProjectsHandler)
-
-	mcp.AddTool[bitbucket.GetProjectInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "bitbucket_get_project",
-		Description: "Get a specific project by project key",
-	}, handler.getProjectHandler)
-
-	mcp.AddTool[bitbucket.GetProjectPrimaryEnhancedEntityLinkInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "bitbucket_get_project_primary_enhanced_entity_link",
-		Description: "Get project's primary enhanced entity link",
-	}, handler.getProjectPrimaryEnhancedEntityLinkHandler)
-
-	mcp.AddTool[bitbucket.GetProjectTasksInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "bitbucket_get_project_tasks",
-		Description: "Get tasks for a specific project",
-	}, handler.getProjectTasksHandler)
-
-	mcp.AddTool[bitbucket.GetRepositoryTasksInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "bitbucket_get_repository_tasks",
-		Description: "Get tasks for a specific repository",
-	}, handler.getRepositoryTasksHandler)
+	utils.RegisterTool[bitbucket.GetProjectsInput, map[string]interface{}](server, "bitbucket_get_projects", "Get a list of projects", handler.getProjectsHandler)
+	utils.RegisterTool[bitbucket.GetProjectInput, map[string]interface{}](server, "bitbucket_get_project", "Get a specific project by project key", handler.getProjectHandler)
+	utils.RegisterTool[bitbucket.GetProjectPrimaryEnhancedEntityLinkInput, map[string]interface{}](server, "bitbucket_get_project_primary_enhanced_entity_link", "Get project's primary enhanced entity link", handler.getProjectPrimaryEnhancedEntityLinkHandler)
+	utils.RegisterTool[bitbucket.GetProjectTasksInput, map[string]interface{}](server, "bitbucket_get_project_tasks", "Get tasks for a specific project", handler.getProjectTasksHandler)
+	utils.RegisterTool[bitbucket.GetRepositoryTasksInput, map[string]interface{}](server, "bitbucket_get_repository_tasks", "Get tasks for a specific repository", handler.getRepositoryTasksHandler)
 }

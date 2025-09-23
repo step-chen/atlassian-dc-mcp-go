@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -42,15 +43,9 @@ func (h *Handler) createSubTaskHandler(ctx context.Context, req *mcp.CallToolReq
 func AddSubtaskTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[jira.GetSubtasksInput, GetSubtasksResult](server, &mcp.Tool{
-		Name:        "jira_get_subtasks",
-		Description: "Get subtasks for a Jira issue",
-	}, handler.getSubtasksHandler)
+	utils.RegisterTool[jira.GetSubtasksInput, GetSubtasksResult](server, "jira_get_subtasks", "Get subtasks for a Jira issue", handler.getSubtasksHandler)
 
 	if permissions["jira_create_subtask"] {
-		mcp.AddTool[jira.CreateSubTaskInput, map[string]interface{}](server, &mcp.Tool{
-			Name:        "jira_create_subtask",
-			Description: "Create a subtask for a Jira issue",
-		}, handler.createSubTaskHandler)
+		utils.RegisterTool[jira.CreateSubTaskInput, map[string]interface{}](server, "jira_create_subtask", "Create a subtask for a Jira issue", handler.createSubTaskHandler)
 	}
 }

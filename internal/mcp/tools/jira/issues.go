@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -30,6 +31,16 @@ func (h *Handler) createIssueHandler(ctx context.Context, req *mcp.CallToolReque
 	return nil, issue, nil
 }
 
+// updateIssueHandler updates an existing Jira issue.
+func (h *Handler) updateIssueHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.UpdateIssueInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+	issue, err := h.client.UpdateIssue(input)
+	if err != nil {
+		return nil, nil, fmt.Errorf("update issue failed: %w", err)
+	}
+
+	return nil, issue, nil
+}
+
 // searchIssuesHandler searches for Jira issues using a JQL query.
 func (h *Handler) searchIssuesHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.SearchIssuesInput) (*mcp.CallToolResult, map[string]interface{}, error) {
 	issues, err := h.client.SearchIssues(input)
@@ -44,18 +55,14 @@ func (h *Handler) searchIssuesHandler(ctx context.Context, req *mcp.CallToolRequ
 func AddIssueTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[jira.GetIssueInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_issue",
-		Description: "Get a specific Jira issue by its key with default fields",
-	}, handler.getIssueHandler)
+	utils.RegisterTool[jira.SearchIssuesInput, map[string]interface{}](server, "jira_search_issues", "Search for Jira issues using JQL", handler.searchIssuesHandler)
+	utils.RegisterTool[jira.GetIssueInput, map[string]interface{}](server, "jira_get_issue", "Get a specific Jira issue by key or ID", handler.getIssueHandler)
 
-	mcp.AddTool[jira.CreateIssueInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_create_issue",
-		Description: "Create a new Jira issue",
-	}, handler.createIssueHandler)
+	if permissions["jira_create_issue"] {
+		utils.RegisterTool[jira.CreateIssueInput, map[string]interface{}](server, "jira_create_issue", "Create a new Jira issue", handler.createIssueHandler)
+	}
 
-	mcp.AddTool[jira.SearchIssuesInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_search_issues",
-		Description: "Search for Jira issues using JQL",
-	}, handler.searchIssuesHandler)
+	if permissions["jira_update_issue"] {
+		utils.RegisterTool[jira.UpdateIssueInput, map[string]interface{}](server, "jira_update_issue", "Update an existing Jira issue", handler.updateIssueHandler)
+	}
 }

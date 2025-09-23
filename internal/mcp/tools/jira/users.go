@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -57,23 +58,8 @@ func (h *Handler) searchUsersHandler(ctx context.Context, req *mcp.CallToolReque
 func AddUserTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[struct{}, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_current_user",
-		Description: "Get the current user",
-	}, handler.getCurrentUserHandler)
-
-	mcp.AddTool[jira.GetUserByNameInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_user_by_name",
-		Description: "Get user by username",
-	}, handler.getUserByNameHandler)
-
-	mcp.AddTool[jira.GetUserByKeyInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_user_by_key",
-		Description: "Get user by key",
-	}, handler.getUserByKeyHandler)
-
-	mcp.AddTool[jira.SearchUsersInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_search_users",
-		Description: "Search for users",
-	}, handler.searchUsersHandler)
+	utils.RegisterTool[struct{}, map[string]interface{}](server, "jira_get_current_user", "Get the current user", handler.getCurrentUserHandler)
+	utils.RegisterTool[jira.GetUserByNameInput, map[string]interface{}](server, "jira_get_user_by_name", "Get user by username", handler.getUserByNameHandler)
+	utils.RegisterTool[jira.GetUserByKeyInput, map[string]interface{}](server, "jira_get_user_by_key", "Get user by key", handler.getUserByKeyHandler)
+	utils.RegisterTool[jira.SearchUsersInput, map[string]interface{}](server, "jira_search_users", "Search for users", handler.searchUsersHandler)
 }

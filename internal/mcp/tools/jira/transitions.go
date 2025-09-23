@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -34,15 +35,9 @@ func (h *Handler) transitionIssueHandler(ctx context.Context, req *mcp.CallToolR
 func AddTransitionTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[jira.GetTransitionsInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_transitions",
-		Description: "Get transitions for a Jira issue",
-	}, handler.getTransitionsHandler)
+	utils.RegisterTool[jira.GetTransitionsInput, map[string]interface{}](server, "jira_get_transitions", "Get transitions for a Jira issue", handler.getTransitionsHandler)
 
 	if permissions["jira_transition_issue"] {
-		mcp.AddTool[jira.TransitionIssueInput, map[string]interface{}](server, &mcp.Tool{
-			Name:        "jira_transition_issue",
-			Description: "Transition a Jira issue",
-		}, handler.transitionIssueHandler)
+		utils.RegisterTool[jira.TransitionIssueInput, map[string]interface{}](server, "jira_transition_issue", "Transition a Jira issue", handler.transitionIssueHandler)
 	}
 }

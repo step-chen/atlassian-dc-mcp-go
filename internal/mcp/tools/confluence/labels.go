@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/confluence"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -33,13 +34,6 @@ func (h *Handler) getLabelsHandler(ctx context.Context, req *mcp.CallToolRequest
 func AddLabelTools(server *mcp.Server, client *confluence.ConfluenceClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[confluence.GetRelatedLabelsInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_related_labels",
-		Description: "Get labels related to a specific label. This tool allows you to find labels that are commonly used together with a given label.",
-	}, handler.getRelatedLabelsHandler)
-
-	mcp.AddTool[confluence.GetLabelsInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_labels",
-		Description: "Get labels with various filter options. This tool allows you to retrieve labels based on name, owner, namespace, or space.",
-	}, handler.getLabelsHandler)
+	utils.RegisterTool[confluence.GetRelatedLabelsInput, map[string]interface{}](server, "confluence_get_related_labels", "Get labels related to a specific label. This tool allows you to find labels that are commonly used together with a given label.", handler.getRelatedLabelsHandler)
+	utils.RegisterTool[confluence.GetLabelsInput, map[string]interface{}](server, "confluence_get_labels", "Get labels with various filter options. This tool allows you to retrieve labels based on name, owner, namespace, or space.", handler.getLabelsHandler)
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/confluence"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -43,18 +44,7 @@ func (h *Handler) getContentCommentsHandler(ctx context.Context, req *mcp.CallTo
 func AddChildrenTools(server *mcp.Server, client *confluence.ConfluenceClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[confluence.GetContentChildrenInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_content_children",
-		Description: "Get content children",
-	}, handler.getContentChildrenHandler)
-
-	mcp.AddTool[confluence.GetContentChildrenByTypeInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_content_children_by_type",
-		Description: "Get content children by type",
-	}, handler.getContentChildrenByTypeHandler)
-
-	mcp.AddTool[confluence.GetContentCommentsInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_content_comments",
-		Description: "Get content comments",
-	}, handler.getContentCommentsHandler)
+	utils.RegisterTool[confluence.GetContentChildrenInput, map[string]interface{}](server, "confluence_get_content_children", "Get content children", handler.getContentChildrenHandler)
+	utils.RegisterTool[confluence.GetContentChildrenByTypeInput, map[string]interface{}](server, "confluence_get_content_children_by_type", "Get content children by type", handler.getContentChildrenByTypeHandler)
+	utils.RegisterTool[confluence.GetContentCommentsInput, map[string]interface{}](server, "confluence_get_content_comments", "Get content comments", handler.getContentCommentsHandler)
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -33,16 +34,10 @@ func (h *Handler) addCommentHandler(ctx context.Context, req *mcp.CallToolReques
 func AddCommentTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[jira.GetCommentsInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_comments",
-		Description: "Get comments for a Jira issue",
-	}, handler.getCommentsHandler)
+	utils.RegisterTool[jira.GetCommentsInput, map[string]interface{}](server, "jira_get_comments", "Get comments for a Jira issue", handler.getCommentsHandler)
 
 	// Only register write tools if write permission is enabled
 	if permissions["jira_add_comment"] {
-		mcp.AddTool[jira.AddCommentInput, map[string]interface{}](server, &mcp.Tool{
-			Name:        "jira_add_comment",
-			Description: "Add a comment to a Jira issue",
-		}, handler.addCommentHandler)
+		utils.RegisterTool[jira.AddCommentInput, map[string]interface{}](server, "jira_add_comment", "Add a comment to a Jira issue", handler.addCommentHandler)
 	}
 }

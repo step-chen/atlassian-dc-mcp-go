@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/confluence"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
-	"github.com/google/jsonschema-go/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -24,12 +24,5 @@ func (h *Handler) getCurrentUserHandler(ctx context.Context, req *mcp.CallToolRe
 func AddUserTools(server *mcp.Server, client *confluence.ConfluenceClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[confluence.EmptyInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_current_user",
-		Description: "Get current Confluence user. This tool retrieves information about the currently authenticated user.",
-		InputSchema: &jsonschema.Schema{
-			Type:       "object",
-			Properties: map[string]*jsonschema.Schema{},
-		},
-	}, handler.getCurrentUserHandler)
+	utils.RegisterTool[confluence.EmptyInput, map[string]interface{}](server, "confluence_get_current_user", "Get current Confluence user. This tool retrieves information about the currently authenticated user.", handler.getCurrentUserHandler)
 }

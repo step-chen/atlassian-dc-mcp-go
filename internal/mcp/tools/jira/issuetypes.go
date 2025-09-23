@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -27,8 +28,5 @@ func (h *Handler) getIssueTypesHandler(ctx context.Context, req *mcp.CallToolReq
 func AddIssueTypeTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[struct{}, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_issue_types",
-		Description: "Get Jira issue types",
-	}, handler.getIssueTypesHandler)
+	utils.RegisterTool[struct{}, map[string]interface{}](server, "jira_get_issue_types", "Get Jira issue types", handler.getIssueTypesHandler)
 }

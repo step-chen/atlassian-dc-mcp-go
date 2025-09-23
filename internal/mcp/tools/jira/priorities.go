@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -27,8 +28,5 @@ func (h *Handler) getPrioritiesHandler(ctx context.Context, req *mcp.CallToolReq
 func AddPriorityTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[struct{}, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_priorities",
-		Description: "Get all Jira priorities",
-	}, handler.getPrioritiesHandler)
+	utils.RegisterTool[struct{}, map[string]interface{}](server, "jira_get_priorities", "Get all Jira priorities", handler.getPrioritiesHandler)
 }

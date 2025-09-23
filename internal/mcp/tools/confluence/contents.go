@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/confluence"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -148,81 +149,30 @@ func (h *Handler) addCommentHandler(ctx context.Context, req *mcp.CallToolReques
 func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[confluence.GetContentInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_content",
-		Description: "Get a list of Confluence content. This tool allows you to retrieve multiple content items with various filter options.",
-	}, handler.getContentHandler)
-
-	mcp.AddTool[confluence.SearchContentInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_search_content",
-		Description: "Search for Confluence content using CQL (Confluence Query Language). This tool allows you to find content based on various criteria such as text, space, labels, and more.",
-	}, handler.searchContentHandler)
-
-	mcp.AddTool[confluence.GetContentByIDInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_content_by_id",
-		Description: "Get a specific Confluence content item by its ID. This tool allows you to retrieve detailed information about a content item including its body, metadata, and version history.",
-	}, handler.getContentByIDHandler)
-
-	mcp.AddTool[confluence.GetContentHistoryInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_content_history",
-		Description: "Retrieve the history of a Confluence content item. This tool provides detailed information about all versions of a content item.",
-	}, handler.getContentHistoryHandler)
-
-	mcp.AddTool[confluence.GetContentCommentsInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_content_comments",
-		Description: "Get comments for a specific Confluence content item. This tool allows you to retrieve all comments associated with a content item.",
-	}, handler.getContentCommentsHandler)
-
-	mcp.AddTool[confluence.GetContentLabelsInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_content_labels",
-		Description: "Get labels for a specific Confluence content item. This tool allows you to retrieve all labels associated with a content item.",
-	}, handler.getContentLabelsHandler)
-
-	mcp.AddTool[confluence.GetAttachmentsInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_attachments",
-		Description: "Get attachments for a specific Confluence content item.",
-	}, handler.getAttachmentsHandler)
-
-	mcp.AddTool[confluence.GetExtractedTextInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_extracted_text",
-		Description: "Get extracted text from a Confluence attachment.",
-	}, handler.getExtractedTextHandler)
-
-	mcp.AddTool[confluence.ScanContentBySpaceKeyInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_scan_content_by_space_key",
-		Description: "Scan Confluence content by space key.",
-	}, handler.scanContentBySpaceKeyHandler)
-
-	mcp.AddTool[confluence.SearchInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_search",
-		Description: "Search Confluence using the Search API.",
-	}, handler.searchHandler)
+	utils.RegisterTool[confluence.GetContentInput, map[string]interface{}](server, "confluence_get_content", "Get a list of Confluence content. This tool allows you to retrieve multiple content items with various filter options.", handler.getContentHandler)
+	utils.RegisterTool[confluence.SearchContentInput, map[string]interface{}](server, "confluence_search_content", "Search for Confluence content using CQL (Confluence Query Language). This tool allows you to find content based on various criteria such as text, space, labels, and more.", handler.searchContentHandler)
+	utils.RegisterTool[confluence.GetContentByIDInput, map[string]interface{}](server, "confluence_get_content_by_id", "Get a specific Confluence content item by its ID. This tool allows you to retrieve detailed information about a content item including its body, metadata, and version history.", handler.getContentByIDHandler)
+	utils.RegisterTool[confluence.GetContentHistoryInput, map[string]interface{}](server, "confluence_get_content_history", "Retrieve the history of a Confluence content item. This tool provides detailed information about all versions of a content item.", handler.getContentHistoryHandler)
+	utils.RegisterTool[confluence.GetContentCommentsInput, map[string]interface{}](server, "confluence_get_content_comments", "Get comments for a specific Confluence content item. This tool allows you to retrieve all comments associated with a content item.", handler.getContentCommentsHandler)
+	utils.RegisterTool[confluence.GetContentLabelsInput, map[string]interface{}](server, "confluence_get_content_labels", "Get labels for a specific Confluence content item. This tool allows you to retrieve all labels associated with a content item.", handler.getContentLabelsHandler)
+	utils.RegisterTool[confluence.GetAttachmentsInput, map[string]interface{}](server, "confluence_get_attachments", "Get attachments for a specific Confluence content item.", handler.getAttachmentsHandler)
+	utils.RegisterTool[confluence.GetExtractedTextInput, map[string]interface{}](server, "confluence_get_extracted_text", "Get extracted text from a Confluence attachment.", handler.getExtractedTextHandler)
+	utils.RegisterTool[confluence.ScanContentBySpaceKeyInput, map[string]interface{}](server, "confluence_scan_content_by_space_key", "Scan Confluence content by space key.", handler.scanContentBySpaceKeyHandler)
+	utils.RegisterTool[confluence.SearchInput, map[string]interface{}](server, "confluence_search", "Search Confluence using the Search API.", handler.searchHandler)
 
 	if permissions["confluence_create_content"] {
-		mcp.AddTool[confluence.CreateContentInput, map[string]interface{}](server, &mcp.Tool{
-			Name:        "confluence_create_content",
-			Description: "Create new Confluence content. This tool allows you to create pages, blog posts, and other content types.",
-		}, handler.createContentHandler)
+		utils.RegisterTool[confluence.CreateContentInput, map[string]interface{}](server, "confluence_create_content", "Create new Confluence content. This tool allows you to create pages, blog posts, and other content types.", handler.createContentHandler)
 	}
 
 	if permissions["confluence_update_content"] {
-		mcp.AddTool[confluence.UpdateContentInput, map[string]interface{}](server, &mcp.Tool{
-			Name:        "confluence_update_content",
-			Description: "Update existing Confluence content. This tool allows you to modify various aspects of existing content such as title, body, and other properties.",
-		}, handler.updateContentHandler)
+		utils.RegisterTool[confluence.UpdateContentInput, map[string]interface{}](server, "confluence_update_content", "Update existing Confluence content. This tool allows you to modify various aspects of existing content such as title, body, and other properties.", handler.updateContentHandler)
 	}
 
 	if permissions["confluence_delete_content"] {
-		mcp.AddTool[confluence.DeleteContentInput, map[string]interface{}](server, &mcp.Tool{
-			Name:        "confluence_delete_content",
-			Description: "Delete Confluence content by ID. This tool allows you to permanently remove content from Confluence.",
-		}, handler.deleteContentHandler)
+		utils.RegisterTool[confluence.DeleteContentInput, map[string]interface{}](server, "confluence_delete_content", "Delete Confluence content by ID. This tool allows you to permanently remove content from Confluence.", handler.deleteContentHandler)
 	}
 
 	if permissions["confluence_add_comment"] {
-		mcp.AddTool[confluence.AddCommentInput, map[string]interface{}](server, &mcp.Tool{
-			Name:        "confluence_add_comment",
-			Description: "Add a comment to Confluence content. This tool allows you to attach comments to specific content items.",
-		}, handler.addCommentHandler)
+		utils.RegisterTool[confluence.AddCommentInput, map[string]interface{}](server, "confluence_add_comment", "Add a comment to Confluence content. This tool allows you to attach comments to specific content items.", handler.addCommentHandler)
 	}
 }

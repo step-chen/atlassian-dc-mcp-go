@@ -3,6 +3,8 @@ package common
 import (
 	"context"
 
+	"atlassian-dc-mcp-go/internal/mcp/utils"
+
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -33,8 +35,5 @@ func capabilitiesHandler(ctx context.Context, req *mcp.CallToolRequest, input Ca
 
 // AddCapabilitiesTool registers the capabilities tool with the MCP server.
 func AddCapabilitiesTool(server *mcp.Server) {
-	mcp.AddTool[CapabilitiesInput, CapabilitiesOutput](server, &mcp.Tool{
-		Name:        "capabilities",
-		Description: "Get detailed information about what tools and operations are supported by this server, including Jira, Confluence, and Bitbucket integrations.",
-	}, capabilitiesHandler)
+	utils.RegisterTool[CapabilitiesInput, CapabilitiesOutput](server, "capabilities", "Get detailed information about what tools and operations are supported by this server, including Jira, Confluence, and Bitbucket integrations.", capabilitiesHandler)
 }

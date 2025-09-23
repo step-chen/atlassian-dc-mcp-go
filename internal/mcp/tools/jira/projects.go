@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/jira"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -37,13 +38,6 @@ func (h *Handler) getProjectsHandler(ctx context.Context, req *mcp.CallToolReque
 func AddProjectTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[jira.GetProjectInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_project",
-		Description: "Get a specific Jira project by key",
-	}, handler.getProjectHandler)
-
-	mcp.AddTool[jira.GetAllProjectsInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "jira_get_projects",
-		Description: "Get all Jira projects with optional filters",
-	}, handler.getProjectsHandler)
+	utils.RegisterTool[jira.GetProjectInput, map[string]interface{}](server, "jira_get_project", "Get a specific Jira project by key", handler.getProjectHandler)
+	utils.RegisterTool[jira.GetAllProjectsInput, map[string]interface{}](server, "jira_get_projects", "Get all Jira projects with optional filters", handler.getProjectsHandler)
 }

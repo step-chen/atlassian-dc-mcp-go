@@ -8,6 +8,7 @@ import (
 	"atlassian-dc-mcp-go/internal/client/confluence"
 	"atlassian-dc-mcp-go/internal/client/jira"
 	"atlassian-dc-mcp-go/internal/config"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -167,8 +168,5 @@ func (h *Handler) healthCheckHandler(ctx context.Context, req *mcp.CallToolReque
 // AddHealthCheckTool registers the health check tool with the MCP server using the new generic API.
 func AddHealthCheckTool(server *mcp.Server, appServer AppServer) {
 	handler := NewHandler(appServer)
-	mcp.AddTool[HealthCheckInput, HealthCheckOutput](server, &mcp.Tool{
-		Name:        "health_check",
-		Description: "Check the health status of the configured services (Jira, Confluence, Bitbucket).",
-	}, handler.healthCheckHandler)
+	utils.RegisterTool[HealthCheckInput, HealthCheckOutput](server, "health_check", "Check the health status of the configured services (Jira, Confluence, Bitbucket).", handler.healthCheckHandler)
 }

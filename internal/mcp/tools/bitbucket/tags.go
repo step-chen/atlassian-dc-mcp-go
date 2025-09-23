@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -33,13 +34,6 @@ func (h *Handler) getTagHandler(ctx context.Context, req *mcp.CallToolRequest, i
 func AddTagTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[bitbucket.GetTagsInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_tags",
-		Description: "Get tags in a repository",
-	}, handler.getTagsHandler)
-
-	mcp.AddTool[bitbucket.GetTagInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_tag",
-		Description: "Get a specific tag in a repository",
-	}, handler.getTagHandler)
+	utils.RegisterTool[bitbucket.GetTagsInput, MapOutput](server, "bitbucket_get_tags", "Get tags in a repository", handler.getTagsHandler)
+	utils.RegisterTool[bitbucket.GetTagInput, MapOutput](server, "bitbucket_get_tag", "Get a specific tag in a repository", handler.getTagHandler)
 }

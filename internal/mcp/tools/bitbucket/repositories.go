@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -124,58 +125,15 @@ func (h *Handler) getRelatedRepositoriesHandler(ctx context.Context, req *mcp.Ca
 func AddRepositoryTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[bitbucket.GetRepositoryInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_repository",
-		Description: "Get a repository",
-	}, handler.getRepositoryHandler)
-
-	mcp.AddTool[bitbucket.GetRepositoriesInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_repositories",
-		Description: "Get a list of repositories",
-	}, handler.getRepositoriesHandler)
-
-	mcp.AddTool[bitbucket.GetProjectRepositoriesInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_project_repositories",
-		Description: "Get repositories in a project",
-	}, handler.getProjectRepositoriesHandler)
-
-	mcp.AddTool[bitbucket.GetRepositoryLabelsInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_repository_labels",
-		Description: "Get repository labels",
-	}, handler.getRepositoryLabelsHandler)
-
-	mcp.AddTool[bitbucket.GetFileContentInput, ContentOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_file_content",
-		Description: "Get file content",
-	}, handler.getFileContentHandler)
-
-	mcp.AddTool[bitbucket.GetReadmeInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_readme",
-		Description: "Get repository readme",
-	}, handler.getReadmeHandler)
-
-	mcp.AddTool[bitbucket.GetFilesInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_files",
-		Description: "Get files in a repository path",
-	}, handler.getFilesHandler)
-
-	mcp.AddTool[bitbucket.GetChangesInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_changes",
-		Description: "Get changes in a repository",
-	}, handler.getChangesHandler)
-
-	mcp.AddTool[bitbucket.CompareChangesInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_compare_changes",
-		Description: "Compare changes between commits",
-	}, handler.compareChangesHandler)
-
-	mcp.AddTool[bitbucket.GetForksInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_forks",
-		Description: "Get forks of a repository",
-	}, handler.getForksHandler)
-
-	mcp.AddTool[bitbucket.GetRelatedRepositoriesInput, MapOutput](server, &mcp.Tool{
-		Name:        "bitbucket_get_related_repositories",
-		Description: "Get related repositories",
-	}, handler.getRelatedRepositoriesHandler)
+	utils.RegisterTool[bitbucket.GetRepositoryInput, MapOutput](server, "bitbucket_get_repository", "Get a repository", handler.getRepositoryHandler)
+	utils.RegisterTool[bitbucket.GetRepositoriesInput, MapOutput](server, "bitbucket_get_repositories", "Get a list of repositories", handler.getRepositoriesHandler)
+	utils.RegisterTool[bitbucket.GetProjectRepositoriesInput, MapOutput](server, "bitbucket_get_project_repositories", "Get repositories in a project", handler.getProjectRepositoriesHandler)
+	utils.RegisterTool[bitbucket.GetRepositoryLabelsInput, MapOutput](server, "bitbucket_get_repository_labels", "Get repository labels", handler.getRepositoryLabelsHandler)
+	utils.RegisterTool[bitbucket.GetFileContentInput, ContentOutput](server, "bitbucket_get_file_content", "Get file content", handler.getFileContentHandler)
+	utils.RegisterTool[bitbucket.GetReadmeInput, MapOutput](server, "bitbucket_get_readme", "Get repository readme", handler.getReadmeHandler)
+	utils.RegisterTool[bitbucket.GetFilesInput, MapOutput](server, "bitbucket_get_files", "Get files in a repository path", handler.getFilesHandler)
+	utils.RegisterTool[bitbucket.GetChangesInput, MapOutput](server, "bitbucket_get_changes", "Get changes in a repository", handler.getChangesHandler)
+	utils.RegisterTool[bitbucket.CompareChangesInput, MapOutput](server, "bitbucket_compare_changes", "Compare changes between commits", handler.compareChangesHandler)
+	utils.RegisterTool[bitbucket.GetForksInput, MapOutput](server, "bitbucket_get_forks", "Get forks of a repository", handler.getForksHandler)
+	utils.RegisterTool[bitbucket.GetRelatedRepositoriesInput, MapOutput](server, "bitbucket_get_related_repositories", "Get related repositories", handler.getRelatedRepositoriesHandler)
 }

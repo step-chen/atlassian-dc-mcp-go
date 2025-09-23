@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"atlassian-dc-mcp-go/internal/client/confluence"
+	"atlassian-dc-mcp-go/internal/mcp/utils"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -53,23 +54,8 @@ func (h *Handler) getSpacesByKeyHandler(ctx context.Context, req *mcp.CallToolRe
 func AddSpaceTools(server *mcp.Server, client *confluence.ConfluenceClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	mcp.AddTool[confluence.GetSpaceInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_space",
-		Description: "Get a specific Confluence space by its key. This tool allows you to retrieve detailed information about a space including its name, description, and metadata.",
-	}, handler.getSpaceHandler)
-
-	mcp.AddTool[confluence.GetContentsInSpaceInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_contents_in_space",
-		Description: "Get contents in a specific Confluence space. This tool allows you to retrieve all content items within a space.",
-	}, handler.getContentsInSpaceHandler)
-
-	mcp.AddTool[confluence.GetContentsByTypeInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_contents_by_type",
-		Description: "Get contents by type in a specific Confluence space. This tool allows you to retrieve content items of a specific type (e.g., page, blogpost) within a space.",
-	}, handler.getContentsByTypeHandler)
-
-	mcp.AddTool[confluence.GetSpacesByKeyInput, map[string]interface{}](server, &mcp.Tool{
-		Name:        "confluence_get_spaces_by_key",
-		Description: "Get spaces by key with various filter options. This tool allows you to retrieve spaces using multiple filter criteria including keys, IDs, types, status, and labels.",
-	}, handler.getSpacesByKeyHandler)
+	utils.RegisterTool[confluence.GetSpaceInput, map[string]interface{}](server, "confluence_get_space", "Get a specific Confluence space by its key. This tool allows you to retrieve detailed information about a space including its name, description, and metadata.", handler.getSpaceHandler)
+	utils.RegisterTool[confluence.GetContentsInSpaceInput, map[string]interface{}](server, "confluence_get_contents_in_space", "Get contents in a specific Confluence space. This tool allows you to retrieve all content items within a space.", handler.getContentsInSpaceHandler)
+	utils.RegisterTool[confluence.GetContentsByTypeInput, map[string]interface{}](server, "confluence_get_contents_by_type", "Get contents by type in a specific Confluence space. This tool allows you to retrieve content items of a specific type (e.g., page, blogpost) within a space.", handler.getContentsByTypeHandler)
+	utils.RegisterTool[confluence.GetSpacesByKeyInput, map[string]interface{}](server, "confluence_get_spaces_by_key", "Get spaces by key with various filter options. This tool allows you to retrieve spaces using multiple filter criteria including keys, IDs, types, status, and labels.", handler.getSpacesByKeyHandler)
 }
