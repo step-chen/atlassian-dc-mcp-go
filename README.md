@@ -203,13 +203,9 @@ jira:
     # Jira write permissions:
     jira_create_issue: false
     jira_update_issue: false
-    jira_delete_issue: false
-    jira_assign_issue: false
     jira_transition_issue: false
     jira_add_comment: false
-    jira_update_comment: false
-    jira_delete_comment: false
-    jira_add_worklog: false
+    jira_create_subtask: false
 
 confluence:
   url: "https://confluence.example.com"
@@ -220,7 +216,7 @@ confluence:
     confluence_create_content: false
     confluence_update_content: false
     confluence_delete_content: false
-    confluence_attach_file: false
+    confluence_add_comment: false
 
 bitbucket:
   url: "https://bitbucket.example.com"
@@ -228,17 +224,11 @@ bitbucket:
   permissions:
     # Note: READ permissions are always enabled and cannot be disabled
     # Bitbucket write permissions:
-    bitbucket_create_project: false
-    bitbucket_update_project: false
-    bitbucket_delete_project: false
-    bitbucket_create_repository: false
-    bitbucket_update_repository: false
-    bitbucket_delete_repository: false
-    bitbucket_fork_repository: false
-    bitbucket_create_pull_request: false
-    bitbucket_update_pull_request: false
     bitbucket_merge_pull_request: false
     bitbucket_decline_pull_request: false
+    bitbucket_add_pull_request_comment: false
+    bitbucket_create_attachment: false
+    bitbucket_delete_attachment: false
 
 ```
 
@@ -262,13 +252,9 @@ export MCP_JIRA_TOKEN="your-jira-api-token"
 # Jira write permissions:
 export MCP_JIRA_PERMISSIONS_JIRA_CREATE_ISSUE=false
 export MCP_JIRA_PERMISSIONS_JIRA_UPDATE_ISSUE=false
-export MCP_JIRA_PERMISSIONS_JIRA_DELETE_ISSUE=false
-export MCP_JIRA_PERMISSIONS_JIRA_ASSIGN_ISSUE=false
 export MCP_JIRA_PERMISSIONS_JIRA_TRANSITION_ISSUE=false
 export MCP_JIRA_PERMISSIONS_JIRA_ADD_COMMENT=false
-export MCP_JIRA_PERMISSIONS_JIRA_UPDATE_COMMENT=false
-export MCP_JIRA_PERMISSIONS_JIRA_DELETE_COMMENT=false
-export MCP_JIRA_PERMISSIONS_JIRA_ADD_WORKLOG=false
+export MCP_JIRA_PERMISSIONS_JIRA_CREATE_SUBTASK=false
 
 export MCP_CONFLUENCE_URL="https://confluence.example.com"
 export MCP_CONFLUENCE_TOKEN="your-confluence-api-token"
@@ -277,23 +263,17 @@ export MCP_CONFLUENCE_TOKEN="your-confluence-api-token"
 export MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_CREATE_CONTENT=false
 export MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_UPDATE_CONTENT=false
 export MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_DELETE_CONTENT=false
-export MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_ATTACH_FILE=false
+export MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_ADD_COMMENT=false
 
 export MCP_BITBUCKET_URL="https://bitbucket.example.com"
 export MCP_BITBUCKET_TOKEN="your-bitbucket-api-token"
 # Note: READ permissions are always enabled and cannot be disabled
 # Bitbucket write permissions:
-export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_PROJECT=false
-export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_UPDATE_PROJECT=false
-export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DELETE_PROJECT=false
-export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_REPOSITORY=false
-export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_UPDATE_REPOSITORY=false
-export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DELETE_REPOSITORY=false
-export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_FORK_REPOSITORY=false
-export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_PULL_REQUEST=false
-export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_UPDATE_PULL_REQUEST=false
 export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_MERGE_PULL_REQUEST=false
 export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DECLINE_PULL_REQUEST=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_ADD_PULL_REQUEST_COMMENT=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_ATTACHMENT=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DELETE_ATTACHMENT=false
 ```
 
 You can also use a `.env` file to manage environment variables:
@@ -315,13 +295,9 @@ MCP_JIRA_TOKEN="your-jira-api-token"
 # Jira write permissions:
 MCP_JIRA_PERMISSIONS_JIRA_CREATE_ISSUE=false
 MCP_JIRA_PERMISSIONS_JIRA_UPDATE_ISSUE=false
-MCP_JIRA_PERMISSIONS_JIRA_DELETE_ISSUE=false
-MCP_JIRA_PERMISSIONS_JIRA_ASSIGN_ISSUE=false
 MCP_JIRA_PERMISSIONS_JIRA_TRANSITION_ISSUE=false
 MCP_JIRA_PERMISSIONS_JIRA_ADD_COMMENT=false
-MCP_JIRA_PERMISSIONS_JIRA_UPDATE_COMMENT=false
-MCP_JIRA_PERMISSIONS_JIRA_DELETE_COMMENT=false
-MCP_JIRA_PERMISSIONS_JIRA_ADD_WORKLOG=false
+MCP_JIRA_PERMISSIONS_JIRA_CREATE_SUBTASK=false
 
 # Confluence configuration
 MCP_CONFLUENCE_URL="https://confluence.example.com"
@@ -331,24 +307,18 @@ MCP_CONFLUENCE_TOKEN="your-confluence-api-token"
 MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_CREATE_CONTENT=false
 MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_UPDATE_CONTENT=false
 MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_DELETE_CONTENT=false
-MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_ATTACH_FILE=false
+MCP_CONFLUENCE_PERMISSIONS_CONFLUENCE_ADD_COMMENT=false
 
 # Bitbucket configuration
 MCP_BITBUCKET_URL="https://bitbucket.example.com"
 MCP_BITBUCKET_TOKEN="your-bitbucket-api-token"
 # Note: READ permissions are always enabled and cannot be disabled
 # Bitbucket write permissions:
-MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_PROJECT=false
-MCP_BITBUCKET_PERMISSIONS_BITBUCKET_UPDATE_PROJECT=false
-MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DELETE_PROJECT=false
-MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_REPOSITORY=false
-MCP_BITBUCKET_PERMISSIONS_BITBUCKET_UPDATE_REPOSITORY=false
-MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DELETE_REPOSITORY=false
-MCP_BITBUCKET_PERMISSIONS_BITBUCKET_FORK_REPOSITORY=false
-MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_PULL_REQUEST=false
-MCP_BITBUCKET_PERMISSIONS_BITBUCKET_UPDATE_PULL_REQUEST=false
 MCP_BITBUCKET_PERMISSIONS_BITBUCKET_MERGE_PULL_REQUEST=false
 MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DECLINE_PULL_REQUEST=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_ADD_PULL_REQUEST_COMMENT=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_ATTACHMENT=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DELETE_ATTACHMENT=false
 ```
 
 Create .env file from example:
@@ -440,6 +410,7 @@ jira:
     jira_create_issue: true     # Allow creating issues
     jira_update_issue: false    # Don't allow updating issues
     jira_delete_issue: false    # Don't allow deleting issues
+    jira_create_subtask: false  # Don't allow creating subtasks
     # ... other permissions
 ```
 
@@ -539,3 +510,10 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## References
+
+- [Confluence REST API](https://developer.atlassian.com/server/confluence/rest/v1010/intro/#about)
+- [Jira REST API](https://developer.atlassian.com/server/jira/platform/rest/v11000/intro/#gettingstarted)
+- [Bitbucket REST API](https://developer.atlassian.com/server/bitbucket/rest/v1000/intro/#about)
+- [Model Context Protocol Go SDK](https://github.com/modelcontextprotocol/go-sdk)
