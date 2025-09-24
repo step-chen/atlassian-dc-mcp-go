@@ -1,8 +1,5 @@
 package jira
 
-// EmptyInput represents an empty input struct
-type EmptyInput struct{}
-
 // PaginationInput represents pagination parameters
 type PaginationInput struct {
 	StartAt    int `json:"startAt,omitempty" jsonschema:"The index of the first item to return"`

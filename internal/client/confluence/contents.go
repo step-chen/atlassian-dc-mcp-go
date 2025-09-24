@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
 
@@ -15,9 +16,9 @@ import (
 //   - input: GetContentInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]any: The content data
+//   - types.MapOutput: The content data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContent(input GetContentInput) (map[string]any, error) {
+func (c *ConfluenceClient) GetContent(input GetContentInput) (types.MapOutput, error) {
 	params := url.Values{}
 
 	utils.SetQueryParam(params, "type", input.TypeParam, "")
@@ -29,7 +30,7 @@ func (c *ConfluenceClient) GetContent(input GetContentInput) (map[string]any, er
 	utils.SetQueryParam(params, "start", input.Start, 0)
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 
-	var content map[string]any
+	var content types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "content"}, params, nil, &content); err != nil {
 		return nil, err
 	}
@@ -43,13 +44,13 @@ func (c *ConfluenceClient) GetContent(input GetContentInput) (map[string]any, er
 //   - input: GetContentByIDInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The content data
+//   - types.MapOutput: The content data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentByID(input GetContentByIDInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) GetContentByID(input GetContentByIDInput) (types.MapOutput, error) {
 	params := url.Values{}
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 
-	var content map[string]interface{}
+	var content types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID}, params, nil, &content); err != nil {
 		return nil, err
 	}
@@ -63,9 +64,9 @@ func (c *ConfluenceClient) GetContentByID(input GetContentByIDInput) (map[string
 //   - input: SearchContentInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The search results
+//   - types.MapOutput: The search results
 //   - error: An error if the request fails
-func (c *ConfluenceClient) SearchContent(input SearchContentInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) SearchContent(input SearchContentInput) (types.MapOutput, error) {
 	params := url.Values{}
 	utils.SetQueryParam(params, "cql", input.CQL, "")
 	utils.SetQueryParam(params, "cqlcontext", input.CQLContext, "")
@@ -73,7 +74,7 @@ func (c *ConfluenceClient) SearchContent(input SearchContentInput) (map[string]i
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 
-	var result map[string]interface{}
+	var result types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "content", "search"}, params, nil, &result); err != nil {
 		return nil, err
 	}
@@ -87,10 +88,10 @@ func (c *ConfluenceClient) SearchContent(input SearchContentInput) (map[string]i
 //   - input: CreateContentInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The created content data
+//   - types.MapOutput: The created content data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) CreateContent(input CreateContentInput) (map[string]interface{}, error) {
-	payload := map[string]interface{}{
+func (c *ConfluenceClient) CreateContent(input CreateContentInput) (types.MapOutput, error) {
+	payload := types.MapOutput{
 		"type":  input.Type,
 		"title": input.Title,
 		"space": input.Space,
@@ -110,7 +111,7 @@ func (c *ConfluenceClient) CreateContent(input CreateContentInput) (map[string]i
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	var content map[string]interface{}
+	var content types.MapOutput
 	if err := c.executeRequest("POST", []string{"rest", "api", "content"}, nil, jsonPayload, &content); err != nil {
 		return nil, err
 	}
@@ -124,15 +125,15 @@ func (c *ConfluenceClient) CreateContent(input CreateContentInput) (map[string]i
 //   - input: UpdateContentInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The updated content data
+//   - types.MapOutput: The updated content data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) UpdateContent(input UpdateContentInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) UpdateContent(input UpdateContentInput) (types.MapOutput, error) {
 	jsonPayload, err := json.Marshal(input.ContentData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	var updatedContent map[string]interface{}
+	var updatedContent types.MapOutput
 	if err := c.executeRequest("PUT", []string{"rest", "api", "content", input.ContentID}, nil, jsonPayload, &updatedContent); err != nil {
 		return nil, err
 	}
@@ -161,13 +162,13 @@ func (c *ConfluenceClient) DeleteContent(input DeleteContentInput) error {
 //   - input: GetContentHistoryInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The content history data
+//   - types.MapOutput: The content history data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentHistory(input GetContentHistoryInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) GetContentHistory(input GetContentHistoryInput) (types.MapOutput, error) {
 	params := url.Values{}
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 
-	var history map[string]interface{}
+	var history types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "history"}, params, nil, &history); err != nil {
 		return nil, err
 	}
@@ -181,16 +182,16 @@ func (c *ConfluenceClient) GetContentHistory(input GetContentHistoryInput) (map[
 //   - input: AddCommentInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The added comment data
+//   - types.MapOutput: The added comment data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) AddComment(input AddCommentInput) (map[string]interface{}, error) {
-	payload := map[string]interface{}{
+func (c *ConfluenceClient) AddComment(input AddCommentInput) (types.MapOutput, error) {
+	payload := types.MapOutput{
 		"type": "comment",
 		"container": map[string]string{
 			"id":   input.ContentID,
 			"type": "page",
 		},
-		"body": map[string]interface{}{
+		"body": types.MapOutput{
 			"storage": map[string]string{
 				"value":          input.CommentBody,
 				"representation": "storage",
@@ -203,7 +204,7 @@ func (c *ConfluenceClient) AddComment(input AddCommentInput) (map[string]interfa
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	var comment map[string]interface{}
+	var comment types.MapOutput
 	if err := c.executeRequest("POST", []string{"rest", "api", "content"}, nil, jsonPayload, &comment); err != nil {
 		return nil, err
 	}
@@ -217,9 +218,9 @@ func (c *ConfluenceClient) AddComment(input AddCommentInput) (map[string]interfa
 //   - input: GetAttachmentsInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The attachments data
+//   - types.MapOutput: The attachments data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetAttachments(input GetAttachmentsInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) GetAttachments(input GetAttachmentsInput) (types.MapOutput, error) {
 	params := url.Values{}
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 	utils.SetQueryParam(params, "start", input.Start, 0)
@@ -227,7 +228,7 @@ func (c *ConfluenceClient) GetAttachments(input GetAttachmentsInput) (map[string
 	utils.SetQueryParam(params, "filename", input.Filename, "")
 	utils.SetQueryParam(params, "mediaType", input.MediaType, "")
 
-	var attachments map[string]interface{}
+	var attachments types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "child", "attachment"}, params, nil, &attachments); err != nil {
 		return nil, err
 	}
@@ -241,10 +242,10 @@ func (c *ConfluenceClient) GetAttachments(input GetAttachmentsInput) (map[string
 //   - input: GetExtractedTextInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The extracted text data
+//   - types.MapOutput: The extracted text data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetExtractedText(input GetExtractedTextInput) (map[string]interface{}, error) {
-	var extractedText map[string]interface{}
+func (c *ConfluenceClient) GetExtractedText(input GetExtractedTextInput) (types.MapOutput, error) {
+	var extractedText types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "child", "attachment", input.AttachmentID, "extractedText"}, nil, nil, &extractedText); err != nil {
 		return nil, err
 	}
@@ -258,14 +259,14 @@ func (c *ConfluenceClient) GetExtractedText(input GetExtractedTextInput) (map[st
 //   - input: GetContentLabelsInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The labels data
+//   - types.MapOutput: The labels data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentLabels(input GetContentLabelsInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) GetContentLabels(input GetContentLabelsInput) (types.MapOutput, error) {
 	params := url.Values{}
 	utils.SetQueryParam(params, "start", input.Start, 0)
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 
-	var labels map[string]interface{}
+	var labels types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "label"}, params, nil, &labels); err != nil {
 		return nil, err
 	}
@@ -279,9 +280,9 @@ func (c *ConfluenceClient) GetContentLabels(input GetContentLabelsInput) (map[st
 //   - input: ScanContentBySpaceKeyInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The scanned content data
+//   - types.MapOutput: The scanned content data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) ScanContentBySpaceKey(input ScanContentBySpaceKeyInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) ScanContentBySpaceKey(input ScanContentBySpaceKeyInput) (types.MapOutput, error) {
 	params := url.Values{}
 
 	utils.SetQueryParam(params, "type", input.TypeParam, "")
@@ -293,7 +294,7 @@ func (c *ConfluenceClient) ScanContentBySpaceKey(input ScanContentBySpaceKeyInpu
 	utils.SetQueryParam(params, "start", input.Start, 0)
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 
-	var content map[string]interface{}
+	var content types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "content", "scan"}, params, nil, &content); err != nil {
 		return nil, err
 	}

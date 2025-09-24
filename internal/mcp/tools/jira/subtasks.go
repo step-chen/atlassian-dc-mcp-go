@@ -6,13 +6,14 @@ import (
 
 	"atlassian-dc-mcp-go/internal/client/jira"
 	"atlassian-dc-mcp-go/internal/mcp/utils"
+	"atlassian-dc-mcp-go/internal/types"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // GetSubtasksResult represents the result structure for getSubtasksHandler
 type GetSubtasksResult struct {
-	Subtasks []map[string]interface{} `json:"subtasks"`
+	Subtasks []types.MapOutput `json:"subtasks"`
 }
 
 // getSubtasksHandler handles getting subtasks for a Jira issue
@@ -30,7 +31,7 @@ func (h *Handler) getSubtasksHandler(ctx context.Context, req *mcp.CallToolReque
 }
 
 // createSubTaskHandler handles creating a subtask for a Jira issue
-func (h *Handler) createSubTaskHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.CreateSubTaskInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+func (h *Handler) createSubTaskHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.CreateSubTaskInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	subtask, err := h.client.CreateSubTask(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("create subtask failed: %w", err)
@@ -46,6 +47,6 @@ func AddSubtaskTools(server *mcp.Server, client *jira.JiraClient, permissions ma
 	utils.RegisterTool[jira.GetSubtasksInput, GetSubtasksResult](server, "jira_get_subtasks", "Get subtasks for a Jira issue", handler.getSubtasksHandler)
 
 	if permissions["jira_create_subtask"] {
-		utils.RegisterTool[jira.CreateSubTaskInput, map[string]interface{}](server, "jira_create_subtask", "Create a subtask for a Jira issue", handler.createSubTaskHandler)
+		utils.RegisterTool[jira.CreateSubTaskInput, types.MapOutput](server, "jira_create_subtask", "Create a subtask for a Jira issue", handler.createSubTaskHandler)
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
 
@@ -19,10 +20,10 @@ import (
 //   - input: GetPullRequestInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The pull request data retrieved from the API
+//   - types.MapOutput: The pull request data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequest(input GetPullRequestInput) (map[string]interface{}, error) {
-	var pr map[string]interface{}
+func (c *BitbucketClient) GetPullRequest(input GetPullRequestInput) (types.MapOutput, error) {
+	var pr types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID)},
@@ -45,9 +46,9 @@ func (c *BitbucketClient) GetPullRequest(input GetPullRequestInput) (map[string]
 //   - input: GetPullRequestActivitiesInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The activities data retrieved from the API
+//   - types.MapOutput: The activities data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestActivities(input GetPullRequestActivitiesInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetPullRequestActivities(input GetPullRequestActivitiesInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 
 	utils.SetQueryParam(queryParams, "fromType", input.FromType, "")
@@ -55,7 +56,7 @@ func (c *BitbucketClient) GetPullRequestActivities(input GetPullRequestActivitie
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
-	var activities map[string]interface{}
+	var activities types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "activities"},
@@ -78,10 +79,10 @@ func (c *BitbucketClient) GetPullRequestActivities(input GetPullRequestActivitie
 //   - input: AddPullRequestCommentInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The comment data retrieved from the API
+//   - types.MapOutput: The comment data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) AddPullRequestComment(input AddPullRequestCommentInput) (map[string]interface{}, error) {
-	payload := map[string]interface{}{
+func (c *BitbucketClient) AddPullRequestComment(input AddPullRequestCommentInput) (types.MapOutput, error) {
+	payload := types.MapOutput{
 		"text": input.CommentText,
 	}
 
@@ -90,7 +91,7 @@ func (c *BitbucketClient) AddPullRequestComment(input AddPullRequestCommentInput
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	var comment map[string]interface{}
+	var comment types.MapOutput
 	if err := c.executeRequest(
 		http.MethodPost,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "comments"},
@@ -122,9 +123,9 @@ type MergePullRequestOptions struct {
 //   - input: MergePullRequestInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The merge result data retrieved from the API
+//   - types.MapOutput: The merge result data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) MergePullRequest(input MergePullRequestInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) MergePullRequest(input MergePullRequestInput) (types.MapOutput, error) {
 	// Create options struct from input fields that are merge options
 	options := MergePullRequestOptions{
 		AutoMerge:   input.AutoMerge,
@@ -143,7 +144,7 @@ func (c *BitbucketClient) MergePullRequest(input MergePullRequestInput) (map[str
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	var result map[string]interface{}
+	var result types.MapOutput
 	if err := c.executeRequest(
 		http.MethodPost,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "merge"},
@@ -171,9 +172,9 @@ type DeclinePullRequestOptions struct {
 //   - input: DeclinePullRequestInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The decline result data retrieved from the API
+//   - types.MapOutput: The decline result data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) DeclinePullRequest(input DeclinePullRequestInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) DeclinePullRequest(input DeclinePullRequestInput) (types.MapOutput, error) {
 	// Create options struct from input fields that are decline options
 	options := DeclinePullRequestOptions{
 		Comment: input.Comment,
@@ -189,7 +190,7 @@ func (c *BitbucketClient) DeclinePullRequest(input DeclinePullRequestInput) (map
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	var result map[string]interface{}
+	var result types.MapOutput
 	if err := c.executeRequest(
 		http.MethodPost,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "decline"},
@@ -212,9 +213,9 @@ func (c *BitbucketClient) DeclinePullRequest(input DeclinePullRequestInput) (map
 //   - input: GetPullRequestsInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The pull requests data retrieved from the API
+//   - types.MapOutput: The pull requests data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequests(input GetPullRequestsInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetPullRequests(input GetPullRequestsInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 
 	utils.SetQueryParam(queryParams, "state", input.State, "")
@@ -228,7 +229,7 @@ func (c *BitbucketClient) GetPullRequests(input GetPullRequestsInput) (map[strin
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var prs map[string]interface{}
+	var prs types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests"},
@@ -251,14 +252,14 @@ func (c *BitbucketClient) GetPullRequests(input GetPullRequestsInput) (map[strin
 //   - input: GetPullRequestSuggestionsInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The suggestions data retrieved from the API
+//   - types.MapOutput: The suggestions data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestSuggestions(input GetPullRequestSuggestionsInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetPullRequestSuggestions(input GetPullRequestSuggestionsInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "changesSince", input.ChangesSince, "")
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
-	var suggestions map[string]interface{}
+	var suggestions types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "dashboard", "pull-request-suggestions"},
@@ -281,10 +282,10 @@ func (c *BitbucketClient) GetPullRequestSuggestions(input GetPullRequestSuggesti
 //   - input: GetPullRequestJiraIssuesInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The Jira issues data retrieved from the API
+//   - types.MapOutput: The Jira issues data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestJiraIssues(input GetPullRequestJiraIssuesInput) (map[string]interface{}, error) {
-	var issues map[string]interface{}
+func (c *BitbucketClient) GetPullRequestJiraIssues(input GetPullRequestJiraIssuesInput) (types.MapOutput, error) {
+	var issues types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "jira", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "issues"},
@@ -307,9 +308,9 @@ func (c *BitbucketClient) GetPullRequestJiraIssues(input GetPullRequestJiraIssue
 //   - input: GetPullRequestsForUserInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The pull requests data retrieved from the API
+//   - types.MapOutput: The pull requests data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestsForUser(input GetPullRequestsForUserInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetPullRequestsForUser(input GetPullRequestsForUserInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "closedSince", input.ClosedSince, "")
 	utils.SetQueryParam(queryParams, "role", input.Role, "")
@@ -320,7 +321,7 @@ func (c *BitbucketClient) GetPullRequestsForUser(input GetPullRequestsForUserInp
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
-	var pullRequests map[string]interface{}
+	var pullRequests types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "dashboard", "pull-requests"},
@@ -343,10 +344,10 @@ func (c *BitbucketClient) GetPullRequestsForUser(input GetPullRequestsForUserInp
 //   - input: GetPullRequestCommentInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The comment data retrieved from the API
+//   - types.MapOutput: The comment data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestComment(input GetPullRequestCommentInput) (map[string]interface{}, error) {
-	var comment map[string]interface{}
+func (c *BitbucketClient) GetPullRequestComment(input GetPullRequestCommentInput) (types.MapOutput, error) {
+	var comment types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "comments", input.CommentID},
@@ -369,9 +370,9 @@ func (c *BitbucketClient) GetPullRequestComment(input GetPullRequestCommentInput
 //   - input: GetPullRequestCommentsInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The comments data retrieved from the API
+//   - types.MapOutput: The comments data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestComments(input GetPullRequestCommentsInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetPullRequestComments(input GetPullRequestCommentsInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 
 	utils.SetRequiredPathQueryParam(queryParams, input.Path)
@@ -385,7 +386,7 @@ func (c *BitbucketClient) GetPullRequestComments(input GetPullRequestCommentsInp
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var comments map[string]interface{}
+	var comments types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "comments"},

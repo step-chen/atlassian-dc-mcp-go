@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
 
@@ -13,10 +14,10 @@ import (
 // of the currently authenticated user.
 //
 // Returns:
-//   - map[string]interface{}: The current user data retrieved from the API
+//   - types.MapOutput: The current user data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetCurrentUser() (map[string]interface{}, error) {
-	var user map[string]interface{}
+func (c *BitbucketClient) GetCurrentUser() (types.MapOutput, error) {
+	var user types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "users"},
@@ -39,10 +40,10 @@ func (c *BitbucketClient) GetCurrentUser() (map[string]interface{}, error) {
 //   - input: GetUserInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The user data retrieved from the API
+//   - types.MapOutput: The user data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetUser(input GetUserInput) (map[string]interface{}, error) {
-	var user map[string]interface{}
+func (c *BitbucketClient) GetUser(input GetUserInput) (types.MapOutput, error) {
+	var user types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "users", input.Username},
@@ -65,9 +66,9 @@ func (c *BitbucketClient) GetUser(input GetUserInput) (map[string]interface{}, e
 //   - input: GetUsersInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The users data retrieved from the API
+//   - types.MapOutput: The users data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetUsers(input GetUsersInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetUsers(input GetUsersInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "filter", input.Filter, "")
 	utils.SetQueryParam(queryParams, "permission", input.Permission, "")
@@ -82,7 +83,7 @@ func (c *BitbucketClient) GetUsers(input GetUsersInput) (map[string]interface{},
 		}
 	}
 
-	var users map[string]interface{}
+	var users types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "users"},

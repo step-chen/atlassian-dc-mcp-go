@@ -6,6 +6,7 @@ import (
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 	"atlassian-dc-mcp-go/internal/mcp/utils"
+	"atlassian-dc-mcp-go/internal/types"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -26,7 +27,7 @@ func (h *Handler) getAttachmentHandler(ctx context.Context, req *mcp.CallToolReq
 }
 
 // getAttachmentMetadataHandler handles getting attachment metadata
-func (h *Handler) getAttachmentMetadataHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetAttachmentMetadataInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+func (h *Handler) getAttachmentMetadataHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetAttachmentMetadataInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	metadata, err := h.client.GetAttachmentMetadata(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get attachment metadata failed: %w", err)
@@ -36,7 +37,7 @@ func (h *Handler) getAttachmentMetadataHandler(ctx context.Context, req *mcp.Cal
 }
 
 // createAttachmentHandler handles creating an attachment
-func (h *Handler) createAttachmentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.CreateAttachmentInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+func (h *Handler) createAttachmentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.CreateAttachmentInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	attachment, err := h.client.CreateAttachment(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("create attachment failed: %w", err)
@@ -66,10 +67,10 @@ func AddAttachmentTools(server *mcp.Server, client *bitbucket.BitbucketClient, p
 	handler := NewHandler(client)
 
 	utils.RegisterTool[bitbucket.GetAttachmentInput, GetAttachmentOutput](server, "bitbucket_get_attachment", "Get a specific attachment", handler.getAttachmentHandler)
-	utils.RegisterTool[bitbucket.GetAttachmentMetadataInput, map[string]interface{}](server, "bitbucket_get_attachment_metadata", "Get metadata for a specific attachment", handler.getAttachmentMetadataHandler)
+	utils.RegisterTool[bitbucket.GetAttachmentMetadataInput, types.MapOutput](server, "bitbucket_get_attachment_metadata", "Get metadata for a specific attachment", handler.getAttachmentMetadataHandler)
 
 	if permissions["bitbucket_create_attachment"] {
-		utils.RegisterTool[bitbucket.CreateAttachmentInput, map[string]interface{}](server, "bitbucket_create_attachment", "Create a new attachment", handler.createAttachmentHandler)
+		utils.RegisterTool[bitbucket.CreateAttachmentInput, types.MapOutput](server, "bitbucket_create_attachment", "Create a new attachment", handler.createAttachmentHandler)
 	}
 
 	if permissions["bitbucket_delete_attachment"] {

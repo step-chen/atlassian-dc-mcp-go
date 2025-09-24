@@ -1,8 +1,7 @@
 // Package bitbucket provides type definitions for Bitbucket MCP tools.
 package bitbucket
 
-// MapOutput represents a generic output map for Bitbucket MCP tools
-type MapOutput = map[string]interface{}
+import "atlassian-dc-mcp-go/internal/types"
 
 // ContentOutput represents the output for getting content
 type ContentOutput struct {
@@ -11,7 +10,7 @@ type ContentOutput struct {
 
 // GetUserOutput represents the output for getting a user
 type GetUserOutput struct {
-	User map[string]interface{} `json:"user" jsonschema:"the user details"`
+	User types.MapOutput `json:"user" jsonschema:"the user details"`
 }
 
 type DiffOutput struct {

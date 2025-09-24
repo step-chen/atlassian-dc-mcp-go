@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
 
@@ -16,16 +17,16 @@ import (
 //   - input: GetTagsInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The tags data retrieved from the API
+//   - types.MapOutput: The tags data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetTags(input GetTagsInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetTags(input GetTagsInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "filterText", input.FilterText, "")
 	utils.SetQueryParam(queryParams, "orderBy", input.OrderBy, "")
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var tags map[string]interface{}
+	var tags types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "tags"},
@@ -48,10 +49,10 @@ func (c *BitbucketClient) GetTags(input GetTagsInput) (map[string]interface{}, e
 //   - input: GetTagInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The tag data retrieved from the API
+//   - types.MapOutput: The tag data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetTag(input GetTagInput) (map[string]interface{}, error) {
-	var tag map[string]interface{}
+func (c *BitbucketClient) GetTag(input GetTagInput) (types.MapOutput, error) {
+	var tag types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "tags", input.Name},

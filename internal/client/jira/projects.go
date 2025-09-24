@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
 
@@ -13,10 +14,10 @@ import (
 //   - projectKey: The key of the project to retrieve
 //
 // Returns:
-//   - map[string]any: The project data
+//   - types.MapOutput: The project data
 //   - error: An error if the request fails
-func (c *JiraClient) GetProject(input GetProjectInput) (map[string]any, error) {
-	var project map[string]any
+func (c *JiraClient) GetProject(input GetProjectInput) (types.MapOutput, error) {
+	var project types.MapOutput
 	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "project", input.ProjectKey}, nil, nil, &project)
 	if err != nil {
 		return nil, err
@@ -34,9 +35,9 @@ func (c *JiraClient) GetProject(input GetProjectInput) (map[string]any, error) {
 //   - browseArchive: Whether to include projects in the archive browser
 //
 // Returns:
-//   - []map[string]any: The projects data
+//   - []types.MapOutput: The projects data
 //   - error: An error if the request fails
-func (c *JiraClient) GetAllProjects(input GetAllProjectsInput) ([]map[string]any, error) {
+func (c *JiraClient) GetAllProjects(input GetAllProjectsInput) ([]types.MapOutput, error) {
 
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "expand", input.Expand, "")
@@ -44,7 +45,7 @@ func (c *JiraClient) GetAllProjects(input GetAllProjectsInput) ([]map[string]any
 	utils.SetQueryParam(queryParams, "includeArchived", input.IncludeArchived, false)
 	utils.SetQueryParam(queryParams, "browseArchive", input.BrowseArchive, false)
 
-	var projects []map[string]any
+	var projects []types.MapOutput
 	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "project"}, queryParams, nil, &projects)
 	if err != nil {
 		return nil, err

@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"atlassian-dc-mcp-go/internal/client/testutils"
+	"atlassian-dc-mcp-go/internal/types"
 )
 
 func TestGetUser(t *testing.T) {
@@ -50,7 +51,7 @@ func TestGetUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var result map[string]any
+			var result types.MapOutput
 			var err error
 
 			switch tt.testType {

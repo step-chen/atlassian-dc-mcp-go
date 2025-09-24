@@ -6,12 +6,13 @@ import (
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 	"atlassian-dc-mcp-go/internal/mcp/utils"
+	"atlassian-dc-mcp-go/internal/types"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // getPullRequestsHandler handles getting pull requests
-func (h *Handler) getPullRequestsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestsInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getPullRequestsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestsInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	pullRequests, err := h.client.GetPullRequests(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get pull requests failed: %w", err)
@@ -21,7 +22,7 @@ func (h *Handler) getPullRequestsHandler(ctx context.Context, req *mcp.CallToolR
 }
 
 // getPullRequestHandler handles getting a specific pull request
-func (h *Handler) getPullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getPullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	pullRequest, err := h.client.GetPullRequest(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get pull request failed: %w", err)
@@ -31,7 +32,7 @@ func (h *Handler) getPullRequestHandler(ctx context.Context, req *mcp.CallToolRe
 }
 
 // getPullRequestActivitiesHandler handles getting pull request activities
-func (h *Handler) getPullRequestActivitiesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestActivitiesInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getPullRequestActivitiesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestActivitiesInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	activities, err := h.client.GetPullRequestActivities(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get pull request activities failed: %w", err)
@@ -41,7 +42,7 @@ func (h *Handler) getPullRequestActivitiesHandler(ctx context.Context, req *mcp.
 }
 
 // getPullRequestCommitsHandler handles getting pull request commits
-func (h *Handler) getPullRequestCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitsInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getPullRequestCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitsInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	// Using GetCommits method as a substitute for GetPullRequestCommits
 	commits, err := h.client.GetCommits(input)
 	if err != nil {
@@ -52,7 +53,7 @@ func (h *Handler) getPullRequestCommitsHandler(ctx context.Context, req *mcp.Cal
 }
 
 // getPullRequestCommentsHandler handles getting pull request comments
-func (h *Handler) getPullRequestCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestCommentsInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getPullRequestCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestCommentsInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	comments, err := h.client.GetPullRequestComments(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get pull request comments failed: %w", err)
@@ -73,7 +74,7 @@ func (h *Handler) getPullRequestDiffHandler(ctx context.Context, req *mcp.CallTo
 }
 
 // mergePullRequestHandler handles merging a pull request
-func (h *Handler) mergePullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.MergePullRequestInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) mergePullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.MergePullRequestInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	result, err := h.client.MergePullRequest(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("merge pull request failed: %w", err)
@@ -83,7 +84,7 @@ func (h *Handler) mergePullRequestHandler(ctx context.Context, req *mcp.CallTool
 }
 
 // declinePullRequestHandler handles declining a pull request
-func (h *Handler) declinePullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.DeclinePullRequestInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) declinePullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.DeclinePullRequestInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	result, err := h.client.DeclinePullRequest(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("decline pull request failed: %w", err)
@@ -93,7 +94,7 @@ func (h *Handler) declinePullRequestHandler(ctx context.Context, req *mcp.CallTo
 }
 
 // addPullRequestCommentHandler handles adding a comment to a pull request
-func (h *Handler) addPullRequestCommentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.AddPullRequestCommentInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) addPullRequestCommentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.AddPullRequestCommentInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	comment, err := h.client.AddPullRequestComment(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("add pull request comment failed: %w", err)
@@ -103,7 +104,7 @@ func (h *Handler) addPullRequestCommentHandler(ctx context.Context, req *mcp.Cal
 }
 
 // getPullRequestSuggestionsHandler handles getting pull request suggestions
-func (h *Handler) getPullRequestSuggestionsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestSuggestionsInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getPullRequestSuggestionsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestSuggestionsInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	suggestions, err := h.client.GetPullRequestSuggestions(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get pull request suggestions failed: %w", err)
@@ -113,7 +114,7 @@ func (h *Handler) getPullRequestSuggestionsHandler(ctx context.Context, req *mcp
 }
 
 // getPullRequestJiraIssuesHandler handles getting Jira issues linked to a pull request
-func (h *Handler) getPullRequestJiraIssuesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestJiraIssuesInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getPullRequestJiraIssuesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestJiraIssuesInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	issues, err := h.client.GetPullRequestJiraIssues(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get pull request Jira issues failed: %w", err)
@@ -123,7 +124,7 @@ func (h *Handler) getPullRequestJiraIssuesHandler(ctx context.Context, req *mcp.
 }
 
 // getPullRequestsForUserHandler handles getting pull requests for a user
-func (h *Handler) getPullRequestsForUserHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestsForUserInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getPullRequestsForUserHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestsForUserInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	pullRequests, err := h.client.GetPullRequestsForUser(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get pull requests for user failed: %w", err)
@@ -133,7 +134,7 @@ func (h *Handler) getPullRequestsForUserHandler(ctx context.Context, req *mcp.Ca
 }
 
 // getPullRequestCommentHandler handles getting a specific comment on a pull request
-func (h *Handler) getPullRequestCommentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestCommentInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getPullRequestCommentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestCommentInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	comment, err := h.client.GetPullRequestComment(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get pull request comment failed: %w", err)
@@ -146,26 +147,26 @@ func (h *Handler) getPullRequestCommentHandler(ctx context.Context, req *mcp.Cal
 func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	utils.RegisterTool[bitbucket.GetPullRequestsInput, MapOutput](server, "bitbucket_get_pull_requests", "Get a list of pull requests", handler.getPullRequestsHandler)
-	utils.RegisterTool[bitbucket.GetPullRequestInput, MapOutput](server, "bitbucket_get_pull_request", "Get a specific pull request", handler.getPullRequestHandler)
-	utils.RegisterTool[bitbucket.GetPullRequestActivitiesInput, MapOutput](server, "bitbucket_get_pull_request_activities", "Get activities for a specific pull request", handler.getPullRequestActivitiesHandler)
-	utils.RegisterTool[bitbucket.GetCommitsInput, MapOutput](server, "bitbucket_get_pull_request_commits", "Get commits for a specific pull request", handler.getPullRequestCommitsHandler)
-	utils.RegisterTool[bitbucket.GetPullRequestCommentsInput, MapOutput](server, "bitbucket_get_pull_request_comments", "Get comments for a specific pull request", handler.getPullRequestCommentsHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestsInput, types.MapOutput](server, "bitbucket_get_pull_requests", "Get a list of pull requests", handler.getPullRequestsHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestInput, types.MapOutput](server, "bitbucket_get_pull_request", "Get a specific pull request", handler.getPullRequestHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestActivitiesInput, types.MapOutput](server, "bitbucket_get_pull_request_activities", "Get activities for a specific pull request", handler.getPullRequestActivitiesHandler)
+	utils.RegisterTool[bitbucket.GetCommitsInput, types.MapOutput](server, "bitbucket_get_pull_request_commits", "Get commits for a specific pull request", handler.getPullRequestCommitsHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestCommentsInput, types.MapOutput](server, "bitbucket_get_pull_request_comments", "Get comments for a specific pull request", handler.getPullRequestCommentsHandler)
 	utils.RegisterTool[bitbucket.GetDiffBetweenCommitsInput, DiffOutput](server, "bitbucket_get_pull_request_diff", "Get diff of a pull request", handler.getPullRequestDiffHandler)
-	utils.RegisterTool[bitbucket.GetPullRequestSuggestionsInput, MapOutput](server, "bitbucket_get_pull_request_suggestions", "Get pull request suggestions", handler.getPullRequestSuggestionsHandler)
-	utils.RegisterTool[bitbucket.GetPullRequestJiraIssuesInput, MapOutput](server, "bitbucket_get_pull_request_jira_issues", "Get Jira issues linked to a pull request", handler.getPullRequestJiraIssuesHandler)
-	utils.RegisterTool[bitbucket.GetPullRequestsForUserInput, MapOutput](server, "bitbucket_get_pull_requests_for_user", "Get pull requests for a specific user", handler.getPullRequestsForUserHandler)
-	utils.RegisterTool[bitbucket.GetPullRequestCommentInput, MapOutput](server, "bitbucket_get_pull_request_comment", "Get a specific comment on a pull request", handler.getPullRequestCommentHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestSuggestionsInput, types.MapOutput](server, "bitbucket_get_pull_request_suggestions", "Get pull request suggestions", handler.getPullRequestSuggestionsHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestJiraIssuesInput, types.MapOutput](server, "bitbucket_get_pull_request_jira_issues", "Get Jira issues linked to a pull request", handler.getPullRequestJiraIssuesHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestsForUserInput, types.MapOutput](server, "bitbucket_get_pull_requests_for_user", "Get pull requests for a specific user", handler.getPullRequestsForUserHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestCommentInput, types.MapOutput](server, "bitbucket_get_pull_request_comment", "Get a specific comment on a pull request", handler.getPullRequestCommentHandler)
 
 	if permissions["bitbucket_merge_pull_request"] {
-		utils.RegisterTool[bitbucket.MergePullRequestInput, MapOutput](server, "bitbucket_merge_pull_request", "Merge a pull request", handler.mergePullRequestHandler)
+		utils.RegisterTool[bitbucket.MergePullRequestInput, types.MapOutput](server, "bitbucket_merge_pull_request", "Merge a pull request", handler.mergePullRequestHandler)
 	}
 
 	if permissions["bitbucket_decline_pull_request"] {
-		utils.RegisterTool[bitbucket.DeclinePullRequestInput, MapOutput](server, "bitbucket_decline_pull_request", "Decline a pull request", handler.declinePullRequestHandler)
+		utils.RegisterTool[bitbucket.DeclinePullRequestInput, types.MapOutput](server, "bitbucket_decline_pull_request", "Decline a pull request", handler.declinePullRequestHandler)
 	}
 
 	if permissions["bitbucket_add_pull_request_comment"] {
-		utils.RegisterTool[bitbucket.AddPullRequestCommentInput, MapOutput](server, "bitbucket_add_pull_request_comment", "Add a comment to a pull request", handler.addPullRequestCommentHandler)
+		utils.RegisterTool[bitbucket.AddPullRequestCommentInput, types.MapOutput](server, "bitbucket_add_pull_request_comment", "Add a comment to a pull request", handler.addPullRequestCommentHandler)
 	}
 }

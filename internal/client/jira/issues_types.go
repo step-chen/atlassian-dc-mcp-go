@@ -1,5 +1,7 @@
 package jira
 
+import "atlassian-dc-mcp-go/internal/types"
+
 // GetIssueInput represents the input parameters for getting an issue
 type GetIssueInput struct {
 	IssueKey string   `json:"issueKey" jsonschema:"required,The key of the issue to retrieve"`
@@ -17,8 +19,8 @@ type CreateIssueInput struct {
 
 // CreateIssueWithPayloadInput represents the input parameters for creating an issue with a custom payload
 type CreateIssueWithPayloadInput struct {
-	Payload      map[string]any `json:"payload" jsonschema:"required,The payload containing issue data"`
-	UpdateHistory bool         `json:"updateHistory,omitempty" jsonschema:"Whether to update the user's history"`
+	Payload       types.MapOutput `json:"payload" jsonschema:"required,The payload containing issue data"`
+	UpdateHistory bool            `json:"updateHistory,omitempty" jsonschema:"Whether to update the user's history"`
 }
 
 // CreateSubTaskInput represents the input parameters for creating a sub-task
@@ -33,14 +35,14 @@ type CreateSubTaskInput struct {
 
 // UpdateIssueInput represents the input parameters for updating an issue
 type UpdateIssueInput struct {
-	IssueKey string            `json:"issueKey" jsonschema:"required,The key of the issue to update"`
-	Updates  map[string]any    `json:"updates" jsonschema:"required,The fields to update"`
+	IssueKey string          `json:"issueKey" jsonschema:"required,The key of the issue to update"`
+	Updates  types.MapOutput `json:"updates" jsonschema:"required,The fields to update"`
 }
 
 // UpdateIssueWithOptionsInput represents the input parameters for updating an issue with additional options
 type UpdateIssueWithOptionsInput struct {
 	IssueKey string            `json:"issueKey" jsonschema:"required,The key of the issue to update"`
-	Updates  map[string]any    `json:"updates" jsonschema:"required,The fields to update"`
+	Updates  types.MapOutput   `json:"updates" jsonschema:"required,The fields to update"`
 	Options  map[string]string `json:"options,omitempty" jsonschema:"Additional options for the update"`
 }
 

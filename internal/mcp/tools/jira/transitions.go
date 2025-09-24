@@ -6,12 +6,13 @@ import (
 
 	"atlassian-dc-mcp-go/internal/client/jira"
 	"atlassian-dc-mcp-go/internal/mcp/utils"
+	"atlassian-dc-mcp-go/internal/types"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // getTransitionsHandler handles getting transitions for a Jira issue
-func (h *Handler) getTransitionsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetTransitionsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+func (h *Handler) getTransitionsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetTransitionsInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	transitions, err := h.client.GetTransitions(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get transitions failed: %w", err)
@@ -21,13 +22,13 @@ func (h *Handler) getTransitionsHandler(ctx context.Context, req *mcp.CallToolRe
 }
 
 // transitionIssueHandler handles transitioning a Jira issue
-func (h *Handler) transitionIssueHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.TransitionIssueInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+func (h *Handler) transitionIssueHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.TransitionIssueInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	err := h.client.TransitionIssue(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("transition issue failed: %w", err)
 	}
 
-	resultMap := map[string]interface{}{"success": true}
+	resultMap := types.MapOutput{"success": true}
 	return nil, resultMap, nil
 }
 
@@ -35,9 +36,9 @@ func (h *Handler) transitionIssueHandler(ctx context.Context, req *mcp.CallToolR
 func AddTransitionTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	utils.RegisterTool[jira.GetTransitionsInput, map[string]interface{}](server, "jira_get_transitions", "Get transitions for a Jira issue", handler.getTransitionsHandler)
+	utils.RegisterTool[jira.GetTransitionsInput, types.MapOutput](server, "jira_get_transitions", "Get transitions for a Jira issue", handler.getTransitionsHandler)
 
 	if permissions["jira_transition_issue"] {
-		utils.RegisterTool[jira.TransitionIssueInput, map[string]interface{}](server, "jira_transition_issue", "Transition a Jira issue", handler.transitionIssueHandler)
+		utils.RegisterTool[jira.TransitionIssueInput, types.MapOutput](server, "jira_transition_issue", "Transition a Jira issue", handler.transitionIssueHandler)
 	}
 }

@@ -1,6 +1,7 @@
 package jira
 
 import (
+	"atlassian-dc-mcp-go/internal/types"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -13,9 +14,9 @@ import (
 //   - input: SearchIssuesInput containing jql, projectKeyOrId, orderBy, statuses, maxResults, startAt, and fields
 //
 // Returns:
-//   - map[string]any: The search results
+//   - types.MapOutput: The search results
 //   - error: An error if the request fails
-func (c *JiraClient) SearchIssues(input SearchIssuesInput) (map[string]any, error) {
+func (c *JiraClient) SearchIssues(input SearchIssuesInput) (types.MapOutput, error) {
 
 	finalJQL := input.JQL
 	if finalJQL == "" {
@@ -37,7 +38,7 @@ func (c *JiraClient) SearchIssues(input SearchIssuesInput) (map[string]any, erro
 		}
 	}
 
-	payload := map[string]any{
+	payload := types.MapOutput{
 		"jql":        finalJQL,
 		"maxResults": input.MaxResults,
 		"startAt":    input.StartAt,
@@ -52,7 +53,7 @@ func (c *JiraClient) SearchIssues(input SearchIssuesInput) (map[string]any, erro
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	var result map[string]interface{}
+	var result types.MapOutput
 	err = c.executeRequest(http.MethodPost, []string{"rest", "api", "2", "search"}, nil, jsonPayload, &result)
 	if err != nil {
 		return nil, err

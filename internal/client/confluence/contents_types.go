@@ -1,5 +1,7 @@
 package confluence
 
+import "atlassian-dc-mcp-go/internal/types"
+
 // GetContentInput represents the input parameters for getting content
 type GetContentInput struct {
 	PaginationInput
@@ -19,18 +21,18 @@ type GetContentByIDInput struct {
 
 // CreateContentInput represents the input parameters for creating content
 type CreateContentInput struct {
-	Type      string                   `json:"type" jsonschema:"required,The type of the content"`
-	Title     string                   `json:"title" jsonschema:"required,The title of the content"`
-	Space     map[string]interface{}   `json:"space" jsonschema:"required,The space information"`
-	Body      map[string]interface{}   `json:"body" jsonschema:"required,The body of the content"`
-	Ancestors []map[string]interface{} `json:"ancestors,omitempty" jsonschema:"The ancestor information"`
-	Metadata  map[string]interface{}   `json:"metadata,omitempty" jsonschema:"The metadata information"`
+	Type      string            `json:"type" jsonschema:"required,The type of the content"`
+	Title     string            `json:"title" jsonschema:"required,The title of the content"`
+	Space     types.MapOutput   `json:"space" jsonschema:"required,The space information"`
+	Body      types.MapOutput   `json:"body" jsonschema:"required,The body of the content"`
+	Ancestors []types.MapOutput `json:"ancestors,omitempty" jsonschema:"The ancestor information"`
+	Metadata  types.MapOutput   `json:"metadata,omitempty" jsonschema:"The metadata information"`
 }
 
 // UpdateContentInput represents the input parameters for updating content
 type UpdateContentInput struct {
-	ContentID   string                 `json:"contentID" jsonschema:"required,The ID of the content to update"`
-	ContentData map[string]interface{} `json:"contentData" jsonschema:"required,The updated content data"`
+	ContentID   string          `json:"contentID" jsonschema:"required,The ID of the content to update"`
+	ContentData types.MapOutput `json:"contentData" jsonschema:"required,The updated content data"`
 }
 
 // DeleteContentInput represents the input parameters for deleting content
@@ -71,8 +73,8 @@ type GetContentLabelsInput struct {
 
 // AddContentLabelInput represents the input parameters for adding a label to content
 type AddContentLabelInput struct {
-	ContentID string                 `json:"contentID" jsonschema:"required,The ID of the content"`
-	LabelData map[string]interface{} `json:"labelData" jsonschema:"required,The label data to add"`
+	ContentID string          `json:"contentID" jsonschema:"required,The ID of the content"`
+	LabelData types.MapOutput `json:"labelData" jsonschema:"required,The label data to add"`
 }
 
 // RemoveContentLabelInput represents the input parameters for removing a label from content
@@ -97,15 +99,15 @@ type GetContentPropertyInput struct {
 
 // CreateContentPropertyInput represents the input parameters for creating a content property
 type CreateContentPropertyInput struct {
-	ContentID    string                 `json:"contentID" jsonschema:"required,The ID of the content"`
-	PropertyData map[string]interface{} `json:"propertyData" jsonschema:"required,The property data to create"`
+	ContentID    string          `json:"contentID" jsonschema:"required,The ID of the content"`
+	PropertyData types.MapOutput `json:"propertyData" jsonschema:"required,The property data to create"`
 }
 
 // UpdateContentPropertyInput represents the input parameters for updating a content property
 type UpdateContentPropertyInput struct {
-	ContentID    string                 `json:"contentID" jsonschema:"required,The ID of the content"`
-	PropertyKey  string                 `json:"propertyKey" jsonschema:"required,The key of the property to update"`
-	PropertyData map[string]interface{} `json:"propertyData" jsonschema:"required,The updated property data"`
+	ContentID    string          `json:"contentID" jsonschema:"required,The ID of the content"`
+	PropertyKey  string          `json:"propertyKey" jsonschema:"required,The key of the property to update"`
+	PropertyData types.MapOutput `json:"propertyData" jsonschema:"required,The updated property data"`
 }
 
 // DeleteContentPropertyInput represents the input parameters for deleting a content property

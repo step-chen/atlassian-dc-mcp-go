@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
 
@@ -14,14 +15,14 @@ import (
 //   - input: GetUserByNameInput containing username
 //
 // Returns:
-//   - map[string]any: The user data
+//   - types.MapOutput: The user data
 //   - error: An error if the request fails
-func (c *JiraClient) GetUserByName(input GetUserByNameInput) (map[string]any, error) {
+func (c *JiraClient) GetUserByName(input GetUserByNameInput) (types.MapOutput, error) {
 
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "username", input.Username, "")
 
-	var user map[string]interface{}
+	var user types.MapOutput
 	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "user"}, queryParams, nil, &user)
 	if err != nil {
 		return nil, err
@@ -36,14 +37,14 @@ func (c *JiraClient) GetUserByName(input GetUserByNameInput) (map[string]any, er
 //   - input: GetUserByKeyInput containing key
 //
 // Returns:
-//   - map[string]any: The user data
+//   - types.MapOutput: The user data
 //   - error: An error if the request fails
-func (c *JiraClient) GetUserByKey(input GetUserByKeyInput) (map[string]any, error) {
+func (c *JiraClient) GetUserByKey(input GetUserByKeyInput) (types.MapOutput, error) {
 
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "key", input.Key, "")
 
-	var user map[string]interface{}
+	var user types.MapOutput
 	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "user"}, queryParams, nil, &user)
 	if err != nil {
 		return nil, err
@@ -58,16 +59,16 @@ func (c *JiraClient) GetUserByKey(input GetUserByKeyInput) (map[string]any, erro
 //   - input: SearchUsersInput containing query, startAt, and maxResults
 //
 // Returns:
-//   - []map[string]any: The users data
+//   - []types.MapOutput: The users data
 //   - error: An error if the request fails
-func (c *JiraClient) SearchUsers(input SearchUsersInput) ([]map[string]any, error) {
+func (c *JiraClient) SearchUsers(input SearchUsersInput) ([]types.MapOutput, error) {
 
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "username", input.Query, "")
 	utils.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
 	utils.SetQueryParam(queryParams, "maxResults", input.MaxResults, 0)
 
-	var users []map[string]interface{}
+	var users []types.MapOutput
 	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "user", "search"}, queryParams, nil, &users)
 	if err != nil {
 		return nil, err
@@ -82,9 +83,9 @@ func (c *JiraClient) SearchUsers(input SearchUsersInput) ([]map[string]any, erro
 //   - input: GetCurrentUserInput (no parameters needed)
 //
 // Returns:
-//   - map[string]any: The current user data
+//   - types.MapOutput: The current user data
 //   - error: An error if the request fails
-func (c *JiraClient) GetCurrentUser() (map[string]any, error) {
+func (c *JiraClient) GetCurrentUser() (types.MapOutput, error) {
 
 	req, err := utils.BuildHttpRequest(
 		http.MethodGet,
@@ -103,7 +104,7 @@ func (c *JiraClient) GetCurrentUser() (map[string]any, error) {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 
-	var user map[string]interface{}
+	var user types.MapOutput
 	if err := utils.HandleHTTPResponse(resp, "jira", &user); err != nil {
 		return nil, err
 	}

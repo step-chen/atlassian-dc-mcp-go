@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
 
@@ -16,16 +17,16 @@ import (
 //   - input: GetProjectsInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The projects data retrieved from the API
+//   - types.MapOutput: The projects data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetProjects(input GetProjectsInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetProjects(input GetProjectsInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 	utils.SetQueryParam(queryParams, "name", input.Name, "")
 	utils.SetQueryParam(queryParams, "permission", input.Permission, "")
 
-	var projects map[string]interface{}
+	var projects types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects"},
@@ -48,10 +49,10 @@ func (c *BitbucketClient) GetProjects(input GetProjectsInput) (map[string]interf
 //   - input: GetProjectInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The project data retrieved from the API
+//   - types.MapOutput: The project data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetProject(input GetProjectInput) (map[string]interface{}, error) {
-	var project map[string]interface{}
+func (c *BitbucketClient) GetProject(input GetProjectInput) (types.MapOutput, error) {
+	var project types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey},
@@ -74,10 +75,10 @@ func (c *BitbucketClient) GetProject(input GetProjectInput) (map[string]interfac
 //   - input: GetProjectPrimaryEnhancedEntityLinkInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The entity link data retrieved from the API
+//   - types.MapOutput: The entity link data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetProjectPrimaryEnhancedEntityLink(input GetProjectPrimaryEnhancedEntityLinkInput) (map[string]interface{}, error) {
-	var entityLink map[string]interface{}
+func (c *BitbucketClient) GetProjectPrimaryEnhancedEntityLink(input GetProjectPrimaryEnhancedEntityLinkInput) (types.MapOutput, error) {
+	var entityLink types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "jira", "latest", "projects", input.ProjectKey, "primary-enhanced-entitylink"},
@@ -100,15 +101,15 @@ func (c *BitbucketClient) GetProjectPrimaryEnhancedEntityLink(input GetProjectPr
 //   - input: GetProjectTasksInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The tasks data retrieved from the API
+//   - types.MapOutput: The tasks data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetProjectTasks(input GetProjectTasksInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetProjectTasks(input GetProjectTasksInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "markup", input.Markup, "")
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var tasks map[string]interface{}
+	var tasks types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "default-tasks", "latest", "projects", input.ProjectKey, "tasks"},
@@ -131,15 +132,15 @@ func (c *BitbucketClient) GetProjectTasks(input GetProjectTasksInput) (map[strin
 //   - input: GetRepositoryTasksInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The tasks data retrieved from the API
+//   - types.MapOutput: The tasks data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetRepositoryTasks(input GetRepositoryTasksInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetRepositoryTasks(input GetRepositoryTasksInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "markup", input.Markup, "")
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var tasks map[string]interface{}
+	var tasks types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "default-tasks", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "tasks"},

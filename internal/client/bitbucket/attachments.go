@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
 
@@ -43,10 +44,10 @@ func (c *BitbucketClient) GetAttachment(input GetAttachmentInput) ([]byte, error
 //   - input: GetAttachmentMetadataInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The attachment metadata retrieved from the API
+//   - types.MapOutput: The attachment metadata retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetAttachmentMetadata(input GetAttachmentMetadataInput) (map[string]interface{}, error) {
-	var metadata map[string]interface{}
+func (c *BitbucketClient) GetAttachmentMetadata(input GetAttachmentMetadataInput) (types.MapOutput, error) {
+	var metadata types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "attachments", input.AttachmentId, "metadata"},
@@ -91,13 +92,13 @@ func (c *BitbucketClient) DeleteAttachment(input DeleteAttachmentInput) error {
 //   - input: CreateAttachmentInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The created attachment data retrieved from the API
+//   - types.MapOutput: The created attachment data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) CreateAttachment(input CreateAttachmentInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) CreateAttachment(input CreateAttachmentInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "filename", input.FileName, "")
 
-	var attachment map[string]interface{}
+	var attachment types.MapOutput
 	if err := c.executeRequest(
 		http.MethodPost,
 		[]string{"rest", "attachment", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", fmt.Sprintf("%d", input.PullRequestID), "attachments"},

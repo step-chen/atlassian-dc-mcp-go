@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"atlassian-dc-mcp-go/internal/client/testutils"
+	"atlassian-dc-mcp-go/internal/types"
 )
 
 func TestGetIssueWorklogs(t *testing.T) {
@@ -100,7 +101,7 @@ func TestGetWorklog(t *testing.T) {
 
 	var worklogID string
 	if worklogs, ok := worklogsResult["worklogs"].([]interface{}); ok && len(worklogs) > 0 {
-		if firstWorklog, ok := worklogs[0].(map[string]interface{}); ok {
+		if firstWorklog, ok := worklogs[0].(types.MapOutput); ok {
 			if id, ok := firstWorklog["id"].(string); ok {
 				worklogID = id
 			}

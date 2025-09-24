@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
 
@@ -17,9 +18,9 @@ import (
 //   - input: GetBranchesInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The branches data retrieved from the API
+//   - types.MapOutput: The branches data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetBranches(input GetBranchesInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetBranches(input GetBranchesInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "base", input.Base, "")
 	utils.SetQueryParam(queryParams, "details", input.Details, false)
@@ -30,7 +31,7 @@ func (c *BitbucketClient) GetBranches(input GetBranchesInput) (map[string]interf
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var branches map[string]interface{}
+	var branches types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "branches"},
@@ -53,10 +54,10 @@ func (c *BitbucketClient) GetBranches(input GetBranchesInput) (map[string]interf
 //   - input: GetDefaultBranchInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The default branch data retrieved from the API
+//   - types.MapOutput: The default branch data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetDefaultBranch(input GetDefaultBranchInput) (map[string]interface{}, error) {
-	var branch map[string]interface{}
+func (c *BitbucketClient) GetDefaultBranch(input GetDefaultBranchInput) (types.MapOutput, error) {
+	var branch types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "default-branch"},
@@ -79,14 +80,14 @@ func (c *BitbucketClient) GetDefaultBranch(input GetDefaultBranchInput) (map[str
 //   - input: GetBranchInfoByCommitIdInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The branch information retrieved from the API
+//   - types.MapOutput: The branch information retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetBranch(input GetBranchInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetBranch(input GetBranchInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
-	var branch map[string]interface{}
+	var branch types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "branch-utils", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "branches", "info", input.CommitId},

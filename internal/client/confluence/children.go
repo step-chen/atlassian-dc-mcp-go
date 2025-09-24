@@ -3,6 +3,7 @@ package confluence
 import (
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
 
@@ -12,14 +13,14 @@ import (
 //   - input: GetContentChildrenInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The content children data
+//   - types.MapOutput: The content children data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentChildren(input GetContentChildrenInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) GetContentChildren(input GetContentChildrenInput) (types.MapOutput, error) {
 	params := url.Values{}
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 	utils.SetQueryParam(params, "parentVersion", input.ParentVersion, "")
 
-	var children map[string]interface{}
+	var children types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "child"}, params, nil, &children); err != nil {
 		return nil, err
 	}
@@ -33,16 +34,16 @@ func (c *ConfluenceClient) GetContentChildren(input GetContentChildrenInput) (ma
 //   - input: GetContentChildrenByTypeInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The content children data
+//   - types.MapOutput: The content children data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentChildrenByType(input GetContentChildrenByTypeInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) GetContentChildrenByType(input GetContentChildrenByTypeInput) (types.MapOutput, error) {
 	params := url.Values{}
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 	utils.SetQueryParam(params, "start", input.Start, 0)
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 	utils.SetQueryParam(params, "orderBy", input.OrderBy, "")
 
-	var children map[string]interface{}
+	var children types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "child", input.ChildType}, params, nil, &children); err != nil {
 		return nil, err
 	}
@@ -56,16 +57,16 @@ func (c *ConfluenceClient) GetContentChildrenByType(input GetContentChildrenByTy
 //   - input: GetContentCommentsInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The content comments data
+//   - types.MapOutput: The content comments data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentComments(input GetContentCommentsInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) GetContentComments(input GetContentCommentsInput) (types.MapOutput, error) {
 	params := url.Values{}
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 	utils.SetQueryParam(params, "parentVersion", input.ParentVersion, "")
 	utils.SetQueryParam(params, "start", input.Start, 0)
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 
-	var comments map[string]interface{}
+	var comments types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "child", "comment"}, params, nil, &comments); err != nil {
 		return nil, err
 	}

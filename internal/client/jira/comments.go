@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
 
@@ -15,9 +16,9 @@ import (
 //   - input: GetCommentsInput containing issueKey, startAt, maxResults, expand, and orderBy
 //
 // Returns:
-//   - map[string]any: The comments data
+//   - types.MapOutput: The comments data
 //   - error: An error if the request fails
-func (c *JiraClient) GetComments(input GetCommentsInput) (map[string]any, error) {
+func (c *JiraClient) GetComments(input GetCommentsInput) (types.MapOutput, error) {
 
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
@@ -25,7 +26,7 @@ func (c *JiraClient) GetComments(input GetCommentsInput) (map[string]any, error)
 	utils.SetQueryParam(queryParams, "expand", input.Expand, "")
 	utils.SetQueryParam(queryParams, "orderBy", input.OrderBy, "")
 
-	var comments map[string]any
+	var comments types.MapOutput
 	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "issue", input.IssueKey, "comment"}, queryParams, nil, &comments)
 	if err != nil {
 		return nil, err
@@ -40,11 +41,11 @@ func (c *JiraClient) GetComments(input GetCommentsInput) (map[string]any, error)
 //   - input: AddCommentInput containing issueKey and comment
 //
 // Returns:
-//   - map[string]any: The added comment data
+//   - types.MapOutput: The added comment data
 //   - error: An error if the request fails
-func (c *JiraClient) AddComment(input AddCommentInput) (map[string]any, error) {
+func (c *JiraClient) AddComment(input AddCommentInput) (types.MapOutput, error) {
 
-	payload := map[string]any{
+	payload := types.MapOutput{
 		"body": input.Comment,
 	}
 
@@ -53,7 +54,7 @@ func (c *JiraClient) AddComment(input AddCommentInput) (map[string]any, error) {
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	var result map[string]any
+	var result types.MapOutput
 	err = c.executeRequest(http.MethodPost, []string{"rest", "api", "2", "issue", input.IssueKey, "comment"}, nil, jsonPayload, &result)
 	if err != nil {
 		return nil, err

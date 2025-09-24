@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"atlassian-dc-mcp-go/internal/client/testutils"
+	"atlassian-dc-mcp-go/internal/types"
 )
 
 func TestListBoards(t *testing.T) {
@@ -61,9 +62,9 @@ func TestListBoards(t *testing.T) {
 					StartAt:    tt.startAt,
 					MaxResults: tt.maxResults,
 				},
-				Name:          tt.boardName,
+				Name:           tt.boardName,
 				ProjectKeyOrId: tt.projectKeyOrId,
-				BoardType:     tt.boardType,
+				BoardType:      tt.boardType,
 			})
 
 			if tt.expectError {
@@ -101,7 +102,7 @@ func TestListBoards(t *testing.T) {
 					assert.True(t, exists, "boards or values field should exist in response")
 					if exists && !tt.expectEmpty {
 						if boardsList, ok := boards.([]interface{}); ok && len(boardsList) > 0 {
-							if firstBoard, ok := boardsList[0].(map[string]interface{}); ok {
+							if firstBoard, ok := boardsList[0].(types.MapOutput); ok {
 								id, idExists := firstBoard["id"]
 								assert.True(t, idExists, "id field should exist in board")
 								if idExists {

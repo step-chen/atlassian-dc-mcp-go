@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
 
@@ -16,10 +17,10 @@ import (
 //   - input: GetRepositoryInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The repository data retrieved from the API
+//   - types.MapOutput: The repository data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetRepository(input GetRepositoryInput) (map[string]interface{}, error) {
-	var repository map[string]interface{}
+func (c *BitbucketClient) GetRepository(input GetRepositoryInput) (types.MapOutput, error) {
+	var repository types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug},
@@ -42,9 +43,9 @@ func (c *BitbucketClient) GetRepository(input GetRepositoryInput) (map[string]in
 //   - input: GetRepositoriesInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The repositories data retrieved from the API
+//   - types.MapOutput: The repositories data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetRepositories(input GetRepositoriesInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetRepositories(input GetRepositoriesInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "projectName", input.ProjectName, "")
 	utils.SetQueryParam(queryParams, "projectKey", input.ProjectKey, "")
@@ -56,7 +57,7 @@ func (c *BitbucketClient) GetRepositories(input GetRepositoriesInput) (map[strin
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 	utils.SetQueryParam(queryParams, "archived", input.Archived, "")
 
-	var repositories map[string]interface{}
+	var repositories types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "repos"},
@@ -79,14 +80,14 @@ func (c *BitbucketClient) GetRepositories(input GetRepositoriesInput) (map[strin
 //   - input: GetProjectRepositoriesInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The repositories data retrieved from the API
+//   - types.MapOutput: The repositories data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetProjectRepositories(input GetProjectRepositoriesInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetProjectRepositories(input GetProjectRepositoriesInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var repositories map[string]interface{}
+	var repositories types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos"},
@@ -168,15 +169,15 @@ func (c *BitbucketClient) GetFileContent(input GetFileContentInput) ([]byte, err
 //   - input: GetFilesInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The files data retrieved from the API
+//   - types.MapOutput: The files data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetFiles(input GetFilesInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetFiles(input GetFilesInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "at", input.At, "")
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var files map[string]interface{}
+	var files types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "files"},
@@ -199,16 +200,16 @@ func (c *BitbucketClient) GetFiles(input GetFilesInput) (map[string]interface{},
 //   - input: GetChangesInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The changes data retrieved from the API
+//   - types.MapOutput: The changes data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetChanges(input GetChangesInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetChanges(input GetChangesInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "until", input.Until, "")
 	utils.SetQueryParam(queryParams, "since", input.Since, "")
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var changes map[string]interface{}
+	var changes types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "changes"},
@@ -231,9 +232,9 @@ func (c *BitbucketClient) GetChanges(input GetChangesInput) (map[string]interfac
 //   - input: CompareChangesInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The comparison data retrieved from the API
+//   - types.MapOutput: The comparison data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) CompareChanges(input CompareChangesInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) CompareChanges(input CompareChangesInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "from", input.From, "")
 	utils.SetQueryParam(queryParams, "to", input.To, "")
@@ -241,7 +242,7 @@ func (c *BitbucketClient) CompareChanges(input CompareChangesInput) (map[string]
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var changes map[string]interface{}
+	var changes types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "compare", "changes"},
@@ -264,14 +265,14 @@ func (c *BitbucketClient) CompareChanges(input CompareChangesInput) (map[string]
 //   - input: GetForksInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The forks data retrieved from the API
+//   - types.MapOutput: The forks data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetForks(input GetForksInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetForks(input GetForksInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var forks map[string]interface{}
+	var forks types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "forks"},
@@ -294,9 +295,9 @@ func (c *BitbucketClient) GetForks(input GetForksInput) (map[string]interface{},
 //   - input: GetReadmeInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The README data retrieved from the API
+//   - types.MapOutput: The README data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetReadme(input GetReadmeInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetReadme(input GetReadmeInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "at", input.At, "")
 	utils.SetQueryParam(queryParams, "markup", input.Markup, "")
@@ -304,7 +305,7 @@ func (c *BitbucketClient) GetReadme(input GetReadmeInput) (map[string]interface{
 	utils.SetQueryParam(queryParams, "includeHeadingId", input.IncludeHeadingId, "")
 	utils.SetQueryParam(queryParams, "hardwrap", input.Hardwrap, "")
 
-	var readme map[string]interface{}
+	var readme types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "readme"},
@@ -327,14 +328,14 @@ func (c *BitbucketClient) GetReadme(input GetReadmeInput) (map[string]interface{
 //   - input: GetRelatedRepositoriesInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The related repositories data retrieved from the API
+//   - types.MapOutput: The related repositories data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetRelatedRepositories(input GetRelatedRepositoriesInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetRelatedRepositories(input GetRelatedRepositoriesInput) (types.MapOutput, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var repositories map[string]interface{}
+	var repositories types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "related"},

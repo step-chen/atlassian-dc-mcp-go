@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
 
@@ -14,9 +15,9 @@ import (
 //   - input: GetBoardsInput containing startAt, maxResults, name, projectKeyOrId, and boardType
 //
 // Returns:
-//   - map[string]any: The boards data
+//   - types.MapOutput: The boards data
 //   - error: An error if the request fails
-func (c *JiraClient) GetBoards(input GetBoardsInput) (map[string]any, error) {
+func (c *JiraClient) GetBoards(input GetBoardsInput) (types.MapOutput, error) {
 
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
@@ -25,7 +26,7 @@ func (c *JiraClient) GetBoards(input GetBoardsInput) (map[string]any, error) {
 	utils.SetQueryParam(queryParams, "projectKeyOrId", input.ProjectKeyOrId, "")
 	utils.SetQueryParam(queryParams, "type", input.BoardType, "")
 
-	var boardsResponse map[string]any
+	var boardsResponse types.MapOutput
 	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "board"}, queryParams, nil, &boardsResponse)
 	if err != nil {
 		return nil, err
@@ -40,10 +41,10 @@ func (c *JiraClient) GetBoards(input GetBoardsInput) (map[string]any, error) {
 //   - input: GetBoardInput containing id
 //
 // Returns:
-//   - map[string]any: The board data
+//   - types.MapOutput: The board data
 //   - error: An error if the request fails
-func (c *JiraClient) GetBoard(input GetBoardInput) (map[string]any, error) {
-	var boardResponse map[string]any
+func (c *JiraClient) GetBoard(input GetBoardInput) (types.MapOutput, error) {
+	var boardResponse types.MapOutput
 	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "board", strconv.Itoa(input.Id)}, nil, nil, &boardResponse)
 	if err != nil {
 		return nil, err
@@ -58,9 +59,9 @@ func (c *JiraClient) GetBoard(input GetBoardInput) (map[string]any, error) {
 //   - input: GetBoardBacklogInput containing boardId, startAt, maxResults, jql, validateQuery, fields, and expand
 //
 // Returns:
-//   - map[string]any: The backlog data
+//   - types.MapOutput: The backlog data
 //   - error: An error if the request fails
-func (c *JiraClient) GetBoardBacklog(input GetBoardBacklogInput) (map[string]any, error) {
+func (c *JiraClient) GetBoardBacklog(input GetBoardBacklogInput) (types.MapOutput, error) {
 
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
@@ -75,7 +76,7 @@ func (c *JiraClient) GetBoardBacklog(input GetBoardBacklogInput) (map[string]any
 		}
 	}
 
-	var backlogResponse map[string]any
+	var backlogResponse types.MapOutput
 	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "board", strconv.Itoa(input.BoardId), "backlog"}, queryParams, nil, &backlogResponse)
 	if err != nil {
 		return nil, err
@@ -90,16 +91,16 @@ func (c *JiraClient) GetBoardBacklog(input GetBoardBacklogInput) (map[string]any
 //   - input: GetBoardEpicsInput containing boardId, startAt, maxResults, and done
 //
 // Returns:
-//   - map[string]any: The epics data
+//   - types.MapOutput: The epics data
 //   - error: An error if the request fails
-func (c *JiraClient) GetBoardEpics(input GetBoardEpicsInput) (map[string]any, error) {
+func (c *JiraClient) GetBoardEpics(input GetBoardEpicsInput) (types.MapOutput, error) {
 
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
 	utils.SetQueryParam(queryParams, "maxResults", input.MaxResults, 0)
 	utils.SetQueryParam(queryParams, "done", input.Done, "")
 
-	var epicsResponse map[string]any
+	var epicsResponse types.MapOutput
 	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "board", strconv.Itoa(input.BoardId), "epic"}, queryParams, nil, &epicsResponse)
 	if err != nil {
 		return nil, err
@@ -114,16 +115,16 @@ func (c *JiraClient) GetBoardEpics(input GetBoardEpicsInput) (map[string]any, er
 //   - input: GetBoardSprintsInput containing boardId, startAt, maxResults, and state
 //
 // Returns:
-//   - map[string]any: The sprints data
+//   - types.MapOutput: The sprints data
 //   - error: An error if the request fails
-func (c *JiraClient) GetBoardSprints(input GetBoardSprintsInput) (map[string]any, error) {
+func (c *JiraClient) GetBoardSprints(input GetBoardSprintsInput) (types.MapOutput, error) {
 
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
 	utils.SetQueryParam(queryParams, "maxResults", input.MaxResults, 0)
 	utils.SetQueryParam(queryParams, "state", input.State, "")
 
-	var sprintsResponse map[string]any
+	var sprintsResponse types.MapOutput
 	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "board", strconv.Itoa(input.BoardId), "sprint"}, queryParams, nil, &sprintsResponse)
 	if err != nil {
 		return nil, err
@@ -138,10 +139,10 @@ func (c *JiraClient) GetBoardSprints(input GetBoardSprintsInput) (map[string]any
 //   - input: GetSprintInput containing sprintId
 //
 // Returns:
-//   - map[string]any: The sprint data
+//   - types.MapOutput: The sprint data
 //   - error: An error if the request fails
-func (c *JiraClient) GetSprint(input GetSprintInput) (map[string]any, error) {
-	var sprintResponse map[string]any
+func (c *JiraClient) GetSprint(input GetSprintInput) (types.MapOutput, error) {
+	var sprintResponse types.MapOutput
 	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "sprint", strconv.Itoa(input.SprintId)}, nil, nil, &sprintResponse)
 	if err != nil {
 		return nil, err
@@ -156,9 +157,9 @@ func (c *JiraClient) GetSprint(input GetSprintInput) (map[string]any, error) {
 //   - input: GetSprintIssuesInput containing sprintId, startAt, maxResults, jql, validateQuery, fields, and expand
 //
 // Returns:
-//   - map[string]any: The issues data
+//   - types.MapOutput: The issues data
 //   - error: An error if the request fails
-func (c *JiraClient) GetSprintIssues(input GetSprintIssuesInput) (map[string]any, error) {
+func (c *JiraClient) GetSprintIssues(input GetSprintIssuesInput) (types.MapOutput, error) {
 
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
@@ -173,7 +174,7 @@ func (c *JiraClient) GetSprintIssues(input GetSprintIssuesInput) (map[string]any
 		}
 	}
 
-	var issuesResponse map[string]any
+	var issuesResponse types.MapOutput
 	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "sprint", strconv.Itoa(input.SprintId), "issue"}, queryParams, nil, &issuesResponse)
 	if err != nil {
 		return nil, err

@@ -1,6 +1,7 @@
 package confluence
 
 import (
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 	"fmt"
 	"net/url"
@@ -13,9 +14,9 @@ import (
 //   - input: GetSpaceInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The space data
+//   - types.MapOutput: The space data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetSpace(input GetSpaceInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) GetSpace(input GetSpaceInput) (types.MapOutput, error) {
 	if input.SpaceKey == "" {
 		return nil, fmt.Errorf("spaceKey cannot be empty")
 	}
@@ -23,7 +24,7 @@ func (c *ConfluenceClient) GetSpace(input GetSpaceInput) (map[string]interface{}
 	params := url.Values{}
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 
-	var space map[string]interface{}
+	var space types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "space", input.SpaceKey}, params, nil, &space); err != nil {
 		return nil, err
 	}
@@ -37,9 +38,9 @@ func (c *ConfluenceClient) GetSpace(input GetSpaceInput) (map[string]interface{}
 //   - input: GetContentsInSpaceInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The contents data
+//   - types.MapOutput: The contents data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentsInSpace(input GetContentsInSpaceInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) GetContentsInSpace(input GetContentsInSpaceInput) (types.MapOutput, error) {
 	if input.SpaceKey == "" {
 		return nil, fmt.Errorf("spaceKey cannot be empty")
 	}
@@ -49,7 +50,7 @@ func (c *ConfluenceClient) GetContentsInSpace(input GetContentsInSpaceInput) (ma
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 
-	var contents map[string]interface{}
+	var contents types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "space", input.SpaceKey, "content"}, params, nil, &contents); err != nil {
 		return nil, err
 	}
@@ -63,9 +64,9 @@ func (c *ConfluenceClient) GetContentsInSpace(input GetContentsInSpaceInput) (ma
 //   - input: GetContentsByTypeInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The contents data
+//   - types.MapOutput: The contents data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentsByType(input GetContentsByTypeInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) GetContentsByType(input GetContentsByTypeInput) (types.MapOutput, error) {
 	if input.SpaceKey == "" {
 		return nil, fmt.Errorf("spaceKey cannot be empty")
 	}
@@ -79,7 +80,7 @@ func (c *ConfluenceClient) GetContentsByType(input GetContentsByTypeInput) (map[
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 
-	var contents map[string]interface{}
+	var contents types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "space", input.SpaceKey, "content", input.ContentType}, params, nil, &contents); err != nil {
 		return nil, err
 	}
@@ -93,9 +94,9 @@ func (c *ConfluenceClient) GetContentsByType(input GetContentsByTypeInput) (map[
 //   - input: GetSpacesByKeyInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The spaces data
+//   - types.MapOutput: The spaces data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetSpacesByKey(input GetSpacesByKeyInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) GetSpacesByKey(input GetSpacesByKeyInput) (types.MapOutput, error) {
 	if len(input.Keys) == 0 && len(input.SpaceIds) == 0 && input.SpaceKeys == "" && len(input.SpaceId) == 0 && input.SpaceKeySingle == "" {
 		return nil, fmt.Errorf("at least one space identifier parameter must be provided")
 	}
@@ -116,7 +117,7 @@ func (c *ConfluenceClient) GetSpacesByKey(input GetSpacesByKeyInput) (map[string
 	utils.SetQueryParam(params, "hasRetentionPolicy", input.HasRetentionPolicy, (*bool)(nil))
 	utils.SetQueryParam(params, "spaceKey", input.Keys, []string{})
 
-	var spaces map[string]interface{}
+	var spaces types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "space"}, params, nil, &spaces); err != nil {
 		return nil, err
 	}

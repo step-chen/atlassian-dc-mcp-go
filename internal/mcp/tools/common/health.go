@@ -9,6 +9,7 @@ import (
 	"atlassian-dc-mcp-go/internal/client/jira"
 	"atlassian-dc-mcp-go/internal/config"
 	"atlassian-dc-mcp-go/internal/mcp/utils"
+	"atlassian-dc-mcp-go/internal/types"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -35,7 +36,7 @@ func NewHandler(appServer AppServer) *Handler {
 }
 
 // HealthCheckInput represents the input for the health check tool
-type HealthCheckInput struct{}
+type HealthCheckInput types.EmptyInput
 
 // ServiceStatus represents the status of a service
 type ServiceStatus struct {
@@ -51,8 +52,8 @@ type HealthCheckOutput struct {
 }
 
 // checkJiraHealth checks the health of the Jira service
-func checkJiraHealth(client *jira.JiraClient) map[string]interface{} {
-	result := make(map[string]interface{})
+func checkJiraHealth(client *jira.JiraClient) types.MapOutput {
+	result := make(types.MapOutput)
 
 	if client != nil {
 		_, err := client.GetCurrentUser()
@@ -70,8 +71,8 @@ func checkJiraHealth(client *jira.JiraClient) map[string]interface{} {
 }
 
 // checkConfluenceHealth checks the health of the Confluence service
-func checkConfluenceHealth(client *confluence.ConfluenceClient) map[string]interface{} {
-	result := make(map[string]interface{})
+func checkConfluenceHealth(client *confluence.ConfluenceClient) types.MapOutput {
+	result := make(types.MapOutput)
 
 	if client != nil {
 		_, err := client.GetCurrentUser()
@@ -89,8 +90,8 @@ func checkConfluenceHealth(client *confluence.ConfluenceClient) map[string]inter
 }
 
 // checkBitbucketHealth checks the health of the Bitbucket service
-func checkBitbucketHealth(client *bitbucket.BitbucketClient) map[string]interface{} {
-	result := make(map[string]interface{})
+func checkBitbucketHealth(client *bitbucket.BitbucketClient) types.MapOutput {
+	result := make(types.MapOutput)
 
 	if client != nil {
 		_, err := client.GetCurrentUser()

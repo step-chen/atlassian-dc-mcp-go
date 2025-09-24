@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
 
@@ -13,9 +14,9 @@ import (
 //   - input: SearchInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The search results
+//   - types.MapOutput: The search results
 //   - error: An error if the request fails
-func (c *ConfluenceClient) Search(input SearchInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) Search(input SearchInput) (types.MapOutput, error) {
 	params := url.Values{}
 	utils.SetQueryParam(params, "cql", input.CQL, "")
 	utils.SetQueryParam(params, "cqlcontext", input.CQLContext, "")
@@ -25,7 +26,7 @@ func (c *ConfluenceClient) Search(input SearchInput) (map[string]interface{}, er
 	utils.SetQueryParam(params, "includeArchivedSpaces", strconv.FormatBool(input.IncludeArchivedSpaces), "")
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 
-	var result map[string]interface{}
+	var result types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "search"}, params, nil, &result); err != nil {
 		return nil, err
 	}

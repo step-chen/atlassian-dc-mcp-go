@@ -3,6 +3,7 @@ package confluence
 import (
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
 
@@ -12,15 +13,15 @@ import (
 //   - input: GetRelatedLabelsInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The related labels data
+//   - types.MapOutput: The related labels data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetRelatedLabels(input GetRelatedLabelsInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) GetRelatedLabels(input GetRelatedLabelsInput) (types.MapOutput, error) {
 
 	params := url.Values{}
 	utils.SetQueryParam(params, "start", input.Start, 0)
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 
-	var labels map[string]interface{}
+	var labels types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "label", input.LabelName, "related"}, params, nil, &labels); err != nil {
 		return nil, err
 	}
@@ -34,9 +35,9 @@ func (c *ConfluenceClient) GetRelatedLabels(input GetRelatedLabelsInput) (map[st
 //   - input: GetLabelsInput containing the parameters for the request
 //
 // Returns:
-//   - map[string]interface{}: The labels data
+//   - types.MapOutput: The labels data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetLabels(input GetLabelsInput) (map[string]interface{}, error) {
+func (c *ConfluenceClient) GetLabels(input GetLabelsInput) (types.MapOutput, error) {
 
 	params := url.Values{}
 	utils.SetQueryParam(params, "labelName", input.LabelName, "")
@@ -46,7 +47,7 @@ func (c *ConfluenceClient) GetLabels(input GetLabelsInput) (map[string]interface
 	utils.SetQueryParam(params, "start", input.Start, 0)
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 
-	var labels map[string]interface{}
+	var labels types.MapOutput
 	if err := c.executeRequest("GET", []string{"rest", "api", "label"}, params, nil, &labels); err != nil {
 		return nil, err
 	}

@@ -6,12 +6,13 @@ import (
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 	"atlassian-dc-mcp-go/internal/mcp/utils"
+	"atlassian-dc-mcp-go/internal/types"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // getCommitsHandler handles getting commits
-func (h *Handler) getCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitsInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitsInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	commits, err := h.client.GetCommits(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get commits failed: %w", err)
@@ -21,7 +22,7 @@ func (h *Handler) getCommitsHandler(ctx context.Context, req *mcp.CallToolReques
 }
 
 // getCommitHandler handles getting a specific commit
-func (h *Handler) getCommitHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getCommitHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	commit, err := h.client.GetCommit(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get commit failed: %w", err)
@@ -31,7 +32,7 @@ func (h *Handler) getCommitHandler(ctx context.Context, req *mcp.CallToolRequest
 }
 
 // getCommitChangesHandler handles getting changes for a specific commit
-func (h *Handler) getCommitChangesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitChangesInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getCommitChangesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitChangesInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	changes, err := h.client.GetCommitChanges(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get commit changes failed: %w", err)
@@ -41,7 +42,7 @@ func (h *Handler) getCommitChangesHandler(ctx context.Context, req *mcp.CallTool
 }
 
 // getCommitCommentHandler handles getting a specific comment on a commit
-func (h *Handler) getCommitCommentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitCommentInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getCommitCommentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitCommentInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	comment, err := h.client.GetCommitComment(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get commit comment failed: %w", err)
@@ -51,7 +52,7 @@ func (h *Handler) getCommitCommentHandler(ctx context.Context, req *mcp.CallTool
 }
 
 // getCommitCommentsHandler handles getting comments on a commit
-func (h *Handler) getCommitCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitCommentsInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getCommitCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitCommentsInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	comments, err := h.client.GetCommitComments(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get commit comments failed: %w", err)
@@ -61,7 +62,7 @@ func (h *Handler) getCommitCommentsHandler(ctx context.Context, req *mcp.CallToo
 }
 
 // getCommitDiffStatsSummaryHandler handles getting diff statistics summary for a commit
-func (h *Handler) getCommitDiffStatsSummaryHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitDiffStatsSummaryInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getCommitDiffStatsSummaryHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitDiffStatsSummaryInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	stats, err := h.client.GetCommitDiffStatsSummary(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get commit diff stats summary failed: %w", err)
@@ -91,7 +92,7 @@ func (h *Handler) getDiffBetweenRevisionsHandler(ctx context.Context, req *mcp.C
 }
 
 // getJiraIssueCommitsHandler handles getting commits related to a Jira issue
-func (h *Handler) getJiraIssueCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetJiraIssueCommitsInput) (*mcp.CallToolResult, MapOutput, error) {
+func (h *Handler) getJiraIssueCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetJiraIssueCommitsInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	commits, err := h.client.GetJiraIssueCommits(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get Jira issue commits failed: %w", err)
@@ -114,14 +115,14 @@ func (h *Handler) getDiffBetweenRevisionsForPathHandler(ctx context.Context, req
 func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	utils.RegisterTool[bitbucket.GetCommitsInput, MapOutput](server, "bitbucket_get_commits", "Get commits for a repository", handler.getCommitsHandler)
-	utils.RegisterTool[bitbucket.GetCommitInput, MapOutput](server, "bitbucket_get_commit", "Get a specific commit", handler.getCommitHandler)
-	utils.RegisterTool[bitbucket.GetCommitChangesInput, MapOutput](server, "bitbucket_get_commit_changes", "Get changes for a specific commit", handler.getCommitChangesHandler)
-	utils.RegisterTool[bitbucket.GetCommitCommentsInput, MapOutput](server, "bitbucket_get_commit_comments", "Get comments on a commit", handler.getCommitCommentsHandler)
-	utils.RegisterTool[bitbucket.GetCommitCommentInput, MapOutput](server, "bitbucket_get_commit_comment", "Get a specific comment on a commit", handler.getCommitCommentHandler)
-	utils.RegisterTool[bitbucket.GetCommitDiffStatsSummaryInput, MapOutput](server, "bitbucket_get_commit_diff_stats_summary", "Get diff statistics summary for a commit", handler.getCommitDiffStatsSummaryHandler)
+	utils.RegisterTool[bitbucket.GetCommitsInput, types.MapOutput](server, "bitbucket_get_commits", "Get commits for a repository", handler.getCommitsHandler)
+	utils.RegisterTool[bitbucket.GetCommitInput, types.MapOutput](server, "bitbucket_get_commit", "Get a specific commit", handler.getCommitHandler)
+	utils.RegisterTool[bitbucket.GetCommitChangesInput, types.MapOutput](server, "bitbucket_get_commit_changes", "Get changes for a specific commit", handler.getCommitChangesHandler)
+	utils.RegisterTool[bitbucket.GetCommitCommentsInput, types.MapOutput](server, "bitbucket_get_commit_comments", "Get comments on a commit", handler.getCommitCommentsHandler)
+	utils.RegisterTool[bitbucket.GetCommitCommentInput, types.MapOutput](server, "bitbucket_get_commit_comment", "Get a specific comment on a commit", handler.getCommitCommentHandler)
+	utils.RegisterTool[bitbucket.GetCommitDiffStatsSummaryInput, types.MapOutput](server, "bitbucket_get_commit_diff_stats_summary", "Get diff statistics summary for a commit", handler.getCommitDiffStatsSummaryHandler)
 	utils.RegisterTool[bitbucket.GetDiffBetweenCommitsInput, DiffOutput](server, "bitbucket_get_diff_between_commits", "Get the diff between two commits", handler.getDiffBetweenCommitsHandler)
 	utils.RegisterTool[bitbucket.GetDiffBetweenRevisionsInput, DiffOutput](server, "bitbucket_get_diff_between_revisions", "Get the diff between revisions", handler.getDiffBetweenRevisionsHandler)
-	utils.RegisterTool[bitbucket.GetJiraIssueCommitsInput, MapOutput](server, "bitbucket_get_jira_issue_commits", "Get commits related to a Jira issue", handler.getJiraIssueCommitsHandler)
+	utils.RegisterTool[bitbucket.GetJiraIssueCommitsInput, types.MapOutput](server, "bitbucket_get_jira_issue_commits", "Get commits related to a Jira issue", handler.getJiraIssueCommitsHandler)
 	utils.RegisterTool[bitbucket.GetDiffBetweenRevisionsForPathInput, DiffOutput](server, "bitbucket_get_diff_between_revisions_for_path", "Get the diff between revisions for a specific path", handler.getDiffBetweenRevisionsForPathHandler)
 }

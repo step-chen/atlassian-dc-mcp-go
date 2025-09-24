@@ -6,12 +6,13 @@ import (
 
 	"atlassian-dc-mcp-go/internal/client/jira"
 	"atlassian-dc-mcp-go/internal/mcp/utils"
+	"atlassian-dc-mcp-go/internal/types"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // getProjectHandler handles getting a Jira project by key.
-func (h *Handler) getProjectHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetProjectInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+func (h *Handler) getProjectHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetProjectInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	project, err := h.client.GetProject(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get project failed: %w", err)
@@ -21,13 +22,13 @@ func (h *Handler) getProjectHandler(ctx context.Context, req *mcp.CallToolReques
 }
 
 // getProjectsHandler handles getting all Jira projects with optional filters and expansions.
-func (h *Handler) getProjectsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetAllProjectsInput) (*mcp.CallToolResult, map[string]interface{}, error) {
+func (h *Handler) getProjectsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetAllProjectsInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	projects, err := h.client.GetAllProjects(input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get projects failed: %w", err)
 	}
 
-	wrappedResult := map[string]interface{}{
+	wrappedResult := types.MapOutput{
 		"projects": projects,
 	}
 
@@ -38,6 +39,6 @@ func (h *Handler) getProjectsHandler(ctx context.Context, req *mcp.CallToolReque
 func AddProjectTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	utils.RegisterTool[jira.GetProjectInput, map[string]interface{}](server, "jira_get_project", "Get a specific Jira project by key", handler.getProjectHandler)
-	utils.RegisterTool[jira.GetAllProjectsInput, map[string]interface{}](server, "jira_get_projects", "Get all Jira projects with optional filters", handler.getProjectsHandler)
+	utils.RegisterTool[jira.GetProjectInput, types.MapOutput](server, "jira_get_project", "Get a specific Jira project by key", handler.getProjectHandler)
+	utils.RegisterTool[jira.GetAllProjectsInput, types.MapOutput](server, "jira_get_projects", "Get all Jira projects with optional filters", handler.getProjectsHandler)
 }

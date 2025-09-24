@@ -1,6 +1,7 @@
 package jira
 
 import (
+	"atlassian-dc-mcp-go/internal/types"
 	"net/http"
 )
 
@@ -10,9 +11,9 @@ import (
 //   - input: GetWorklogsInput containing issueKey and optional worklogId
 //
 // Returns:
-//   - map[string]any: The worklogs data
+//   - types.MapOutput: The worklogs data
 //   - error: An error if the request fails
-func (c *JiraClient) GetWorklogs(input GetWorklogsInput) (map[string]any, error) {
+func (c *JiraClient) GetWorklogs(input GetWorklogsInput) (types.MapOutput, error) {
 
 	pathSegments := []string{"rest", "api", "2", "issue", input.IssueKey, "worklog"}
 
@@ -20,7 +21,7 @@ func (c *JiraClient) GetWorklogs(input GetWorklogsInput) (map[string]any, error)
 		pathSegments = append(pathSegments, input.WorklogId)
 	}
 
-	var worklogs map[string]any
+	var worklogs types.MapOutput
 	err := c.executeRequest(http.MethodGet, pathSegments, nil, nil, &worklogs)
 	if err != nil {
 		return nil, err

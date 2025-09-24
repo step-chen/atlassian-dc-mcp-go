@@ -4,21 +4,22 @@ import (
 	"context"
 
 	"atlassian-dc-mcp-go/internal/mcp/utils"
+	"atlassian-dc-mcp-go/internal/types"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // CapabilitiesInput represents the input for the capabilities tool
-type CapabilitiesInput struct{}
+type CapabilitiesInput types.EmptyInput
 
 // CapabilitiesOutput represents the output of the capabilities tool
 type CapabilitiesOutput struct {
-	Capabilities map[string]interface{} `json:"capabilities"`
+	Capabilities types.MapOutput `json:"capabilities"`
 }
 
 // capabilitiesHandler handles getting server capabilities
 func capabilitiesHandler(ctx context.Context, req *mcp.CallToolRequest, input CapabilitiesInput) (*mcp.CallToolResult, CapabilitiesOutput, error) {
-	capabilities := map[string]interface{}{
+	capabilities := types.MapOutput{
 		"description": "Atlassian DC MCP Server",
 		"features": []string{
 			"health_check",

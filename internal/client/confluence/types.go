@@ -1,7 +1,5 @@
 package confluence
 
-type EmptyInput struct{}
-
 // PaginationInput represents pagination parameters
 type PaginationInput struct {
 	Start int `json:"start,omitempty" jsonschema:"The starting index of the returned results"`
