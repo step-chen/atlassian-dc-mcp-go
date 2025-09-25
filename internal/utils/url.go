@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils/logging"
 	"bytes"
 	"encoding/json"
@@ -157,9 +158,11 @@ func SetQueryParam(params url.Values, key string, value any, invalid any) {
 // SetRequestBodyParam sets a request body parameter based on its value.
 // The parameter is set only if the value is not empty or zero.
 // For string types, the parameter is set only if not empty.
-// For numeric types, the parameter is set only if greater than zero.
+// For slice types, the parameter is set only if the slice is not empty.
+// For numeric types, the parameter is set only if it's not zero.
 // For boolean types, the parameter is always set.
 // For pointer types, the parameter is set only if the pointer is not nil.
+// For MapOutput and []MapOutput types, the parameter is set only if not nil/empty.
 func SetRequestBodyParam(params map[string]interface{}, key string, value interface{}) {
 	switch v := value.(type) {
 	case string:
@@ -191,6 +194,16 @@ func SetRequestBodyParam(params map[string]interface{}, key string, value interf
 	case *bool:
 		if v != nil {
 			params[key] = *v
+		}
+	case types.MapOutput:
+		// For MapOutput, set only if not nil
+		if v != nil {
+			params[key] = v
+		}
+	case []types.MapOutput:
+		// For []MapOutput, set only if not empty
+		if len(v) > 0 {
+			params[key] = v
 		}
 	default:
 		// For other types, only set if not nil

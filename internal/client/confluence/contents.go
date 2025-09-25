@@ -91,20 +91,13 @@ func (c *ConfluenceClient) SearchContent(input SearchContentInput) (types.MapOut
 //   - types.MapOutput: The created content data
 //   - error: An error if the request fails
 func (c *ConfluenceClient) CreateContent(input CreateContentInput) (types.MapOutput, error) {
-	payload := types.MapOutput{
-		"type":  input.Type,
-		"title": input.Title,
-		"space": input.Space,
-		"body":  input.Body,
-	}
-
-	if len(input.Ancestors) > 0 {
-		payload["ancestors"] = input.Ancestors
-	}
-
-	if len(input.Metadata) > 0 {
-		payload["metadata"] = input.Metadata
-	}
+	payload := make(types.MapOutput)
+	utils.SetRequestBodyParam(payload, "type", input.Type)
+	utils.SetRequestBodyParam(payload, "title", input.Title)
+	utils.SetRequestBodyParam(payload, "space", input.Space)
+	utils.SetRequestBodyParam(payload, "body", input.Body)
+	utils.SetRequestBodyParam(payload, "ancestors", input.Ancestors)
+	utils.SetRequestBodyParam(payload, "metadata", input.Metadata)
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
