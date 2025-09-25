@@ -1,11 +1,5 @@
 package confluence
 
-// GetSpacesInput represents the input parameters for getting spaces
-type GetSpacesInput struct {
-	PaginationInput
-	Expand []string `json:"expand,omitempty" jsonschema:"Fields to expand in the response"`
-}
-
 // GetSpaceInput represents the input parameters for getting a specific space
 type GetSpaceInput struct {
 	SpaceKey string   `json:"spaceKey" jsonschema:"required,The key of the space to retrieve"`

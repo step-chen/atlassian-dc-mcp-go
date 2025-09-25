@@ -46,74 +46,10 @@ type GetContentHistoryInput struct {
 	Expand    []string `json:"expand,omitempty" jsonschema:"Fields to expand in the response"`
 }
 
-// GetContentVersionInput represents the input parameters for getting a specific content version
-type GetContentVersionInput struct {
-	ContentID string   `json:"contentID" jsonschema:"required,The ID of the content"`
-	Version   int      `json:"version" jsonschema:"required,The version number to retrieve"`
-	Expand    []string `json:"expand,omitempty" jsonschema:"Fields to expand in the response"`
-}
-
-// GetContentRestrictionsInput represents the input parameters for getting content restrictions
-type GetContentRestrictionsInput struct {
-	ContentID string   `json:"contentID" jsonschema:"required,The ID of the content"`
-	Expand    []string `json:"expand,omitempty" jsonschema:"Fields to expand in the response"`
-}
-
-// GetContentRestrictionsByOperationInput represents the input parameters for getting content restrictions by operation
-type GetContentRestrictionsByOperationInput struct {
-	ContentID string `json:"contentID" jsonschema:"required,The ID of the content"`
-	Operation string `json:"operation" jsonschema:"required,The operation to get restrictions for"`
-}
-
 // GetContentLabelsInput represents the input parameters for getting content labels
 type GetContentLabelsInput struct {
 	PaginationInput
 	ContentID string `json:"contentID" jsonschema:"required,The ID of the content"`
-}
-
-// AddContentLabelInput represents the input parameters for adding a label to content
-type AddContentLabelInput struct {
-	ContentID string          `json:"contentID" jsonschema:"required,The ID of the content"`
-	LabelData types.MapOutput `json:"labelData" jsonschema:"required,The label data to add"`
-}
-
-// RemoveContentLabelInput represents the input parameters for removing a label from content
-type RemoveContentLabelInput struct {
-	ContentID string `json:"contentID" jsonschema:"required,The ID of the content"`
-	Label     string `json:"label" jsonschema:"required,The label to remove"`
-}
-
-// GetContentPropertiesInput represents the input parameters for getting content properties
-type GetContentPropertiesInput struct {
-	PaginationInput
-	ContentID string   `json:"contentID" jsonschema:"required,The ID of the content"`
-	Expand    []string `json:"expand,omitempty" jsonschema:"Fields to expand in the response"`
-}
-
-// GetContentPropertyInput represents the input parameters for getting a specific content property
-type GetContentPropertyInput struct {
-	ContentID   string   `json:"contentID" jsonschema:"required,The ID of the content"`
-	PropertyKey string   `json:"propertyKey" jsonschema:"required,The key of the property to retrieve"`
-	Expand      []string `json:"expand,omitempty" jsonschema:"Fields to expand in the response"`
-}
-
-// CreateContentPropertyInput represents the input parameters for creating a content property
-type CreateContentPropertyInput struct {
-	ContentID    string          `json:"contentID" jsonschema:"required,The ID of the content"`
-	PropertyData types.MapOutput `json:"propertyData" jsonschema:"required,The property data to create"`
-}
-
-// UpdateContentPropertyInput represents the input parameters for updating a content property
-type UpdateContentPropertyInput struct {
-	ContentID    string          `json:"contentID" jsonschema:"required,The ID of the content"`
-	PropertyKey  string          `json:"propertyKey" jsonschema:"required,The key of the property to update"`
-	PropertyData types.MapOutput `json:"propertyData" jsonschema:"required,The updated property data"`
-}
-
-// DeleteContentPropertyInput represents the input parameters for deleting a content property
-type DeleteContentPropertyInput struct {
-	ContentID   string `json:"contentID" jsonschema:"required,The ID of the content"`
-	PropertyKey string `json:"propertyKey" jsonschema:"required,The key of the property to delete"`
 }
 
 // SearchContentInput represents the input parameters for SearchContent method.

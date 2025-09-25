@@ -17,54 +17,6 @@ type GetRepositoryInput struct {
 	CommonInput
 }
 
-// GetRepositoryAvatarInput represents the input parameters for getting a repository avatar
-type GetRepositoryAvatarInput struct {
-	CommonInput
-}
-
-// GetRepositoryBranchesInput represents the input parameters for getting repository branches
-type GetRepositoryBranchesInput struct {
-	CommonInput
-	PaginationInput
-	Base    string `json:"base,omitempty" jsonschema:"The base branch to filter branches"`
-	Details bool   `json:"details,omitempty" jsonschema:"Include details in response"`
-}
-
-// GetRepositoryBranchInput represents the input parameters for getting a specific repository branch
-type GetRepositoryBranchInput struct {
-	CommonInput
-	Name string `json:"name" jsonschema:"required,The branch name"`
-}
-
-// GetRepositoryCommitsInput represents the input parameters for getting repository commits
-type GetRepositoryCommitsInput struct {
-	CommonInput
-	PaginationInput
-	Until string `json:"until,omitempty" jsonschema:"Filter commits until a specific time"`
-	Since string `json:"since,omitempty" jsonschema:"Filter commits since a specific time"`
-	Path  string `json:"path,omitempty" jsonschema:"Path to filter commits by"`
-}
-
-// GetRepositoryTagsInput represents the input parameters for getting repository tags
-type GetRepositoryTagsInput struct {
-	CommonInput
-	PaginationInput
-	Name string `json:"name,omitempty" jsonschema:"Filter tags by name"`
-}
-
-// GetRepositoryTagInput represents the input parameters for getting a specific repository tag
-type GetRepositoryTagInput struct {
-	CommonInput
-	Name string `json:"name" jsonschema:"required,The tag name"`
-}
-
-// GetRepositoryUsersInput represents the input parameters for getting repository users
-type GetRepositoryUsersInput struct {
-	CommonInput
-	PaginationInput
-	Filter string `json:"filter,omitempty" jsonschema:"Filter users by name"`
-}
-
 // GetRepositoryLabelsInput represents the input parameters for getting repository labels
 type GetRepositoryLabelsInput struct {
 	CommonInput

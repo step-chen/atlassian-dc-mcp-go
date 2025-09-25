@@ -374,6 +374,12 @@ func (c *BitbucketClient) GetPullRequestComment(input GetPullRequestCommentInput
 //   - types.MapOutput: The participant data retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) UpdatePullRequestParticipantStatus(input UpdatePullRequestStatusInput) (types.MapOutput, error) {
+	switch input.Status {
+	case "UNAPPROVED", "NEEDS_WORK", "APPROVED":
+	default:
+		return nil, fmt.Errorf("invalid status value: %s, valid values are: UNAPPROVED, NEEDS_WORK, APPROVED", input.Status)
+	}
+
 	// Create the payload with participant data
 	payload := types.MapOutput{
 		"status": input.Status,

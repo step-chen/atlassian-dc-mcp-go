@@ -29,13 +29,6 @@ type GetPullRequestActivitiesInput struct {
 	FromId        string `json:"fromId,omitempty" jsonschema:"Filter activities by from id"`
 }
 
-// GetPullRequestChangesInput represents the input parameters for getting pull request changes
-type GetPullRequestChangesInput struct {
-	CommonInput
-	PaginationInput
-	PullRequestID int `json:"pullRequestId" jsonschema:"required,The pull request ID"`
-}
-
 // GetPullRequestCommentsInput represents the input parameters for getting pull request comments
 type GetPullRequestCommentsInput struct {
 	CommonInput
@@ -49,28 +42,6 @@ type GetPullRequestCommentsInput struct {
 	DiffType      string `json:"diffType,omitempty" jsonschema:"Filter comments by diff type"`
 	DiffTypes     string `json:"diffTypes,omitempty" jsonschema:"Filter comments by diff types"`
 	States        string `json:"states,omitempty" jsonschema:"Filter comments by states"`
-}
-
-// GetPullRequestCommitsInput represents the input parameters for getting pull request commits
-type GetPullRequestCommitsInput struct {
-	CommonInput
-	PaginationInput
-	PullRequestID int `json:"pullRequestId" jsonschema:"required,The pull request ID"`
-}
-
-// GetPullRequestDiffInput represents the input parameters for getting pull request diff
-type GetPullRequestDiffInput struct {
-	CommonInput
-	PullRequestID int    `json:"pullRequestId" jsonschema:"required,The pull request ID"`
-	Path          string `json:"path,omitempty" jsonschema:"Filter diff by path"`
-	Context       int    `json:"context,omitempty" jsonschema:"Number of context lines to include"`
-	Since         string `json:"since,omitempty" jsonschema:"The commit ID or ref to retrieve diff since"`
-}
-
-// GetPullRequestMergeStatusInput represents the input parameters for getting pull request merge status
-type GetPullRequestMergeStatusInput struct {
-	CommonInput
-	PullRequestID int `json:"pullRequestId" jsonschema:"required,The pull request ID"`
 }
 
 // AddPullRequestCommentInput represents the input parameters for adding a pull request comment
@@ -97,20 +68,6 @@ type MergePullRequestInput struct {
 	AutoSubject   *string `json:"autoSubject,omitempty" jsonschema:"Auto-generated merge commit subject"`
 	Message       *string `json:"message,omitempty" jsonschema:"The merge commit message"`
 	StrategyId    *string `json:"strategyId,omitempty" jsonschema:"The merge strategy to use"`
-}
-
-// GetPullRequestParticipantsInput represents the input parameters for getting pull request participants
-type GetPullRequestParticipantsInput struct {
-	CommonInput
-	PaginationInput
-	PullRequestID int `json:"pullRequestId" jsonschema:"required,The pull request ID"`
-}
-
-// GetPullRequestStatusInput represents the input parameters for getting pull request status
-type GetPullRequestStatusInput struct {
-	CommonInput
-	PullRequestID int    `json:"pullRequestId" jsonschema:"required,The pull request ID"`
-	RefRevision   string `json:"refRevision,omitempty" jsonschema:"Reference revision"`
 }
 
 // GetPullRequestSuggestionsInput represents the input parameters for getting pull request suggestions
