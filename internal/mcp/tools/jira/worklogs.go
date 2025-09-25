@@ -21,9 +21,24 @@ func (h *Handler) getWorklogsHandler(ctx context.Context, req *mcp.CallToolReque
 	return nil, worklogs, nil
 }
 
+// addWorklogHandler handles adding a worklog to a Jira issue
+func (h *Handler) addWorklogHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.AddWorklogInput) (*mcp.CallToolResult, types.MapOutput, error) {
+	worklog, err := h.client.AddWorklog(input)
+	if err != nil {
+		return nil, nil, fmt.Errorf("add worklog failed: %w", err)
+	}
+
+	return nil, worklog, nil
+}
+
 // AddWorklogTools registers the worklog-related tools with the MCP server
 func AddWorklogTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
 	utils.RegisterTool[jira.GetWorklogsInput, types.MapOutput](server, "jira_get_worklogs", "Get worklogs for a Jira issue or a specific worklog by ID", handler.getWorklogsHandler)
+	
+	// Check if the user has permission to add worklogs
+	if permissions["jira-add-worklogs"] {
+		utils.RegisterTool[jira.AddWorklogInput, types.MapOutput](server, "jira_add_worklog", "Add a new worklog entry to a Jira issue", handler.addWorklogHandler)
+	}
 }

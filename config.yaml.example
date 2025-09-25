@@ -40,6 +40,7 @@ jira:
     jira_add_comment: false
     jira_create_subtask: false
     jira_set_issue_estimation_for_board: false
+    jira_add_worklogs: false
 
 confluence:
   url: "https://confluence.example.com"

@@ -187,6 +187,7 @@ Permissions allow you to control which operations can be performed on each servi
 - `jira_add_comment`: Add comments to issues
 - `jira_create_subtask`: Create subtasks
 - `jira_set_issue_estimation_for_board`: Set issue estimation for a board
+- `jira_add_worklogs`: Add worklogs to issues
 
 ###### Confluence Permissions
 
@@ -227,6 +228,8 @@ export MCP_JIRA_PERMISSIONS_JIRA_UPDATE_ISSUE=false
 export MCP_JIRA_PERMISSIONS_JIRA_TRANSITION_ISSUE=false
 export MCP_JIRA_PERMISSIONS_JIRA_ADD_COMMENT=false
 export MCP_JIRA_PERMISSIONS_JIRA_CREATE_SUBTASK=false
+export MCP_JIRA_PERMISSIONS_JIRA_SET_ISSUE_ESTIMATION_FOR_BOARD=false
+export MCP_JIRA_PERMISSIONS_JIRA_ADD_WORKLOGS=false
 
 export MCP_CONFLUENCE_URL="https://confluence.example.com"
 export MCP_CONFLUENCE_TOKEN="your-confluence-api-token"
@@ -272,6 +275,8 @@ MCP_JIRA_PERMISSIONS_JIRA_UPDATE_ISSUE=false
 MCP_JIRA_PERMISSIONS_JIRA_TRANSITION_ISSUE=false
 MCP_JIRA_PERMISSIONS_JIRA_ADD_COMMENT=false
 MCP_JIRA_PERMISSIONS_JIRA_CREATE_SUBTASK=false
+MCP_JIRA_PERMISSIONS_JIRA_SET_ISSUE_ESTIMATION_FOR_BOARD=false
+MCP_JIRA_PERMISSIONS_JIRA_ADD_WORKLOGS=false
 
 # Confluence configuration
 MCP_CONFLUENCE_URL="https://confluence.example.com"
