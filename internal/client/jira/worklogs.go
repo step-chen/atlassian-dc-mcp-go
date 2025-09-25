@@ -52,17 +52,10 @@ func (c *JiraClient) AddWorklog(input AddWorklogInput) (types.MapOutput, error) 
 	utils.SetQueryParam(queryParams, "reduceBy", input.ReduceBy, "")
 
 	// Prepare request body
-	requestBody := map[string]interface{}{
-		"timeSpent": input.TimeSpent,
-	}
-	
-	if input.Comment != "" {
-		requestBody["comment"] = input.Comment
-	}
-	
-	if input.Started != "" {
-		requestBody["started"] = input.Started
-	}
+	requestBody := make(map[string]interface{})
+	utils.SetRequestBodyParam(requestBody, "timeSpent", input.TimeSpent)
+	utils.SetRequestBodyParam(requestBody, "comment", input.Comment)
+	utils.SetRequestBodyParam(requestBody, "started", input.Started)
 
 	body, err := json.Marshal(requestBody)
 	if err != nil {

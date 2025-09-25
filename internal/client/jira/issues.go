@@ -210,11 +210,11 @@ func (c *JiraClient) GetTransitions(input GetTransitionsInput) (types.MapOutput,
 // Returns:
 //   - error: An error if the request fails
 func (c *JiraClient) TransitionIssue(input TransitionIssueInput) error {
-	payload := types.MapOutput{
-		"transition": map[string]string{
-			"id": input.TransitionID,
-		},
-	}
+	transition := make(types.MapOutput)
+	utils.SetRequestBodyParam(transition, "id", input.TransitionID)
+	
+	payload := make(types.MapOutput)
+	utils.SetRequestBodyParam(payload, "transition", transition)
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -312,9 +312,8 @@ func (c *JiraClient) SetIssueEstimationForBoard(input SetIssueEstimationForBoard
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "boardId", input.BoardId, int64(0))
 
-	payload := types.MapOutput{
-		"value": input.Value,
-	}
+	payload := make(types.MapOutput)
+	utils.SetRequestBodyParam(payload, "value", input.Value)
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {

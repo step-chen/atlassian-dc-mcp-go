@@ -154,6 +154,52 @@ func SetQueryParam(params url.Values, key string, value any, invalid any) {
 	}
 }
 
+// SetRequestBodyParam sets a request body parameter based on its value.
+// The parameter is set only if the value is not empty or zero.
+// For string types, the parameter is set only if not empty.
+// For numeric types, the parameter is set only if greater than zero.
+// For boolean types, the parameter is always set.
+// For pointer types, the parameter is set only if the pointer is not nil.
+func SetRequestBodyParam(params map[string]interface{}, key string, value interface{}) {
+	switch v := value.(type) {
+	case string:
+		if v != "" {
+			params[key] = v
+		}
+	case []string:
+		if len(v) > 0 {
+			params[key] = v
+		}
+	case int, int8, int16, int32, int64:
+		if v != 0 {
+			params[key] = v
+		}
+	case float32, float64:
+		if v != 0.0 {
+			params[key] = v
+		}
+	case bool:
+		params[key] = v
+	case *string:
+		if v != nil && *v != "" {
+			params[key] = *v
+		}
+	case *int:
+		if v != nil && *v != 0 {
+			params[key] = *v
+		}
+	case *bool:
+		if v != nil {
+			params[key] = *v
+		}
+	default:
+		// For other types, only set if not nil
+		if v != nil {
+			params[key] = v
+		}
+	}
+}
+
 func ExecuteHTTPRequest(client *http.Client, req *http.Request, service string, result interface{}) error {
 	resp, err := client.Do(req)
 	if err != nil {

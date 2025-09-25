@@ -45,9 +45,8 @@ func (c *JiraClient) GetComments(input GetCommentsInput) (types.MapOutput, error
 //   - error: An error if the request fails
 func (c *JiraClient) AddComment(input AddCommentInput) (types.MapOutput, error) {
 
-	payload := types.MapOutput{
-		"body": input.Comment,
-	}
+	payload := make(types.MapOutput)
+	utils.SetRequestBodyParam(payload, "body", input.Comment)
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {

@@ -129,9 +129,8 @@ func (c *BitbucketClient) GetPullRequestChanges(input GetPullRequestChangesInput
 //   - types.MapOutput: The comment data retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) AddPullRequestComment(input AddPullRequestCommentInput) (types.MapOutput, error) {
-	payload := types.MapOutput{
-		"text": input.CommentText,
-	}
+	payload := make(types.MapOutput)
+	utils.SetRequestBodyParam(payload, "text", input.CommentText)
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -428,18 +427,11 @@ func (c *BitbucketClient) UpdatePullRequestParticipantStatus(input UpdatePullReq
 	}
 
 	// Create the payload with participant data
-	payload := types.MapOutput{
-		"status": input.Status,
-	}
-
-	// Add lastReviewedCommit if provided
-	if input.LastReviewedCommit != "" {
-		payload["lastReviewedCommit"] = input.LastReviewedCommit
-	}
-
-	// Add version if provided
+	payload := make(types.MapOutput)
+	utils.SetRequestBodyParam(payload, "status", input.Status)
+	utils.SetRequestBodyParam(payload, "lastReviewedCommit", input.LastReviewedCommit)
 	if input.Version != nil {
-		payload["version"] = *input.Version
+		utils.SetRequestBodyParam(payload, "version", *input.Version)
 	}
 
 	jsonPayload, err := json.Marshal(payload)

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"atlassian-dc-mcp-go/internal/utils"
 )
 
 // SearchIssues searches for issues using JQL.
@@ -38,15 +40,11 @@ func (c *JiraClient) SearchIssues(input SearchIssuesInput) (types.MapOutput, err
 		}
 	}
 
-	payload := types.MapOutput{
-		"jql":        finalJQL,
-		"maxResults": input.MaxResults,
-		"startAt":    input.StartAt,
-	}
-
-	if len(input.Fields) > 0 {
-		payload["fields"] = input.Fields
-	}
+	payload := make(types.MapOutput)
+	utils.SetRequestBodyParam(payload, "jql", finalJQL)
+	utils.SetRequestBodyParam(payload, "maxResults", input.MaxResults)
+	utils.SetRequestBodyParam(payload, "startAt", input.StartAt)
+	utils.SetRequestBodyParam(payload, "fields", input.Fields)
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
