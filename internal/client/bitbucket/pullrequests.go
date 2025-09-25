@@ -70,6 +70,53 @@ func (c *BitbucketClient) GetPullRequestActivities(input GetPullRequestActivitie
 	return activities, nil
 }
 
+// GetPullRequestChanges retrieves changes for a specific pull request.
+//
+// This function makes an HTTP GET request to the Bitbucket API to fetch changes
+// for a specific pull request with optional filtering.
+//
+// Parameters:
+//   - input: GetPullRequestChangesInput containing the parameters for the request
+//
+// Returns:
+//   - types.MapOutput: The changes data retrieved from the API
+//   - error: An error if the request fails
+func (c *BitbucketClient) GetPullRequestChanges(input GetPullRequestChangesInput) (types.MapOutput, error) {
+	// Validate required parameters
+	if input.ProjectKey == "" {
+		return nil, fmt.Errorf("project key is required")
+	}
+	if input.RepoSlug == "" {
+		return nil, fmt.Errorf("repository slug is required")
+	}
+	if input.PullRequestID <= 0 {
+		return nil, fmt.Errorf("pull request ID must be a positive integer")
+	}
+
+	queryParams := make(url.Values)
+	utils.SetQueryParam(queryParams, "start", input.Start, 0)
+	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	utils.SetQueryParam(queryParams, "sinceId", input.SinceId, "")
+	utils.SetQueryParam(queryParams, "untilId", input.UntilId, "")
+	utils.SetQueryParam(queryParams, "changeScope", input.ChangeScope, "")
+	if input.WithComments {
+		queryParams.Set("withComments", "true")
+	}
+
+	var changes types.MapOutput
+	if err := c.executeRequest(
+		http.MethodGet,
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "changes"},
+		queryParams,
+		nil,
+		&changes,
+	); err != nil {
+		return nil, fmt.Errorf("failed to get pull request changes: %w", err)
+	}
+
+	return changes, nil
+}
+
 // AddPullRequestComment adds a comment to a specific pull request.
 //
 // This function makes an HTTP POST request to the Bitbucket API to add a comment

@@ -29,6 +29,20 @@ type GetPullRequestActivitiesInput struct {
 	FromId        string `json:"fromId,omitempty" jsonschema:"Filter activities by from id"`
 }
 
+// GetPullRequestChangesInput represents the input parameters for getting pull request changes
+type GetPullRequestChangesInput struct {
+	CommonInput
+	PaginationInput
+	PullRequestID int `json:"pullRequestId" jsonschema:"required,The pull request ID"`
+	// Additional query parameters for pull request changes
+	SinceId     string `json:"sinceId,omitempty" jsonschema:"The change ID from which to start retrieving changes"`
+	ChangeScope string `json:"changeScope,omitempty" jsonschema:"The scope of changes to retrieve (e.g. UNREVIEWED)"`
+	UntilId     string `json:"untilId,omitempty" jsonschema:"The change ID until which to retrieve changes"`
+	WithComments bool   `json:"withComments,omitempty" jsonschema:"Include comments in the response"`
+	Start       int    `json:"start,omitempty" jsonschema:"Pagination start position (ignored by server)"`
+	Limit       int    `json:"limit,omitempty" jsonschema:"Maximum number of changes to retrieve"`
+}
+
 // GetPullRequestCommentsInput represents the input parameters for getting pull request comments
 type GetPullRequestCommentsInput struct {
 	CommonInput

@@ -103,6 +103,16 @@ func (h *Handler) addPullRequestCommentHandler(ctx context.Context, req *mcp.Cal
 	return nil, comment, nil
 }
 
+// getPullRequestChangesHandler handles getting pull request changes
+func (h *Handler) getPullRequestChangesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestChangesInput) (*mcp.CallToolResult, types.MapOutput, error) {
+	changes, err := h.client.GetPullRequestChanges(input)
+	if err != nil {
+		return nil, nil, fmt.Errorf("get pull request changes failed: %w", err)
+	}
+
+	return nil, changes, nil
+}
+
 // getPullRequestSuggestionsHandler handles getting pull request suggestions
 func (h *Handler) getPullRequestSuggestionsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestSuggestionsInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	suggestions, err := h.client.GetPullRequestSuggestions(input)
@@ -201,6 +211,7 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient, 
 	utils.RegisterTool[bitbucket.GetCommitsInput, types.MapOutput](server, "bitbucket_get_pull_request_commits", "Get commits for a specific pull request", handler.getPullRequestCommitsHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestCommentsInput, types.MapOutput](server, "bitbucket_get_pull_request_comments", "Get comments for a specific pull request", handler.getPullRequestCommentsHandler)
 	utils.RegisterTool[bitbucket.GetDiffBetweenCommitsInput, DiffOutput](server, "bitbucket_get_pull_request_diff", "Get diff of a pull request", handler.getPullRequestDiffHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestChangesInput, types.MapOutput](server, "bitbucket_get_pull_request_changes", "Get changes for a specific pull request", handler.getPullRequestChangesHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestSuggestionsInput, types.MapOutput](server, "bitbucket_get_pull_request_suggestions", "Get pull request suggestions", handler.getPullRequestSuggestionsHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestJiraIssuesInput, types.MapOutput](server, "bitbucket_get_pull_request_jira_issues", "Get Jira issues linked to a pull request", handler.getPullRequestJiraIssuesHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestsForUserInput, types.MapOutput](server, "bitbucket_get_pull_requests_for_user", "Get pull requests for a specific user", handler.getPullRequestsForUserHandler)
