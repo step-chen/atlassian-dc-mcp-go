@@ -110,7 +110,10 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient, permissions map[
 	utils.RegisterTool[jira.GetIssueInput, types.MapOutput](server, "jira_get_issue", "Get a specific Jira issue by key or ID", handler.getIssueHandler)
 	utils.RegisterTool[jira.GetAgileIssueInput, types.MapOutput](server, "jira_get_agile_issue", "Get an agile Jira issue by key or ID", handler.getAgileIssueHandler)
 	utils.RegisterTool[jira.GetIssueEstimationForBoardInput, types.MapOutput](server, "jira_get_issue_estimation_for_board", "Get issue estimation for a board", handler.getIssueEstimationForBoardHandler)
-	utils.RegisterTool[jira.SetIssueEstimationForBoardInput, types.MapOutput](server, "jira_set_issue_estimation_for_board", "Set issue estimation for a board", handler.setIssueEstimationForBoardHandler)
+	
+	if permissions["jira_set_issue_estimation_for_board"] {
+		utils.RegisterTool[jira.SetIssueEstimationForBoardInput, types.MapOutput](server, "jira_set_issue_estimation_for_board", "Set issue estimation for a board", handler.setIssueEstimationForBoardHandler)
+	}
 
 	if permissions["jira_create_issue"] {
 		utils.RegisterTool[jira.CreateIssueInput, types.MapOutput](server, "jira_create_issue", "Create a new Jira issue", handler.createIssueHandler)

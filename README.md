@@ -186,6 +186,7 @@ Permissions allow you to control which operations can be performed on each servi
 - `jira_transition_issue`: Transition issues between statuses
 - `jira_add_comment`: Add comments to issues
 - `jira_create_subtask`: Create subtasks
+- `jira_set_issue_estimation_for_board`: Set issue estimation for a board
 
 ###### Confluence Permissions
 
