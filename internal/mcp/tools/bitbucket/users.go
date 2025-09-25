@@ -11,16 +11,6 @@ import (
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// getCurrentUserHandler handles getting the current Bitbucket user
-func (h *Handler) getCurrentUserHandler(ctx context.Context, req *mcp.CallToolRequest, input types.EmptyInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	user, err := h.client.GetCurrentUser()
-	if err != nil {
-		return nil, nil, fmt.Errorf("get current user failed: %w", err)
-	}
-
-	return nil, user, nil
-}
-
 // getUserHandler handles getting a user
 func (h *Handler) getUserHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetUserInput) (*mcp.CallToolResult, GetUserOutput, error) {
 	user, err := h.client.GetUser(input)
@@ -45,7 +35,6 @@ func (h *Handler) getUsersHandler(ctx context.Context, req *mcp.CallToolRequest,
 func AddUserTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	utils.RegisterTool[types.EmptyInput, types.MapOutput](server, "bitbucket_get_current_user", "Get current Bitbucket user", handler.getCurrentUserHandler)
 	utils.RegisterTool[bitbucket.GetUserInput, GetUserOutput](server, "bitbucket_get_user", "Get a Bitbucket user", handler.getUserHandler)
 	utils.RegisterTool[bitbucket.GetUsersInput, types.MapOutput](server, "bitbucket_get_users", "Get a list of Bitbucket users", handler.getUsersHandler)
 }

@@ -361,6 +361,53 @@ func (c *BitbucketClient) GetPullRequestComment(input GetPullRequestCommentInput
 	return comment, nil
 }
 
+// UpdatePullRequestParticipantStatus updates a participant's status for a pull request.
+//
+// This function makes an HTTP PUT request to the Bitbucket API to update the current
+// user's status for a pull request. Implicitly adds the user as a participant if they
+// are not already. If the current user is the author, this method will fail.
+//
+// Parameters:
+//   - input: UpdatePullRequestStatusInput containing the parameters for the request
+//
+// Returns:
+//   - types.MapOutput: The participant data retrieved from the API
+//   - error: An error if the request fails
+func (c *BitbucketClient) UpdatePullRequestParticipantStatus(input UpdatePullRequestStatusInput) (types.MapOutput, error) {
+	// Create the payload with participant data
+	payload := types.MapOutput{
+		"status": input.Status,
+	}
+
+	// Add lastReviewedCommit if provided
+	if input.LastReviewedCommit != "" {
+		payload["lastReviewedCommit"] = input.LastReviewedCommit
+	}
+
+	// Add version if provided
+	if input.Version != nil {
+		payload["version"] = *input.Version
+	}
+
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal payload: %w", err)
+	}
+
+	var participant types.MapOutput
+	if err := c.executeRequest(
+		http.MethodPut,
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "participants", input.UserSlug},
+		nil,
+		jsonPayload,
+		&participant,
+	); err != nil {
+		return nil, err
+	}
+
+	return participant, nil
+}
+
 // GetPullRequestComments retrieves comments on a pull request.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch comments

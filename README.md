@@ -151,86 +151,57 @@ Just make sure your configuration is properly set for the desired transport mode
 
 ## Configuration
 
-The application supports multiple configuration sources with the following priority (from highest to lowest):
-1. Environment variables
-2. Configuration file (config.yaml)
-3. Default values
+The application requires a configuration file to operate. By default, it looks for `config.yaml` in the current directory, but you can specify a different path using the `-c` or `--config` flag.
 
-### Configuration File
-
-Copy the example configuration file and edit it:
+A sample configuration file is provided as `config.yaml.example`. Copy this file to `config.yaml` and edit it with your settings:
 
 ```bash
 cp config.yaml.example config.yaml
 ```
 
-Then edit `config.yaml` with your settings:
+The configuration file contains the following sections:
 
-```yaml
-# Server port (default is 8090 if not specified)
-port: 8090
+#### Server Configuration
 
-# Client timeout in seconds (default is 60 seconds if not specified)
-client_timeout: 60
+- `port`: The port the server will listen on (default: 8090)
+- `client_timeout`: Client timeout in seconds (default: 60)
+- `transport`: Transport mode (stdio, sse, http)
 
-# Transport mode (stdio, sse, http)
-# stdio: Standard input/output communication (default)
-# sse: Server-Sent Events communication
-# http: HTTP streaming communication on port 8090
-transport: "stdio"
+#### Service Configuration
 
-# Logging configuration
-logging:
-  # Development mode enables human-friendly console output
-  development: true
-  
-  # Log level (debug, info, warn, error, fatal)
-  level: "info"
-  
-  # Path to log file (optional)
-  # If not specified, logs go to console only
-  file_path: "/var/log/atlassian-dc-mcp.log"
-  
-  # Log level for file output (optional)
-  # If not specified, uses the level set for console output
-  file_level: "debug"
+Each Atlassian service (Jira, Confluence, Bitbucket) has its own section with the following settings:
 
-jira:
-  url: "https://jira.example.com"
-  token: "your-jira-api-token"
-  permissions:
-    # Note: READ permissions are always enabled and cannot be disabled
-    # Jira write permissions:
-    jira_create_issue: false
-    jira_update_issue: false
-    jira_transition_issue: false
-    jira_add_comment: false
-    jira_create_subtask: false
+- `url`: The base URL of the service
+- `token`: The API token for authentication
+- `permissions`: A map of permissions for fine-grained access control
 
-confluence:
-  url: "https://confluence.example.com"
-  token: "your-confluence-api-token"
-  permissions:
-    # Note: READ permissions are always enabled and cannot be disabled
-    # Confluence write permissions:
-    confluence_create_content: false
-    confluence_update_content: false
-    confluence_delete_content: false
-    confluence_add_comment: false
+##### Permissions
 
-bitbucket:
-  url: "https://bitbucket.example.com"
-  token: "your-bitbucket-api-token"
-  permissions:
-    # Note: READ permissions are always enabled and cannot be disabled
-    # Bitbucket write permissions:
-    bitbucket_merge_pull_request: false
-    bitbucket_decline_pull_request: false
-    bitbucket_add_pull_request_comment: false
-    bitbucket_create_attachment: false
-    bitbucket_delete_attachment: false
+Permissions allow you to control which operations can be performed on each service. Read permissions are always enabled, but write permissions can be selectively enabled or disabled.
 
-```
+###### Jira Permissions
+
+- `jira_create_issue`: Create new issues
+- `jira_update_issue`: Update existing issues
+- `jira_transition_issue`: Transition issues between statuses
+- `jira_add_comment`: Add comments to issues
+- `jira_create_subtask`: Create subtasks
+
+###### Confluence Permissions
+
+- `confluence_create_content`: Create new content
+- `confluence_update_content`: Update existing content
+- `confluence_delete_content`: Delete content
+- `confluence_add_comment`: Add comments to content
+
+###### Bitbucket Permissions
+
+- `bitbucket_merge_pull_request`: Merge pull requests
+- `bitbucket_decline_pull_request`: Decline pull requests
+- `bitbucket_add_pull_request_comment`: Add comments to pull requests
+- `bitbucket_create_attachment`: Create attachments
+- `bitbucket_delete_attachment`: Delete attachments
+- `bitbucket_update_pull_request_status`: Update pull request participant status (approve, request changes, or reset approval)
 
 ### Environment Variables
 
@@ -269,11 +240,13 @@ export MCP_BITBUCKET_URL="https://bitbucket.example.com"
 export MCP_BITBUCKET_TOKEN="your-bitbucket-api-token"
 # Note: READ permissions are always enabled and cannot be disabled
 # Bitbucket write permissions:
-export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_MERGE_PULL_REQUEST=false
-export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DECLINE_PULL_REQUEST=false
-export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_ADD_PULL_REQUEST_COMMENT=false
-export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_ATTACHMENT=false
-export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DELETE_ATTACHMENT=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_MERGE_PULL_REQUEST=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DECLINE_PULL_REQUEST=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_ADD_PULL_REQUEST_COMMENT=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_ATTACHMENT=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DELETE_ATTACHMENT=false
+MCP_BITBUCKET_PERMISSIONS_BITBUCKET_UPDATE_PULL_REQUEST_STATUS=false
+
 ```
 
 You can also use a `.env` file to manage environment variables:

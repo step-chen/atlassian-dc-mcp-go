@@ -94,7 +94,7 @@ func checkBitbucketHealth(client *bitbucket.BitbucketClient) types.MapOutput {
 	result := make(types.MapOutput)
 
 	if client != nil {
-		_, err := client.GetCurrentUser()
+		_, err := client.GetUsers(bitbucket.GetUsersInput{})
 		if err != nil {
 			result["status"] = "error"
 			result["message"] = err.Error()

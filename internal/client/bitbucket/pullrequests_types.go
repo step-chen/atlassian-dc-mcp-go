@@ -80,12 +80,6 @@ type AddPullRequestCommentInput struct {
 	CommentText   string `json:"commentText" jsonschema:"required,The text of the comment to add"`
 }
 
-// ApprovePullRequestInput represents the input parameters for approving a pull request
-type ApprovePullRequestInput struct {
-	CommonInput
-	PullRequestID int `json:"pullRequestId" jsonschema:"required,The pull request ID"`
-}
-
 // DeclinePullRequestInput represents the input parameters for declining a pull request
 type DeclinePullRequestInput struct {
 	CommonInput
@@ -147,4 +141,19 @@ type GetPullRequestCommentInput struct {
 	CommonInput
 	PullRequestID int    `json:"pullRequestId" jsonschema:"required,The pull request ID"`
 	CommentID     string `json:"commentId" jsonschema:"required,The ID of the comment to retrieve"`
+}
+
+// UpdatePullRequestStatusInput represents the input parameters for updating pull request status
+type UpdatePullRequestWithoutStatusInput struct {
+	CommonInput
+	PullRequestID      int    `json:"pullRequestId" jsonschema:"required,The pull request ID"`
+	UserSlug           string `json:"userSlug" jsonschema:"required,The user slug"`
+	Version            *int   `json:"version,omitempty" jsonschema:"The version of the pull request participant"`
+	LastReviewedCommit string `json:"lastReviewedCommit,omitempty" jsonschema:"The commit ID of the last reviewed commit"`
+}
+
+// UpdatePullRequestStatusInput represents the input parameters for updating pull request status
+type UpdatePullRequestStatusInput struct {
+	UpdatePullRequestWithoutStatusInput
+	Status string `json:"status" jsonschema:"required,The status to set for the pull request participant. Valid values: UNAPPROVED, NEEDS_WORK, APPROVED"`
 }

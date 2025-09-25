@@ -143,6 +143,54 @@ func (h *Handler) getPullRequestCommentHandler(ctx context.Context, req *mcp.Cal
 	return nil, comment, nil
 }
 
+// setPullRequestApproved handles approving a pull request
+func (h *Handler) setPullRequestApproved(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.UpdatePullRequestWithoutStatusInput) (*mcp.CallToolResult, types.MapOutput, error) {
+	// Create the full input with status set to APPROVED
+	fullInput := bitbucket.UpdatePullRequestStatusInput{
+		UpdatePullRequestWithoutStatusInput: input,
+		Status:                              "APPROVED",
+	}
+
+	participant, err := h.client.UpdatePullRequestParticipantStatus(fullInput)
+	if err != nil {
+		return nil, nil, fmt.Errorf("approve pull request failed: %w", err)
+	}
+
+	return nil, participant, nil
+}
+
+// setPullRequestNeedsWork handles requesting changes for a pull request
+func (h *Handler) setPullRequestNeedsWork(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.UpdatePullRequestWithoutStatusInput) (*mcp.CallToolResult, types.MapOutput, error) {
+	// Create the full input with status set to NEEDS_WORK
+	fullInput := bitbucket.UpdatePullRequestStatusInput{
+		UpdatePullRequestWithoutStatusInput: input,
+		Status:                              "NEEDS_WORK",
+	}
+
+	participant, err := h.client.UpdatePullRequestParticipantStatus(fullInput)
+	if err != nil {
+		return nil, nil, fmt.Errorf("request changes for pull request failed: %w", err)
+	}
+
+	return nil, participant, nil
+}
+
+// setPullRequestUnapproved handles resetting a pull request approval
+func (h *Handler) setPullRequestUnapproved(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.UpdatePullRequestWithoutStatusInput) (*mcp.CallToolResult, types.MapOutput, error) {
+	// Create the full input with status set to UNAPPROVED
+	fullInput := bitbucket.UpdatePullRequestStatusInput{
+		UpdatePullRequestWithoutStatusInput: input,
+		Status:                              "UNAPPROVED",
+	}
+
+	participant, err := h.client.UpdatePullRequestParticipantStatus(fullInput)
+	if err != nil {
+		return nil, nil, fmt.Errorf("reset pull request approval failed: %w", err)
+	}
+
+	return nil, participant, nil
+}
+
 // AddPullRequestTools registers the pull request-related tools with the MCP server
 func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
@@ -157,6 +205,13 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient, 
 	utils.RegisterTool[bitbucket.GetPullRequestJiraIssuesInput, types.MapOutput](server, "bitbucket_get_pull_request_jira_issues", "Get Jira issues linked to a pull request", handler.getPullRequestJiraIssuesHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestsForUserInput, types.MapOutput](server, "bitbucket_get_pull_requests_for_user", "Get pull requests for a specific user", handler.getPullRequestsForUserHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestCommentInput, types.MapOutput](server, "bitbucket_get_pull_request_comment", "Get a specific comment on a pull request", handler.getPullRequestCommentHandler)
+
+	// Register specific tools for each status
+	if permissions["bitbucket_update_pull_request_status"] {
+		utils.RegisterTool[bitbucket.UpdatePullRequestWithoutStatusInput, types.MapOutput](server, "bitbucket_approve_pull_request", "Set pull request status to approved", handler.setPullRequestApproved)
+		utils.RegisterTool[bitbucket.UpdatePullRequestWithoutStatusInput, types.MapOutput](server, "bitbucket_request_changes_pull_request", "Set pull request status to needs work", handler.setPullRequestNeedsWork)
+		utils.RegisterTool[bitbucket.UpdatePullRequestWithoutStatusInput, types.MapOutput](server, "bitbucket_reset_pull_request_approval", "Set pull request status to unapproved", handler.setPullRequestUnapproved)
+	}
 
 	if permissions["bitbucket_merge_pull_request"] {
 		utils.RegisterTool[bitbucket.MergePullRequestInput, types.MapOutput](server, "bitbucket_merge_pull_request", "Merge a pull request", handler.mergePullRequestHandler)

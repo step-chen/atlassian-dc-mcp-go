@@ -62,3 +62,4 @@ bitbucket:
     bitbucket_add_pull_request_comment: false
     bitbucket_create_attachment: false
     bitbucket_delete_attachment: false
+    bitbucket_update_pull_request_status: false

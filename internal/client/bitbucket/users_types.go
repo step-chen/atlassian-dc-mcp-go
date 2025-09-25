@@ -10,7 +10,7 @@ type GetUsersInput struct {
 
 // GetUserInput represents the input parameters for getting a specific user
 type GetUserInput struct {
-	Username string `json:"username" jsonschema:"required,The slug of the user to retrieve"`
+	UserSlug string `json:"userslug" jsonschema:"required,The slug of the user to retrieve"`
 }
 
 // GetUserProjectsInput represents the input parameters for getting projects for a user
