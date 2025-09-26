@@ -41,17 +41,6 @@ func (h *Handler) getPullRequestActivitiesHandler(ctx context.Context, req *mcp.
 	return nil, activities, nil
 }
 
-// getPullRequestCommitsHandler handles getting pull request commits
-func (h *Handler) getPullRequestCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	// Using GetCommits method as a substitute for GetPullRequestCommits
-	commits, err := h.client.GetCommits(input)
-	if err != nil {
-		return nil, nil, fmt.Errorf("get pull request commits failed: %w", err)
-	}
-
-	return nil, commits, nil
-}
-
 // getPullRequestCommentsHandler handles getting pull request comments
 func (h *Handler) getPullRequestCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestCommentsInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	comments, err := h.client.GetPullRequestComments(input)
@@ -208,7 +197,6 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient, 
 	utils.RegisterTool[bitbucket.GetPullRequestsInput, types.MapOutput](server, "bitbucket_get_pull_requests", "Get a list of pull requests", handler.getPullRequestsHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestInput, types.MapOutput](server, "bitbucket_get_pull_request", "Get a specific pull request", handler.getPullRequestHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestActivitiesInput, types.MapOutput](server, "bitbucket_get_pull_request_activities", "Get activities for a specific pull request", handler.getPullRequestActivitiesHandler)
-	utils.RegisterTool[bitbucket.GetCommitsInput, types.MapOutput](server, "bitbucket_get_pull_request_commits", "Get commits for a specific pull request", handler.getPullRequestCommitsHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestCommentsInput, types.MapOutput](server, "bitbucket_get_pull_request_comments", "Get comments for a specific pull request", handler.getPullRequestCommentsHandler)
 	utils.RegisterTool[bitbucket.GetDiffBetweenCommitsInput, DiffOutput](server, "bitbucket_get_pull_request_diff", "Get diff of a pull request", handler.getPullRequestDiffHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestChangesInput, types.MapOutput](server, "bitbucket_get_pull_request_changes", "Get changes for a specific pull request", handler.getPullRequestChangesHandler)

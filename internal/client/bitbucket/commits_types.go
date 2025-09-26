@@ -13,6 +13,16 @@ type GetCommitsInput struct {
 	WithCounts    bool   `json:"withCounts,omitempty" jsonschema:"Include commit counts"`
 }
 
+// GetPullRequestCommitsInput represents the input parameters for getting commits for a pull request
+type GetPullRequestCommitsInput struct {
+	CommonInput
+	PaginationInput
+	PullRequestID int    `json:"pullRequestId" jsonschema:"required,The pull request ID"`
+	AvatarScheme  string `json:"avatarScheme,omitempty" jsonschema:"Avatar scheme"`
+	WithCounts    string `json:"withCounts,omitempty" jsonschema:"Include commit counts"`
+	AvatarSize    string `json:"avatarSize,omitempty" jsonschema:"Avatar size"`
+}
+
 // GetCommitInput represents the input parameters for getting a specific commit
 type GetCommitInput struct {
 	CommonInput

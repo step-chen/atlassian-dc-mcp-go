@@ -21,6 +21,16 @@ func (h *Handler) getCommitsHandler(ctx context.Context, req *mcp.CallToolReques
 	return nil, commits, nil
 }
 
+// getPullRequestCommitsHandler handles getting commits for a pull request
+func (h *Handler) getPullRequestCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestCommitsInput) (*mcp.CallToolResult, types.MapOutput, error) {
+	commits, err := h.client.GetPullRequestCommits(input)
+	if err != nil {
+		return nil, nil, fmt.Errorf("get pull request commits failed: %w", err)
+	}
+
+	return nil, commits, nil
+}
+
 // getCommitHandler handles getting a specific commit
 func (h *Handler) getCommitHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	commit, err := h.client.GetCommit(input)
@@ -116,6 +126,7 @@ func AddCommitTools(server *mcp.Server, client *bitbucket.BitbucketClient, permi
 	handler := NewHandler(client)
 
 	utils.RegisterTool[bitbucket.GetCommitsInput, types.MapOutput](server, "bitbucket_get_commits", "Get commits for a repository", handler.getCommitsHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestCommitsInput, types.MapOutput](server, "bitbucket_get_pull_request_commits", "Get commits for a pull request", handler.getPullRequestCommitsHandler)
 	utils.RegisterTool[bitbucket.GetCommitInput, types.MapOutput](server, "bitbucket_get_commit", "Get a specific commit", handler.getCommitHandler)
 	utils.RegisterTool[bitbucket.GetCommitChangesInput, types.MapOutput](server, "bitbucket_get_commit_changes", "Get changes for a specific commit", handler.getCommitChangesHandler)
 	utils.RegisterTool[bitbucket.GetCommitCommentsInput, types.MapOutput](server, "bitbucket_get_commit_comments", "Get comments on a commit", handler.getCommitCommentsHandler)

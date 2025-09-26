@@ -46,6 +46,41 @@ func (c *BitbucketClient) GetCommits(input GetCommitsInput) (types.MapOutput, er
 	return commits, nil
 }
 
+// GetPullRequestCommits retrieves commits for the specified pull request.
+//
+// This function makes an HTTP GET request to the Bitbucket API to fetch commits
+// for a specific pull request with various filtering options.
+// The authenticated user must have REPO_READ permission for the repository that 
+// this pull request targets to call this resource.
+//
+// Parameters:
+//   - input: GetPullRequestCommitsInput containing the parameters for the request
+//
+// Returns:
+//   - types.MapOutput: The commits data retrieved from the API
+//   - error: An error if the request fails
+func (c *BitbucketClient) GetPullRequestCommits(input GetPullRequestCommitsInput) (types.MapOutput, error) {
+	queryParams := url.Values{}
+	utils.SetQueryParam(queryParams, "avatarScheme", input.AvatarScheme, "")
+	utils.SetQueryParam(queryParams, "withCounts", input.WithCounts, "")
+	utils.SetQueryParam(queryParams, "avatarSize", input.AvatarSize, "")
+	utils.SetQueryParam(queryParams, "start", input.Start, 0)
+	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
+
+	var commits types.MapOutput
+	if err := c.executeRequest(
+		http.MethodGet,
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "commits"},
+		queryParams,
+		nil,
+		&commits,
+	); err != nil {
+		return nil, err
+	}
+
+	return commits, nil
+}
+
 // GetCommit retrieves details of a specific commit.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch details
