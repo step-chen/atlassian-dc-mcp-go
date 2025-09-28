@@ -441,6 +441,16 @@ Tools for interacting with Bitbucket:
 - Get commits
 - And more
 
+## Lingma Rules
+
+This project includes predefined Lingma rules that demonstrate how to use the Atlassian Data Center MCP service for automated code review tasks. For detailed information on how to use these rules, please refer to the [Lingma Rules documentation](docs/lingma-rules.md).
+
+The [code_review.md](.lingma/rules/code_review.md) rule file provides an example configuration showing how to leverage the Atlassian Data Center MCP service for automated Bitbucket PR code reviews. These rules help you:
+
+- Automate code review processes using the MCP service
+- Standardize code quality and security checks
+- Improve interaction efficiency with AI assistants during code reviews
+
 ## Development
 
 ### Prerequisites

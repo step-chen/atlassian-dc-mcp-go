@@ -23,7 +23,6 @@ vendor/
 *.swp
 *.swo
 *~
-/.lingma/
 
 # Go workspace file
 go.work
