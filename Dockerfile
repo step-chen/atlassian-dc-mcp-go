@@ -31,7 +31,7 @@ COPY . .
 # -w: strip DWARF table
 # This significantly reduces the binary size.
 RUN CGO_ENABLED=0 GOOS=linux go build \
-    -ldflags="-s -w -trimpath -extldflags '-static'" \
+    -ldflags="-s -w -extldflags '-static'" \
     -o /atlassian-dc-mcp-server \
     ./cmd/server
 
