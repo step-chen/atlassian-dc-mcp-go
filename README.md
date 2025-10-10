@@ -1,5 +1,7 @@
 # Atlassian Data Center MCP (Model Context Protocol)
 
+Author: Stephen Chen
+
 This project provides a Go-based Model Context Protocol (MCP) service for managing and interacting with Atlassian Data Center products including Jira, Confluence, and Bitbucket. It allows you to manage these products programmatically through a unified interface with configurable authentication and permissions.
 
 ## Features
@@ -165,7 +167,38 @@ The configuration file contains the following sections:
 
 - `port`: The port the server will listen on (default: 8090)
 - `client_timeout`: Client timeout in seconds (default: 60)
-- `transport`: Transport mode (stdio, sse, http)
+- `transport`: Transport configuration for enabling multiple transports simultaneously
+
+##### Transport Configuration
+
+The optimal configuration structure allows enabling multiple transports simultaneously:
+
+```yaml
+transport:
+  # List of transport modes to enable
+  modes:
+    - http
+    - sse
+    - stdio
+  
+  # HTTP transport configuration
+  http:
+    path: "/mcp"
+  
+  # SSE transport configuration
+  sse:
+    path: "/sse"
+  
+  # Stdio transport configuration
+  stdio:
+    enabled: true
+```
+
+When using multiple transports:
+- HTTP endpoint: `http://localhost:8090/mcp` (configurable via `transport.http.path`)
+- SSE endpoint: `http://localhost:8090/sse` (configurable via `transport.sse.path`)
+
+All enabled transports will run on the same port specified by the `port` configuration.
 
 #### Service Configuration
 
@@ -244,12 +277,12 @@ export MCP_BITBUCKET_URL="https://bitbucket.example.com"
 export MCP_BITBUCKET_TOKEN="your-bitbucket-api-token"
 # Note: READ permissions are always enabled and cannot be disabled
 # Bitbucket write permissions:
-MCP_BITBUCKET_PERMISSIONS_BITBUCKET_MERGE_PULL_REQUEST=false
-MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DECLINE_PULL_REQUEST=false
-MCP_BITBUCKET_PERMISSIONS_BITBUCKET_ADD_PULL_REQUEST_COMMENT=false
-MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_ATTACHMENT=false
-MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DELETE_ATTACHMENT=false
-MCP_BITBUCKET_PERMISSIONS_BITBUCKET_UPDATE_PULL_REQUEST_STATUS=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_MERGE_PULL_REQUEST=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DECLINE_PULL_REQUEST=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_ADD_PULL_REQUEST_COMMENT=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_CREATE_ATTACHMENT=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_DELETE_ATTACHMENT=false
+export MCP_BITBUCKET_PERMISSIONS_BITBUCKET_UPDATE_PULL_REQUEST_STATUS=false
 
 ```
 
@@ -400,6 +433,21 @@ This configuration provides two ways to use the service with an AI assistant:
    # Run with HTTP config
    ./dist/atlassian-dc-mcp-server -c config_http.yaml
    ```
+
+## Health Check
+
+The application provides a health check endpoint that can be used to monitor service status:
+
+- Endpoint: `/health`
+- Method: GET
+- Response: JSON with status information for each configured service
+
+Example:
+```bash
+curl http://localhost:8090/health
+```
+
+This endpoint is also used in the docker-compose healthcheck configuration.
 
 ## Permissions
 
