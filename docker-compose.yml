@@ -8,7 +8,7 @@ services:
     container_name: atlassian-dc-mcp
     # Mount the local config file into the container
     volumes:
-      - ./config_http.yaml:/app/config.yaml:ro
+      - ./config.yaml:/app/config.yaml:ro
       - ./.env:/app/.env:ro
     # Expose ports (only relevant for HTTP mode)
     ports:

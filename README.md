@@ -312,6 +312,39 @@ Then edit `.env` file with your settings. Configuration changes will be automati
 The application supports hot reloading of configuration. When the config.yaml file is modified, 
 the changes are automatically applied without restarting the service.
 
+### Transport Configuration
+
+The server supports three transport modes:
+
+1. `stdio` - Standard input/output
+2. `http` - HTTP transport
+3. `sse` - Server-Sent Events transport
+
+The optimal configuration structure allows enabling multiple transports simultaneously:
+
+```yaml
+transport:
+  # List of transport modes to enable
+  modes:
+    - http
+    - sse
+    - stdio
+  
+  # HTTP transport configuration
+  http:
+    path: "/mcp"
+  
+  # SSE transport configuration
+  sse:
+    path: "/sse"
+```
+
+When using multiple transports:
+- HTTP endpoint: `http://localhost:8090/mcp` (configurable via `transport.http.path`)
+- SSE endpoint: `http://localhost:8090/sse` (configurable via `transport.sse.path`)
+
+All enabled transports will run on the same port specified by the `port` configuration.
+
 ## Client Configuration
 
 To use this service with an AI assistant that supports MCP, you need to configure the AI assistant to connect to the MCP server. Here's an example configuration for the MCP servers:

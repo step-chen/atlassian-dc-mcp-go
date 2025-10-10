@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"atlassian-dc-mcp-go/internal/utils/logging"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
@@ -31,14 +32,30 @@ type BitbucketConfig struct {
 	Permissions Permissions `mapstructure:"permissions"`
 }
 
+type TransportConfig struct {
+	Modes []string `mapstructure:"modes"`
+
+	HTTP struct {
+		Path string `mapstructure:"path"`
+	} `mapstructure:"http"`
+
+	SSE struct {
+		Path string `mapstructure:"path"`
+	} `mapstructure:"sse"`
+
+	Stdio struct {
+		Enabled bool `mapstructure:"enabled"`
+	} `mapstructure:"stdio"`
+}
+
 type Config struct {
-	Port         int             `mapstructure:"port"`
-	Jira         JiraConfig      `mapstructure:"jira"`
-	Confluence   ConfluenceConfig `mapstructure:"confluence"`
-	Bitbucket    BitbucketConfig  `mapstructure:"bitbucket"`
-	Logging      logging.Config   `mapstructure:"logging"`
-	Transport    string          `mapstructure:"transport"`
-	ClientTimeout int            `mapstructure:"client_timeout"`
+	Port          int              `mapstructure:"port"`
+	Jira          JiraConfig       `mapstructure:"jira"`
+	Confluence    ConfluenceConfig `mapstructure:"confluence"`
+	Bitbucket     BitbucketConfig  `mapstructure:"bitbucket"`
+	Logging       logging.Config   `mapstructure:"logging"`
+	Transport     TransportConfig  `mapstructure:"transport"`
+	ClientTimeout int              `mapstructure:"client_timeout"`
 }
 
 // Validate checks that the configuration is valid
@@ -48,19 +65,21 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("invalid port: %d, must be between 1 and 65535", c.Port)
 	}
 
-	// Validate transport mode
-	if c.Transport == "" {
-		c.Transport = "stdio" // default to stdio
-	}
-
+	// Validate transport modes
 	validTransports := map[string]bool{
 		"stdio": true,
 		"sse":   true,
 		"http":  true,
 	}
 
-	if !validTransports[c.Transport] {
-		return fmt.Errorf("invalid transport mode: %s, valid options are: stdio, sse, http", c.Transport)
+	if len(c.Transport.Modes) == 0 {
+		c.Transport.Modes = []string{"http", "sse"}
+	}
+
+	for _, transport := range c.Transport.Modes {
+		if !validTransports[transport] {
+			return fmt.Errorf("invalid transport mode: %s, valid options are: stdio, sse, http", transport)
+		}
 	}
 
 	// Validate client timeout
@@ -131,6 +150,9 @@ func LoadConfig(configPath string) (*Config, error) {
 	viper.SetDefault("logging.development", false)
 	viper.SetDefault("logging.level", "info")
 	viper.SetDefault("client_timeout", 60) // Default client timeout in seconds
+	viper.SetDefault("transport.modes", []string{"http", "sse"})
+	viper.SetDefault("transport.http.path", "/mcp")
+	viper.SetDefault("transport.sse.path", "/sse")
 
 	viper.SetEnvPrefix("MCP")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
