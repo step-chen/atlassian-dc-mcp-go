@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mcp-server:
     image: ${IMAGE_NAME:-atlassian-dc-mcp}:latest
