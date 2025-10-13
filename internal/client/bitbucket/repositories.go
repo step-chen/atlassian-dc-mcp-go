@@ -27,6 +27,7 @@ func (c *BitbucketClient) GetRepository(input GetRepositoryInput) (types.MapOutp
 		nil,
 		nil,
 		&repository,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -64,6 +65,7 @@ func (c *BitbucketClient) GetRepositories(input GetRepositoriesInput) (types.Map
 		queryParams,
 		nil,
 		&repositories,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -94,6 +96,7 @@ func (c *BitbucketClient) GetProjectRepositories(input GetProjectRepositoriesInp
 		queryParams,
 		nil,
 		&repositories,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -120,6 +123,7 @@ func (c *BitbucketClient) GetRepositoryLabels(input GetRepositoryLabelsInput) ([
 		nil,
 		nil,
 		&labels,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -153,6 +157,7 @@ func (c *BitbucketClient) GetFileContent(input GetFileContentInput) ([]byte, err
 		queryParams,
 		nil,
 		&content,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -184,6 +189,7 @@ func (c *BitbucketClient) GetFiles(input GetFilesInput) (types.MapOutput, error)
 		queryParams,
 		nil,
 		&files,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -216,6 +222,7 @@ func (c *BitbucketClient) GetChanges(input GetChangesInput) (types.MapOutput, er
 		queryParams,
 		nil,
 		&changes,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -249,6 +256,7 @@ func (c *BitbucketClient) CompareChanges(input CompareChangesInput) (types.MapOu
 		queryParams,
 		nil,
 		&changes,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -279,6 +287,7 @@ func (c *BitbucketClient) GetForks(input GetForksInput) (types.MapOutput, error)
 		queryParams,
 		nil,
 		&forks,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -312,6 +321,7 @@ func (c *BitbucketClient) GetReadme(input GetReadmeInput) (types.MapOutput, erro
 		queryParams,
 		nil,
 		&readme,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -342,6 +352,7 @@ func (c *BitbucketClient) GetRelatedRepositories(input GetRelatedRepositoriesInp
 		queryParams,
 		nil,
 		&repositories,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}

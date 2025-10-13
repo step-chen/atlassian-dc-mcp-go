@@ -27,7 +27,7 @@ func (c *ConfluenceClient) Search(input SearchInput) (types.MapOutput, error) {
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 
 	var result types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "search"}, params, nil, &result); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "search"}, params, nil, &result, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 

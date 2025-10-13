@@ -27,7 +27,7 @@ func (c *JiraClient) GetComments(input GetCommentsInput) (types.MapOutput, error
 	utils.SetQueryParam(queryParams, "orderBy", input.OrderBy, "")
 
 	var comments types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "issue", input.IssueKey, "comment"}, queryParams, nil, &comments)
+	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "issue", input.IssueKey, "comment"}, queryParams, nil, &comments, utils.AcceptJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (c *JiraClient) AddComment(input AddCommentInput) (types.MapOutput, error) 
 	}
 
 	var result types.MapOutput
-	err = c.executeRequest(http.MethodPost, []string{"rest", "api", "2", "issue", input.IssueKey, "comment"}, nil, jsonPayload, &result)
+	err = c.executeRequest(http.MethodPost, []string{"rest", "api", "2", "issue", input.IssueKey, "comment"}, nil, jsonPayload, &result, utils.AcceptJSON)
 	if err != nil {
 		return nil, err
 	}

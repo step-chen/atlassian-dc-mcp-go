@@ -30,8 +30,8 @@ func NewJiraClient(config *config.JiraConfig) *JiraClient {
 }
 
 // executeRequest executes an HTTP request to the Jira API.
-func (c *JiraClient) executeRequest(method string, pathSegments []string, queryParams url.Values, body []byte, result interface{}) error {
-	req, err := utils.BuildHttpRequest(method, c.Config.URL, pathSegments, queryParams, body, c.Config.Token)
+func (c *JiraClient) executeRequest(method string, pathSegments []string, queryParams url.Values, body []byte, result any, accept utils.Accept) error {
+	req, err := utils.BuildHttpRequest(method, c.Config.URL, pathSegments, queryParams, body, c.Config.Token, accept)
 	if err != nil {
 		return fmt.Errorf("failed to build request: %w", err)
 	}

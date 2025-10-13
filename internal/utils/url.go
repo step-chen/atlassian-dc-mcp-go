@@ -14,6 +14,13 @@ import (
 	"go.uber.org/zap"
 )
 
+type Accept string
+
+const (
+	AcceptJSON = Accept("application/json")
+	AcceptText = Accept("text/plain")
+)
+
 func BuildURL(baseURL string, pathParams []string, queryParams url.Values) (string, error) {
 	u, err := url.Parse(baseURL)
 	if err != nil {
@@ -33,7 +40,7 @@ func BuildURL(baseURL string, pathParams []string, queryParams url.Values) (stri
 	return u.String(), nil
 }
 
-func BuildHttpRequest(method, baseURL string, pathParams []string, queryParams url.Values, body []byte, token string) (*http.Request, error) {
+func BuildHttpRequest(method, baseURL string, pathParams []string, queryParams url.Values, body []byte, token string, accept Accept) (*http.Request, error) {
 	url, err := BuildURL(baseURL, pathParams, queryParams)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build URL: %w", err)
@@ -51,11 +58,8 @@ func BuildHttpRequest(method, baseURL string, pathParams []string, queryParams u
 	}
 
 	req.Header.Set("Authorization", "Bearer "+token)
-	req.Header.Set("Accept", "application/json")
-
-	if body != nil && (method == http.MethodPost || method == http.MethodPut) {
-		req.Header.Set("Content-Type", "application/json")
-	}
+	//  "application/json" or "text/plain"
+	req.Header.Set("Accept", string(accept))
 
 	return req, nil
 }

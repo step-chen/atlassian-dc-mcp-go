@@ -1,6 +1,9 @@
 package confluence
 
-import "atlassian-dc-mcp-go/internal/types"
+import (
+	"atlassian-dc-mcp-go/internal/types"
+	"atlassian-dc-mcp-go/internal/utils"
+)
 
 // GetCurrentUser retrieves details of the current user.
 //
@@ -12,7 +15,7 @@ import "atlassian-dc-mcp-go/internal/types"
 //   - error: An error if the request fails
 func (c *ConfluenceClient) GetCurrentUser() (types.MapOutput, error) {
 	var user types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "user", "current"}, nil, nil, &user); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "user", "current"}, nil, nil, &user, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 

@@ -31,7 +31,7 @@ func (c *ConfluenceClient) GetContent(input GetContentInput) (types.MapOutput, e
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 
 	var content types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "content"}, params, nil, &content); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "content"}, params, nil, &content, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -51,7 +51,7 @@ func (c *ConfluenceClient) GetContentByID(input GetContentByIDInput) (types.MapO
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 
 	var content types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID}, params, nil, &content); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID}, params, nil, &content, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -75,7 +75,7 @@ func (c *ConfluenceClient) SearchContent(input SearchContentInput) (types.MapOut
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 
 	var result types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "content", "search"}, params, nil, &result); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "content", "search"}, params, nil, &result, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -105,7 +105,7 @@ func (c *ConfluenceClient) CreateContent(input CreateContentInput) (types.MapOut
 	}
 
 	var content types.MapOutput
-	if err := c.executeRequest("POST", []string{"rest", "api", "content"}, nil, jsonPayload, &content); err != nil {
+	if err := c.executeRequest("POST", []string{"rest", "api", "content"}, nil, jsonPayload, &content, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -127,7 +127,7 @@ func (c *ConfluenceClient) UpdateContent(input UpdateContentInput) (types.MapOut
 	}
 
 	var updatedContent types.MapOutput
-	if err := c.executeRequest("PUT", []string{"rest", "api", "content", input.ContentID}, nil, jsonPayload, &updatedContent); err != nil {
+	if err := c.executeRequest("PUT", []string{"rest", "api", "content", input.ContentID}, nil, jsonPayload, &updatedContent, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -142,7 +142,7 @@ func (c *ConfluenceClient) UpdateContent(input UpdateContentInput) (types.MapOut
 // Returns:
 //   - error: An error if the request fails
 func (c *ConfluenceClient) DeleteContent(input DeleteContentInput) error {
-	if err := c.executeRequest("DELETE", []string{"rest", "api", "content", input.ContentID}, nil, nil, nil); err != nil {
+	if err := c.executeRequest("DELETE", []string{"rest", "api", "content", input.ContentID}, nil, nil, nil, utils.AcceptJSON); err != nil {
 		return err
 	}
 
@@ -162,7 +162,7 @@ func (c *ConfluenceClient) GetContentHistory(input GetContentHistoryInput) (type
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 
 	var history types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "history"}, params, nil, &history); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "history"}, params, nil, &history, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -198,7 +198,7 @@ func (c *ConfluenceClient) AddComment(input AddCommentInput) (types.MapOutput, e
 	}
 
 	var comment types.MapOutput
-	if err := c.executeRequest("POST", []string{"rest", "api", "content"}, nil, jsonPayload, &comment); err != nil {
+	if err := c.executeRequest("POST", []string{"rest", "api", "content"}, nil, jsonPayload, &comment, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -222,7 +222,7 @@ func (c *ConfluenceClient) GetAttachments(input GetAttachmentsInput) (types.MapO
 	utils.SetQueryParam(params, "mediaType", input.MediaType, "")
 
 	var attachments types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "child", "attachment"}, params, nil, &attachments); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "child", "attachment"}, params, nil, &attachments, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -239,7 +239,7 @@ func (c *ConfluenceClient) GetAttachments(input GetAttachmentsInput) (types.MapO
 //   - error: An error if the request fails
 func (c *ConfluenceClient) GetExtractedText(input GetExtractedTextInput) (types.MapOutput, error) {
 	var extractedText types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "child", "attachment", input.AttachmentID, "extractedText"}, nil, nil, &extractedText); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "child", "attachment", input.AttachmentID, "extractedText"}, nil, nil, &extractedText, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -260,7 +260,7 @@ func (c *ConfluenceClient) GetContentLabels(input GetContentLabelsInput) (types.
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 
 	var labels types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "label"}, params, nil, &labels); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "label"}, params, nil, &labels, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -288,7 +288,7 @@ func (c *ConfluenceClient) ScanContentBySpaceKey(input ScanContentBySpaceKeyInpu
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 
 	var content types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "content", "scan"}, params, nil, &content); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "content", "scan"}, params, nil, &content, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 

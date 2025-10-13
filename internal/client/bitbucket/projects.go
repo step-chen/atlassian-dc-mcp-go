@@ -33,6 +33,7 @@ func (c *BitbucketClient) GetProjects(input GetProjectsInput) (types.MapOutput, 
 		queryParams,
 		nil,
 		&projects,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -59,6 +60,7 @@ func (c *BitbucketClient) GetProject(input GetProjectInput) (types.MapOutput, er
 		nil,
 		nil,
 		&project,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -85,6 +87,7 @@ func (c *BitbucketClient) GetProjectPrimaryEnhancedEntityLink(input GetProjectPr
 		nil,
 		nil,
 		&entityLink,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -116,6 +119,7 @@ func (c *BitbucketClient) GetProjectTasks(input GetProjectTasksInput) (types.Map
 		queryParams,
 		nil,
 		&tasks,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -147,6 +151,7 @@ func (c *BitbucketClient) GetRepositoryTasks(input GetRepositoryTasksInput) (typ
 		queryParams,
 		nil,
 		&tasks,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}

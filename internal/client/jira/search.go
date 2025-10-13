@@ -52,7 +52,7 @@ func (c *JiraClient) SearchIssues(input SearchIssuesInput) (types.MapOutput, err
 	}
 
 	var result types.MapOutput
-	err = c.executeRequest(http.MethodPost, []string{"rest", "api", "2", "search"}, nil, jsonPayload, &result)
+	err = c.executeRequest(http.MethodPost, []string{"rest", "api", "2", "search"}, nil, jsonPayload, &result, utils.AcceptJSON)
 	if err != nil {
 		return nil, err
 	}

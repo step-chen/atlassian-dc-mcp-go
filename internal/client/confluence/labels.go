@@ -22,7 +22,7 @@ func (c *ConfluenceClient) GetRelatedLabels(input GetRelatedLabelsInput) (types.
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 
 	var labels types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "label", input.LabelName, "related"}, params, nil, &labels); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "label", input.LabelName, "related"}, params, nil, &labels, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -48,7 +48,7 @@ func (c *ConfluenceClient) GetLabels(input GetLabelsInput) (types.MapOutput, err
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 
 	var labels types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "label"}, params, nil, &labels); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "label"}, params, nil, &labels, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 

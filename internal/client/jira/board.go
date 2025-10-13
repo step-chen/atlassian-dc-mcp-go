@@ -27,7 +27,7 @@ func (c *JiraClient) GetBoards(input GetBoardsInput) (types.MapOutput, error) {
 	utils.SetQueryParam(queryParams, "type", input.BoardType, "")
 
 	var boardsResponse types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "board"}, queryParams, nil, &boardsResponse)
+	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "board"}, queryParams, nil, &boardsResponse, utils.AcceptJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (c *JiraClient) GetBoards(input GetBoardsInput) (types.MapOutput, error) {
 //   - error: An error if the request fails
 func (c *JiraClient) GetBoard(input GetBoardInput) (types.MapOutput, error) {
 	var boardResponse types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "board", strconv.Itoa(input.Id)}, nil, nil, &boardResponse)
+	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "board", strconv.Itoa(input.Id)}, nil, nil, &boardResponse, utils.AcceptJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func (c *JiraClient) GetBoardBacklog(input GetBoardBacklogInput) (types.MapOutpu
 	}
 
 	var backlogResponse types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "board", strconv.Itoa(input.BoardId), "backlog"}, queryParams, nil, &backlogResponse)
+	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "board", strconv.Itoa(input.BoardId), "backlog"}, queryParams, nil, &backlogResponse, utils.AcceptJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (c *JiraClient) GetBoardEpics(input GetBoardEpicsInput) (types.MapOutput, e
 	utils.SetQueryParam(queryParams, "done", input.Done, "")
 
 	var epicsResponse types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "board", strconv.Itoa(input.BoardId), "epic"}, queryParams, nil, &epicsResponse)
+	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "board", strconv.Itoa(input.BoardId), "epic"}, queryParams, nil, &epicsResponse, utils.AcceptJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (c *JiraClient) GetBoardSprints(input GetBoardSprintsInput) (types.MapOutpu
 	utils.SetQueryParam(queryParams, "state", input.State, "")
 
 	var sprintsResponse types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "board", strconv.Itoa(input.BoardId), "sprint"}, queryParams, nil, &sprintsResponse)
+	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "board", strconv.Itoa(input.BoardId), "sprint"}, queryParams, nil, &sprintsResponse, utils.AcceptJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func (c *JiraClient) GetBoardSprints(input GetBoardSprintsInput) (types.MapOutpu
 //   - error: An error if the request fails
 func (c *JiraClient) GetSprint(input GetSprintInput) (types.MapOutput, error) {
 	var sprintResponse types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "sprint", strconv.Itoa(input.SprintId)}, nil, nil, &sprintResponse)
+	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "sprint", strconv.Itoa(input.SprintId)}, nil, nil, &sprintResponse, utils.AcceptJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +175,7 @@ func (c *JiraClient) GetSprintIssues(input GetSprintIssuesInput) (types.MapOutpu
 	}
 
 	var issuesResponse types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "sprint", strconv.Itoa(input.SprintId), "issue"}, queryParams, nil, &issuesResponse)
+	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "sprint", strconv.Itoa(input.SprintId), "issue"}, queryParams, nil, &issuesResponse, utils.AcceptJSON)
 	if err != nil {
 		return nil, err
 	}

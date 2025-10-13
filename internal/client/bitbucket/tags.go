@@ -33,6 +33,7 @@ func (c *BitbucketClient) GetTags(input GetTagsInput) (types.MapOutput, error) {
 		queryParams,
 		nil,
 		&tags,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -59,6 +60,7 @@ func (c *BitbucketClient) GetTag(input GetTagInput) (types.MapOutput, error) {
 		nil,
 		nil,
 		&tag,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}

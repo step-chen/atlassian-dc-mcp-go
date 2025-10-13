@@ -39,6 +39,7 @@ func (c *BitbucketClient) GetCommits(input GetCommitsInput) (types.MapOutput, er
 		queryParams,
 		nil,
 		&commits,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -50,7 +51,7 @@ func (c *BitbucketClient) GetCommits(input GetCommitsInput) (types.MapOutput, er
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch commits
 // for a specific pull request with various filtering options.
-// The authenticated user must have REPO_READ permission for the repository that 
+// The authenticated user must have REPO_READ permission for the repository that
 // this pull request targets to call this resource.
 //
 // Parameters:
@@ -74,6 +75,7 @@ func (c *BitbucketClient) GetPullRequestCommits(input GetPullRequestCommitsInput
 		queryParams,
 		nil,
 		&commits,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -103,6 +105,7 @@ func (c *BitbucketClient) GetCommit(input GetCommitInput) (types.MapOutput, erro
 		queryParams,
 		nil,
 		&result,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -135,6 +138,7 @@ func (c *BitbucketClient) GetCommitChanges(input GetCommitChangesInput) (types.M
 		queryParams,
 		nil,
 		&changes,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -168,6 +172,7 @@ func (c *BitbucketClient) GetCommitDiffStatsSummary(input GetCommitDiffStatsSumm
 		queryParams,
 		nil,
 		&result,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -196,12 +201,7 @@ func (c *BitbucketClient) GetDiffBetweenCommits(input GetDiffBetweenCommitsInput
 	utils.SetQueryParam(queryParams, "whitespace", input.Whitespace, "")
 	utils.SetQueryParam(queryParams, "fromRepo", input.FromRepo, "")
 
-	var pathSegments []string
-	if input.Path != "" {
-		pathSegments = []string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "compare", "diff" + input.Path}
-	} else {
-		pathSegments = []string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "compare", "diff"}
-	}
+	var pathSegments = []string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "compare", "diff" + input.Path}
 
 	var diff string
 	if err := c.executeRequest(
@@ -210,6 +210,7 @@ func (c *BitbucketClient) GetDiffBetweenCommits(input GetDiffBetweenCommitsInput
 		queryParams,
 		nil,
 		&diff,
+		utils.AcceptJSON,
 	); err != nil {
 		return "", err
 	}
@@ -246,6 +247,7 @@ func (c *BitbucketClient) GetDiffBetweenRevisions(input GetDiffBetweenRevisionsI
 		queryParams,
 		nil,
 		&diff,
+		utils.AcceptJSON,
 	); err != nil {
 		return "", err
 	}
@@ -272,6 +274,7 @@ func (c *BitbucketClient) GetCommitComment(input GetCommitCommentInput) (types.M
 		nil,
 		nil,
 		&result,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -304,6 +307,7 @@ func (c *BitbucketClient) GetCommitComments(input GetCommitCommentsInput) (types
 		queryParams,
 		nil,
 		&comments,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -335,6 +339,7 @@ func (c *BitbucketClient) GetJiraIssueCommits(input GetJiraIssueCommitsInput) (t
 		queryParams,
 		nil,
 		&commits,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -369,6 +374,7 @@ func (c *BitbucketClient) GetDiffBetweenRevisionsForPath(input GetDiffBetweenRev
 		queryParams,
 		nil,
 		&diff,
+		utils.AcceptJSON,
 	); err != nil {
 		return "", err
 	}

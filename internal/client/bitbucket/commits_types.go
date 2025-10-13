@@ -53,7 +53,7 @@ type GetCommitDiffStatsSummaryInput struct {
 // GetDiffBetweenCommitsInput represents the input parameters for getting diff between commits
 type GetDiffBetweenCommitsInput struct {
 	CommonInput
-	Path         string `json:"path,omitempty" jsonschema:"The file path"`
+	Path         string `json:"path" jsonschema:"required, The file path"`
 	From         string `json:"from,omitempty" jsonschema:"The source commit ID or ref"`
 	To           string `json:"to,omitempty" jsonschema:"The target commit ID or ref"`
 	ContextLines int    `json:"contextLines,omitempty" jsonschema:"Number of context lines to include"`

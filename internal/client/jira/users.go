@@ -23,7 +23,7 @@ func (c *JiraClient) GetUserByName(input GetUserByNameInput) (types.MapOutput, e
 	utils.SetQueryParam(queryParams, "username", input.Username, "")
 
 	var user types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "user"}, queryParams, nil, &user)
+	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "user"}, queryParams, nil, &user, utils.AcceptJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (c *JiraClient) GetUserByKey(input GetUserByKeyInput) (types.MapOutput, err
 	utils.SetQueryParam(queryParams, "key", input.Key, "")
 
 	var user types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "user"}, queryParams, nil, &user)
+	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "user"}, queryParams, nil, &user, utils.AcceptJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (c *JiraClient) SearchUsers(input SearchUsersInput) ([]types.MapOutput, err
 	utils.SetQueryParam(queryParams, "maxResults", input.MaxResults, 0)
 
 	var users []types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "user", "search"}, queryParams, nil, &users)
+	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "user", "search"}, queryParams, nil, &users, utils.AcceptJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -94,6 +94,7 @@ func (c *JiraClient) GetCurrentUser() (types.MapOutput, error) {
 		nil,
 		nil,
 		c.Config.Token,
+		utils.AcceptJSON,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build request: %w", err)

@@ -1,8 +1,10 @@
 package bitbucket
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 	"atlassian-dc-mcp-go/internal/mcp/utils"
@@ -49,17 +51,6 @@ func (h *Handler) getPullRequestCommentsHandler(ctx context.Context, req *mcp.Ca
 	}
 
 	return nil, comments, nil
-}
-
-// getPullRequestDiffHandler handles getting pull request diff
-func (h *Handler) getPullRequestDiffHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetDiffBetweenCommitsInput) (*mcp.CallToolResult, DiffOutput, error) {
-	// Using GetDiffBetweenCommits method as a substitute for GetPullRequestDiff
-	diff, err := h.client.GetDiffBetweenCommits(input)
-	if err != nil {
-		return nil, DiffOutput{}, fmt.Errorf("get pull request diff failed: %w", err)
-	}
-
-	return nil, DiffOutput{Diff: string(diff)}, nil
 }
 
 // mergePullRequestHandler handles merging a pull request
@@ -142,6 +133,52 @@ func (h *Handler) getPullRequestCommentHandler(ctx context.Context, req *mcp.Cal
 	return nil, comment, nil
 }
 
+// getPullRequestDiffStreamHandler handles streaming the diff for a pull request
+func (h *Handler) getPullRequestDiffStreamHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestDiffStreamInput) (*mcp.CallToolResult, DiffOutput, error) {
+	stream, err := h.client.GetPullRequestDiffStreamRaw(input)
+	if err != nil {
+		return nil, DiffOutput{}, fmt.Errorf("get pull request diff stream failed: %w", err)
+	}
+	defer stream.Close()
+
+	// Read the entire stream into a string
+	var buf bytes.Buffer
+	_, err = io.Copy(&buf, stream)
+	if err != nil {
+		return nil, DiffOutput{}, fmt.Errorf("reading pull request diff stream failed: %w", err)
+	}
+
+	return nil, DiffOutput{Diff: buf.String()}, nil
+}
+
+// getPullRequestDiffHandler handles getting the diff for a specific file in a pull request
+func (h *Handler) getPullRequestDiffHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestDiffInput) (*mcp.CallToolResult, DiffOutput, error) {
+	stream, err := h.client.GetPullRequestDiff(input)
+	if err != nil {
+		return nil, DiffOutput{}, fmt.Errorf("get pull request diff failed: %w", err)
+	}
+	defer stream.Close()
+
+	// Read the entire stream into a string
+	var buf bytes.Buffer
+	_, err = io.Copy(&buf, stream)
+	if err != nil {
+		return nil, DiffOutput{}, fmt.Errorf("reading pull request diff failed: %w", err)
+	}
+
+	return nil, DiffOutput{Diff: buf.String()}, nil
+}
+
+// testPullRequestCanMergeHandler handles testing if a pull request can be merged
+func (h *Handler) testPullRequestCanMergeHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.TestPullRequestCanMergeInput) (*mcp.CallToolResult, types.MapOutput, error) {
+	mergeStatus, err := h.client.TestPullRequestCanMerge(input)
+	if err != nil {
+		return nil, nil, fmt.Errorf("test pull request can merge failed: %w", err)
+	}
+
+	return nil, mergeStatus, nil
+}
+
 // setPullRequestApproved handles approving a pull request
 func (h *Handler) setPullRequestApproved(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.UpdatePullRequestWithoutStatusInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	// Create the full input with status set to APPROVED
@@ -198,8 +235,9 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient, 
 	utils.RegisterTool[bitbucket.GetPullRequestInput, types.MapOutput](server, "bitbucket_get_pull_request", "Get a specific pull request", handler.getPullRequestHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestActivitiesInput, types.MapOutput](server, "bitbucket_get_pull_request_activities", "Get activities for a specific pull request", handler.getPullRequestActivitiesHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestCommentsInput, types.MapOutput](server, "bitbucket_get_pull_request_comments", "Get comments for a specific pull request", handler.getPullRequestCommentsHandler)
-	utils.RegisterTool[bitbucket.GetDiffBetweenCommitsInput, DiffOutput](server, "bitbucket_get_pull_request_diff", "Get diff of a pull request", handler.getPullRequestDiffHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestChangesInput, types.MapOutput](server, "bitbucket_get_pull_request_changes", "Get changes for a specific pull request", handler.getPullRequestChangesHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestDiffStreamInput, DiffOutput](server, "bitbucket_get_pull_request_diff_stream", "Stream the diff for a pull request", handler.getPullRequestDiffStreamHandler)
+	utils.RegisterTool[bitbucket.TestPullRequestCanMergeInput, types.MapOutput](server, "bitbucket_test_pull_request_can_merge", "Test if a pull request can be merged", handler.testPullRequestCanMergeHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestSuggestionsInput, types.MapOutput](server, "bitbucket_get_pull_request_suggestions", "Get pull request suggestions", handler.getPullRequestSuggestionsHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestJiraIssuesInput, types.MapOutput](server, "bitbucket_get_pull_request_jira_issues", "Get Jira issues linked to a pull request", handler.getPullRequestJiraIssuesHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestsForUserInput, types.MapOutput](server, "bitbucket_get_pull_requests_for_user", "Get pull requests for a specific user", handler.getPullRequestsForUserHandler)
@@ -211,6 +249,8 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient, 
 		utils.RegisterTool[bitbucket.UpdatePullRequestWithoutStatusInput, types.MapOutput](server, "bitbucket_request_changes_pull_request", "Set pull request status to needs work", handler.setPullRequestNeedsWork)
 		utils.RegisterTool[bitbucket.UpdatePullRequestWithoutStatusInput, types.MapOutput](server, "bitbucket_reset_pull_request_approval", "Set pull request status to unapproved", handler.setPullRequestUnapproved)
 	}
+
+	utils.RegisterTool[bitbucket.GetPullRequestDiffInput, DiffOutput](server, "bitbucket_get_pull_request_diff", "Get the diff for a specific file in a pull request", handler.getPullRequestDiffHandler)
 
 	if permissions["bitbucket_merge_pull_request"] {
 		utils.RegisterTool[bitbucket.MergePullRequestInput, types.MapOutput](server, "bitbucket_merge_pull_request", "Merge a pull request", handler.mergePullRequestHandler)

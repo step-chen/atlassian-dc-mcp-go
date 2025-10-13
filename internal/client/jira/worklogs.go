@@ -26,7 +26,7 @@ func (c *JiraClient) GetWorklogs(input GetWorklogsInput) (types.MapOutput, error
 	}
 
 	var worklogs types.MapOutput
-	err := c.executeRequest(http.MethodGet, pathSegments, nil, nil, &worklogs)
+	err := c.executeRequest(http.MethodGet, pathSegments, nil, nil, &worklogs, utils.AcceptJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (c *JiraClient) AddWorklog(input AddWorklogInput) (types.MapOutput, error) 
 	}
 
 	var worklog types.MapOutput
-	err = c.executeRequest(http.MethodPost, pathSegments, queryParams, body, &worklog)
+	err = c.executeRequest(http.MethodPost, pathSegments, queryParams, body, &worklog, utils.AcceptJSON)
 	if err != nil {
 		return nil, err
 	}

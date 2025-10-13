@@ -21,7 +21,7 @@ type ConfluenceClient struct {
 func NewConfluenceClient(config *config.ConfluenceConfig) *ConfluenceClient {
 	clientConfig := utils.DefaultHTTPClientConfig()
 	httpClient := utils.NewHTTPClient(clientConfig)
-	
+
 	return &ConfluenceClient{
 		Config:       config,
 		HTTPClient:   httpClient,
@@ -30,8 +30,8 @@ func NewConfluenceClient(config *config.ConfluenceConfig) *ConfluenceClient {
 }
 
 // executeRequest executes an HTTP request to the Confluence API.
-func (c *ConfluenceClient) executeRequest(method string, pathSegments []string, queryParams url.Values, body []byte, result interface{}) error {
-	req, err := utils.BuildHttpRequest(method, c.Config.URL, pathSegments, queryParams, body, c.Config.Token)
+func (c *ConfluenceClient) executeRequest(method string, pathSegments []string, queryParams url.Values, body []byte, result any, accept utils.Accept) error {
+	req, err := utils.BuildHttpRequest(method, c.Config.URL, pathSegments, queryParams, body, c.Config.Token, accept)
 	if err != nil {
 		return fmt.Errorf("failed to build request: %w", err)
 	}
@@ -41,9 +41,4 @@ func (c *ConfluenceClient) executeRequest(method string, pathSegments []string, 
 	}
 
 	return nil
-}
-
-// ExecuteRequest is a public wrapper for executeRequest method.
-func (c *ConfluenceClient) ExecuteRequest(method string, pathSegments []string, queryParams url.Values, body []byte, result interface{}) error {
-	return c.executeRequest(method, pathSegments, queryParams, body, result)
 }

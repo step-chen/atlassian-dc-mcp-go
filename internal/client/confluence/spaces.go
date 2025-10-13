@@ -25,7 +25,7 @@ func (c *ConfluenceClient) GetSpace(input GetSpaceInput) (types.MapOutput, error
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 
 	var space types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "space", input.SpaceKey}, params, nil, &space); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "space", input.SpaceKey}, params, nil, &space, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -51,7 +51,7 @@ func (c *ConfluenceClient) GetContentsInSpace(input GetContentsInSpaceInput) (ty
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 
 	var contents types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "space", input.SpaceKey, "content"}, params, nil, &contents); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "space", input.SpaceKey, "content"}, params, nil, &contents, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -81,7 +81,7 @@ func (c *ConfluenceClient) GetContentsByType(input GetContentsByTypeInput) (type
 	utils.SetQueryParam(params, "expand", input.Expand, []string{})
 
 	var contents types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "space", input.SpaceKey, "content", input.ContentType}, params, nil, &contents); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "space", input.SpaceKey, "content", input.ContentType}, params, nil, &contents, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -118,7 +118,7 @@ func (c *ConfluenceClient) GetSpacesByKey(input GetSpacesByKeyInput) (types.MapO
 	utils.SetQueryParam(params, "spaceKey", input.Keys, []string{})
 
 	var spaces types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "space"}, params, nil, &spaces); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "space"}, params, nil, &spaces, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 

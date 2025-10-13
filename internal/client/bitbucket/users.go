@@ -27,6 +27,7 @@ func (c *BitbucketClient) GetUser(input GetUserInput) (types.MapOutput, error) {
 		nil,
 		nil,
 		&user,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -67,6 +68,7 @@ func (c *BitbucketClient) GetUsers(input GetUsersInput) (types.MapOutput, error)
 		queryParams,
 		nil,
 		&users,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}

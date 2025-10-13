@@ -38,6 +38,7 @@ func (c *BitbucketClient) GetBranches(input GetBranchesInput) (types.MapOutput, 
 		queryParams,
 		nil,
 		&branches,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -64,6 +65,7 @@ func (c *BitbucketClient) GetDefaultBranch(input GetDefaultBranchInput) (types.M
 		nil,
 		nil,
 		&branch,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -94,6 +96,7 @@ func (c *BitbucketClient) GetBranch(input GetBranchInput) (types.MapOutput, erro
 		queryParams,
 		nil,
 		&branch,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}

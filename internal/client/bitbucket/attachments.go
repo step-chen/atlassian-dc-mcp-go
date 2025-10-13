@@ -28,6 +28,7 @@ func (c *BitbucketClient) GetAttachment(input GetAttachmentInput) ([]byte, error
 		nil,
 		nil,
 		&content,
+		"application/json",
 	); err != nil {
 		return nil, err
 	}
@@ -54,6 +55,7 @@ func (c *BitbucketClient) GetAttachmentMetadata(input GetAttachmentMetadataInput
 		nil,
 		nil,
 		&metadata,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -77,6 +79,7 @@ func (c *BitbucketClient) DeleteAttachment(input DeleteAttachmentInput) error {
 		nil,
 		nil,
 		nil,
+		utils.AcceptJSON,
 	); err != nil {
 		return err
 	}
@@ -105,6 +108,7 @@ func (c *BitbucketClient) CreateAttachment(input CreateAttachmentInput) (types.M
 		queryParams,
 		input.FileAttachment,
 		&attachment,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}

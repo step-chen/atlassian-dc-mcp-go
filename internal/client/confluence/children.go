@@ -21,7 +21,7 @@ func (c *ConfluenceClient) GetContentChildren(input GetContentChildrenInput) (ty
 	utils.SetQueryParam(params, "parentVersion", input.ParentVersion, "")
 
 	var children types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "child"}, params, nil, &children); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "child"}, params, nil, &children, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -44,7 +44,7 @@ func (c *ConfluenceClient) GetContentChildrenByType(input GetContentChildrenByTy
 	utils.SetQueryParam(params, "orderBy", input.OrderBy, "")
 
 	var children types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "child", input.ChildType}, params, nil, &children); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "child", input.ChildType}, params, nil, &children, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 
@@ -67,7 +67,7 @@ func (c *ConfluenceClient) GetContentComments(input GetContentCommentsInput) (ty
 	utils.SetQueryParam(params, "limit", input.Limit, 0)
 
 	var comments types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "child", "comment"}, params, nil, &comments); err != nil {
+	if err := c.executeRequest("GET", []string{"rest", "api", "content", input.ContentID, "child", "comment"}, params, nil, &comments, utils.AcceptJSON); err != nil {
 		return nil, err
 	}
 

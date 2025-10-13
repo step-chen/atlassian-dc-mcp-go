@@ -3,6 +3,7 @@ package bitbucket
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -30,6 +31,7 @@ func (c *BitbucketClient) GetPullRequest(input GetPullRequestInput) (types.MapOu
 		nil,
 		nil,
 		&pr,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -63,6 +65,7 @@ func (c *BitbucketClient) GetPullRequestActivities(input GetPullRequestActivitie
 		queryParams,
 		nil,
 		&activities,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -73,35 +76,22 @@ func (c *BitbucketClient) GetPullRequestActivities(input GetPullRequestActivitie
 // GetPullRequestChanges retrieves changes for a specific pull request.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch changes
-// for a specific pull request with optional filtering.
+// for a specific pull request.
 //
 // Parameters:
 //   - input: GetPullRequestChangesInput containing the parameters for the request
 //
 // Returns:
-//   - types.MapOutput: The changes data retrieved from the API
+//   - map[string]interface{}: The changes data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestChanges(input GetPullRequestChangesInput) (types.MapOutput, error) {
-	// Validate required parameters
-	if input.ProjectKey == "" {
-		return nil, fmt.Errorf("project key is required")
-	}
-	if input.RepoSlug == "" {
-		return nil, fmt.Errorf("repository slug is required")
-	}
-	if input.PullRequestID <= 0 {
-		return nil, fmt.Errorf("pull request ID must be a positive integer")
-	}
-
+func (c *BitbucketClient) GetPullRequestChanges(input GetPullRequestChangesInput) (map[string]interface{}, error) {
 	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "start", input.Start, 0)
-	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	utils.SetQueryParam(queryParams, "changeScope", string(input.ChangeScope), "")
+	utils.SetQueryParam(queryParams, "limit", strconv.Itoa(input.Limit), 0)
 	utils.SetQueryParam(queryParams, "sinceId", input.SinceId, "")
+	utils.SetQueryParam(queryParams, "start", strconv.Itoa(input.Start), 0)
 	utils.SetQueryParam(queryParams, "untilId", input.UntilId, "")
-	utils.SetQueryParam(queryParams, "changeScope", input.ChangeScope, "")
-	if input.WithComments {
-		queryParams.Set("withComments", "true")
-	}
+	utils.SetQueryParam(queryParams, "withComments", strconv.FormatBool(input.WithComments), false)
 
 	var changes types.MapOutput
 	if err := c.executeRequest(
@@ -110,8 +100,9 @@ func (c *BitbucketClient) GetPullRequestChanges(input GetPullRequestChangesInput
 		queryParams,
 		nil,
 		&changes,
+		utils.AcceptJSON,
 	); err != nil {
-		return nil, fmt.Errorf("failed to get pull request changes: %w", err)
+		return nil, err
 	}
 
 	return changes, nil
@@ -134,7 +125,7 @@ func (c *BitbucketClient) AddPullRequestComment(input AddPullRequestCommentInput
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal payload: %w", err)
+		return nil, fmt.Errorf("failed to marshal comment: %w", err)
 	}
 
 	var comment types.MapOutput
@@ -144,6 +135,7 @@ func (c *BitbucketClient) AddPullRequestComment(input AddPullRequestCommentInput
 		nil,
 		jsonPayload,
 		&comment,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -197,6 +189,7 @@ func (c *BitbucketClient) MergePullRequest(input MergePullRequestInput) (types.M
 		nil,
 		jsonPayload,
 		&result,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -207,6 +200,38 @@ func (c *BitbucketClient) MergePullRequest(input MergePullRequestInput) (types.M
 // DeclinePullRequestOptions represents the options for declining a pull request.
 type DeclinePullRequestOptions struct {
 	Comment *string `json:"comment,omitempty"`
+}
+
+// GetPullRequestDiff retrieves a diff for a specific file within a pull request.
+//
+// This function makes an HTTP GET request to the Bitbucket API to fetch a diff
+// for a specific file within a pull request.
+//
+// Parameters:
+//   - input: GetPullRequestDiffInput containing the parameters for the request
+//
+// Returns:
+//   - io.ReadCloser: A reader to stream the diff content
+//   - error: An error if the request fails
+func (c *BitbucketClient) GetPullRequestDiff(input GetPullRequestDiffInput) (io.ReadCloser, error) {
+	queryParams := make(url.Values)
+	utils.SetQueryParam(queryParams, "srcPath", input.SrcPath, "")
+	utils.SetQueryParam(queryParams, "contextLines", input.ContextLines, "")
+	utils.SetQueryParam(queryParams, "sinceId", input.SinceId, "")
+	utils.SetQueryParam(queryParams, "untilId", input.UntilId, "")
+	utils.SetQueryParam(queryParams, "whitespace", input.Whitespace, "")
+	utils.SetQueryParam(queryParams, "withComments", input.WithComments, "")
+	utils.SetQueryParam(queryParams, "diffType", input.DiffType, "")
+	utils.SetQueryParam(queryParams, "avatarScheme", input.AvatarScheme, "")
+	utils.SetQueryParam(queryParams, "avatarSize", input.AvatarSize, "")
+
+	return c.executeStreamRequest(
+		http.MethodGet,
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "diff", input.Path},
+		queryParams,
+		nil,
+		utils.AcceptJSON,
+	)
 }
 
 // DeclinePullRequest declines a specific pull request.
@@ -243,6 +268,7 @@ func (c *BitbucketClient) DeclinePullRequest(input DeclinePullRequestInput) (typ
 		queryParams,
 		jsonPayload,
 		&result,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -282,6 +308,7 @@ func (c *BitbucketClient) GetPullRequests(input GetPullRequestsInput) (types.Map
 		queryParams,
 		nil,
 		&prs,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -312,6 +339,7 @@ func (c *BitbucketClient) GetPullRequestSuggestions(input GetPullRequestSuggesti
 		queryParams,
 		nil,
 		&suggestions,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -338,6 +366,7 @@ func (c *BitbucketClient) GetPullRequestJiraIssues(input GetPullRequestJiraIssue
 		nil,
 		nil,
 		&issues,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -374,6 +403,7 @@ func (c *BitbucketClient) GetPullRequestsForUser(input GetPullRequestsForUserInp
 		queryParams,
 		nil,
 		&pullRequests,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -400,6 +430,7 @@ func (c *BitbucketClient) GetPullRequestComment(input GetPullRequestCommentInput
 		nil,
 		nil,
 		&comment,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -446,6 +477,7 @@ func (c *BitbucketClient) UpdatePullRequestParticipantStatus(input UpdatePullReq
 		nil,
 		jsonPayload,
 		&participant,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
@@ -485,9 +517,63 @@ func (c *BitbucketClient) GetPullRequestComments(input GetPullRequestCommentsInp
 		queryParams,
 		nil,
 		&comments,
+		utils.AcceptJSON,
 	); err != nil {
 		return nil, err
 	}
 
 	return comments, nil
+}
+
+// GetPullRequestDiffStreamRaw streams the raw diff for a pull request.
+//
+// This function makes an HTTP GET request to the Bitbucket API to stream the raw diff
+// for a specific pull request. The authenticated user must have REPO_READ permission
+// for the repository that this pull request targets.
+//
+// Parameters:
+//   - input: GetPullRequestDiffStreamInput containing the parameters for the request
+//
+// Returns:
+//   - io.ReadCloser: A reader that can be used to stream the diff content
+//   - error: An error if the request fails
+func (c *BitbucketClient) GetPullRequestDiffStreamRaw(input GetPullRequestDiffStreamInput) (io.ReadCloser, error) {
+	queryParams := make(url.Values)
+	utils.SetQueryParam(queryParams, "contextLines", strconv.Itoa(input.ContextLines), 0)
+	utils.SetQueryParam(queryParams, "whitespace", input.Whitespace, "")
+
+	return c.executeStreamRequest(
+		http.MethodGet,
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID) + ".diff"},
+		queryParams,
+		nil,
+		utils.AcceptText,
+	)
+}
+
+// GetPullRequestMergeStatus retrieves merge status for a specific pull request.
+//
+// This function makes an HTTP GET request to the Bitbucket API to fetch merge status
+// for a specific pull request.
+//
+// Parameters:
+//   - input: TestPullRequestCanMergeInput containing the parameters for the request
+//
+// Returns:
+//   - types.MapOutput: The merge status data retrieved from the API
+//   - error: An error if the request fails
+func (c *BitbucketClient) TestPullRequestCanMerge(input TestPullRequestCanMergeInput) (types.MapOutput, error) {
+	var mergeStatus types.MapOutput
+	if err := c.executeRequest(
+		http.MethodGet,
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "merge"},
+		nil,
+		nil,
+		&mergeStatus,
+		utils.AcceptJSON,
+	); err != nil {
+		return nil, err
+	}
+
+	return mergeStatus, nil
 }
