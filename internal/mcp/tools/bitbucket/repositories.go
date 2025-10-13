@@ -59,7 +59,7 @@ func (h *Handler) getFileContentHandler(ctx context.Context, req *mcp.CallToolRe
 		return nil, ContentOutput{}, fmt.Errorf("get file content failed: %w", err)
 	}
 
-	return nil, ContentOutput{Content: content}, nil
+	return nil, ContentOutput{Content: string(content)}, nil
 }
 
 // getReadmeHandler handles getting readme

@@ -5,7 +5,7 @@ import "atlassian-dc-mcp-go/internal/types"
 
 // ContentOutput represents the output for getting content
 type ContentOutput struct {
-	Content []byte `json:"content" jsonschema:"the content"`
+	Content string `json:"content" jsonschema:"the content as string"`
 }
 
 // GetUserOutput represents the output for getting a user

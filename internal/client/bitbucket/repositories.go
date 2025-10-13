@@ -1,6 +1,8 @@
 package bitbucket
 
 import (
+	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 
@@ -150,16 +152,23 @@ func (c *BitbucketClient) GetFileContent(input GetFileContentInput) ([]byte, err
 	utils.SetQueryParam(queryParams, "includeHeadingId", input.IncludeHeadingId, "")
 	utils.SetQueryParam(queryParams, "hardwrap", input.Hardwrap, "")
 
-	var content []byte
-	if err := c.executeRequest(
+	// 使用executeStreamRequest来获取原始文件内容，而不是尝试解析JSON
+	respBody, err := c.executeStreamRequest(
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "raw", input.Path},
 		queryParams,
 		nil,
-		&content,
-		utils.AcceptJSON,
-	); err != nil {
+		utils.AcceptText, // 使用text/plain而不是application/json
+	)
+	if err != nil {
 		return nil, err
+	}
+	defer respBody.Close()
+
+	// 读取响应体内容
+	content, err := io.ReadAll(respBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	return content, nil
