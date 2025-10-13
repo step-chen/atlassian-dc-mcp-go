@@ -8,6 +8,6 @@ type CommonInput struct {
 
 // PaginationInput represents pagination parameters
 type PaginationInput struct {
-	Start int `json:"start,omitempty" jsonschema:"The starting index of the returned branches"`
-	Limit int `json:"limit,omitempty" jsonschema:"The limit of the number of branches to return"`
+	Start int `json:"start,omitempty" jsonschema:"Start number for the page (inclusive). If not passed, first page is assumed"`
+	Limit int `json:"limit,omitempty" jsonschema:"Number of items to return. If not passed, a page size of 25 is used"`
 }

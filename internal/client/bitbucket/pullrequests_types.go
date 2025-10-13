@@ -39,8 +39,6 @@ type GetPullRequestChangesInput struct {
 	ChangeScope  string `json:"changeScope,omitempty" jsonschema:"The scope of changes to retrieve (e.g. UNREVIEWED)"`
 	UntilId      string `json:"untilId,omitempty" jsonschema:"The change ID until which to retrieve changes"`
 	WithComments bool   `json:"withComments,omitempty" jsonschema:"Include comments in the response"`
-	Start        int    `json:"start,omitempty" jsonschema:"Pagination start position (ignored by server)"`
-	Limit        int    `json:"limit,omitempty" jsonschema:"Maximum number of changes to retrieve"`
 }
 
 // GetPullRequestCommentsInput represents the input parameters for getting pull request comments
@@ -94,6 +92,12 @@ type GetPullRequestSuggestionsInput struct {
 type GetPullRequestJiraIssuesInput struct {
 	CommonInput
 	PullRequestID int `json:"pullRequestId" jsonschema:"required,The pull request ID"`
+}
+
+// RestJiraIssue represents a Jira issue linked to a pull request
+type RestJiraIssue struct {
+	Key string `json:"key"`
+	URL string `json:"url"`
 }
 
 // GetPullRequestsForUserInput represents the input parameters for getting pull requests for a specific user

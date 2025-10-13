@@ -25,12 +25,12 @@ type GetRepositoryLabelsInput struct {
 // GetFileContentInput represents the input parameters for getting file content
 type GetFileContentInput struct {
 	CommonInput
-	Path      string `json:"path" jsonschema:"required,The file path"`
-	At        string `json:"at,omitempty" jsonschema:"The commit ID or ref to retrieve the file from"`
-	Size      bool   `json:"size,omitempty" jsonschema:"Include file size in response"`
-	TypeParam bool   `json:"type,omitempty" jsonschema:"Include file type in response"`
-	Blame     bool   `json:"blame,omitempty" jsonschema:"Include blame information"`
-	NoContent bool   `json:"noContent,omitempty" jsonschema:"Return metadata without content"`
+	Path        string `json:"path" jsonschema:"required,The file path"`
+	At          string `json:"at,omitempty" jsonschema:"The commit ID or ref to retrieve the file from"`
+	Markup      string `json:"markup,omitempty" jsonschema:"Markup formatting option"`
+	HtmlEscape  string `json:"htmlEscape,omitempty" jsonschema:"HTML escape option"`
+	IncludeHeadingId string `json:"includeHeadingId,omitempty" jsonschema:"Include heading IDs"`
+	Hardwrap    string `json:"hardwrap,omitempty" jsonschema:"Hard wrap option"`
 }
 
 // GetFilesInput represents the input parameters for getting files

@@ -145,10 +145,10 @@ func (c *BitbucketClient) GetRepositoryLabels(input GetRepositoryLabelsInput) ([
 func (c *BitbucketClient) GetFileContent(input GetFileContentInput) ([]byte, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "at", input.At, "")
-	utils.SetQueryParam(queryParams, "size", input.Size, false)
-	utils.SetQueryParam(queryParams, "type", input.TypeParam, false)
-	utils.SetQueryParam(queryParams, "blame", input.Blame, false)
-	utils.SetQueryParam(queryParams, "noContent", input.NoContent, false)
+	utils.SetQueryParam(queryParams, "markup", input.Markup, "")
+	utils.SetQueryParam(queryParams, "htmlEscape", input.HtmlEscape, "")
+	utils.SetQueryParam(queryParams, "includeHeadingId", input.IncludeHeadingId, "")
+	utils.SetQueryParam(queryParams, "hardwrap", input.Hardwrap, "")
 
 	var content []byte
 	if err := c.executeRequest(
@@ -182,10 +182,15 @@ func (c *BitbucketClient) GetFiles(input GetFilesInput) (types.MapOutput, error)
 	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	utils.SetQueryParam(queryParams, "start", input.Start, 0)
 
+	pathParams := []string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "files"}
+	if input.Path != "" {
+		pathParams = append(pathParams, input.Path)
+	}
+
 	var files types.MapOutput
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "files"},
+		pathParams,
 		queryParams,
 		nil,
 		&files,

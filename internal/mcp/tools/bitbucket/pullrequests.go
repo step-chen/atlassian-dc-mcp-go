@@ -110,7 +110,12 @@ func (h *Handler) getPullRequestJiraIssuesHandler(ctx context.Context, req *mcp.
 		return nil, nil, fmt.Errorf("get pull request Jira issues failed: %w", err)
 	}
 
-	return nil, issues, nil
+	// Convert slice to map for MCP response
+	result := types.MapOutput{
+		"issues": issues,
+	}
+
+	return nil, result, nil
 }
 
 // getPullRequestsForUserHandler handles getting pull requests for a user

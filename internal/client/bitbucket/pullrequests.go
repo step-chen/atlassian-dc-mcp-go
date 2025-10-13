@@ -84,7 +84,11 @@ func (c *BitbucketClient) GetPullRequestActivities(input GetPullRequestActivitie
 // Returns:
 //   - map[string]interface{}: The changes data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestChanges(input GetPullRequestChangesInput) (map[string]interface{}, error) {
+func (c *BitbucketClient) GetPullRequestChanges(input GetPullRequestChangesInput) (types.MapOutput, error) {
+	limit := input.Limit
+	if limit <= 0 {
+		limit = 25
+	}
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "changeScope", string(input.ChangeScope), "")
 	utils.SetQueryParam(queryParams, "limit", strconv.Itoa(input.Limit), 0)
@@ -230,7 +234,7 @@ func (c *BitbucketClient) GetPullRequestDiff(input GetPullRequestDiffInput) (io.
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "diff", input.Path},
 		queryParams,
 		nil,
-		utils.AcceptJSON,
+		utils.AcceptText,
 	)
 }
 
@@ -356,13 +360,13 @@ func (c *BitbucketClient) GetPullRequestSuggestions(input GetPullRequestSuggesti
 //   - input: GetPullRequestJiraIssuesInput containing the parameters for the request
 //
 // Returns:
-//   - types.MapOutput: The Jira issues data retrieved from the API
+//   - []RestJiraIssue: The Jira issues data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestJiraIssues(input GetPullRequestJiraIssuesInput) (types.MapOutput, error) {
-	var issues types.MapOutput
+func (c *BitbucketClient) GetPullRequestJiraIssues(input GetPullRequestJiraIssuesInput) ([]RestJiraIssue, error) {
+	var issues []RestJiraIssue
 	if err := c.executeRequest(
 		http.MethodGet,
-		[]string{"rest", "jira", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "issues"},
+		[]string{"rest", "jira", "1.0", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "issues"},
 		nil,
 		nil,
 		&issues,
