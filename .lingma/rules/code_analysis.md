@@ -1,5 +1,5 @@
 ---
-trigger: manual
+trigger: always_on
 name: analyze
 ---
 
@@ -23,36 +23,21 @@ To use this code analysis feature, use the following command:
 
 Examples:
 - `/analyze MYPROJECT myrepo internal/service` - Analyze code in the internal/service directory under the myrepo repository of MYPROJECT project
-- `/analyze PROJ repo1 src/utils` - Analyze code in the src/utils directory under the repo1 repository of PROJ project
-
-## Parameter Parsing
-
-When processing the `/analyze` command, you must first parse the input parameters to extract the following components:
-
-1. **PROJECT** - The project key or identifier (e.g., "MYPROJECT")
-2. **REPO** - The repository slug or name (e.g., "myrepo")
-3. **PATH** - The path to the directory or file to analyze (e.g., "internal/service")
-
-For example, given the command `/analyze MYPROJECT myrepo internal/service`:
-- PROJECT = "MYPROJECT"
-- REPO = "myrepo"
-- PATH = "internal/service"
-
-Ensure that all three parameters are correctly identified before proceeding with the analysis.
 
 ## Analysis Process
 
 When analyzing code, you should follow these steps:
 
 1. First use `bitbucket_get_repository` to get basic repository information
-2. Use `bitbucket_get_files` to get the file list under the specified directory
-3. For each file, use `bitbucket_get_file_content` to get the file content
-4. Analyze the file content and identify the following issues:
+2. Use `bitbucket_get_files` to get the file list under the specified directory, recording every file path to be analyzed
+3. For each directory encountered, recursively use `bitbucket_get_files` to get files in subdirectories, recording every file path to be analyzed
+4. For each file, use `bitbucket_get_file_content` to get the file content
+5. Analyze the file content and identify the following issues:
    - Code efficiency issues
    - Database operation efficiency issues
    - Hard-coded values
    - Duplicate or similar code segments
-5. Use `bitbucket_get_commits` and `bitbucket_get_commit_changes` to understand the code history changes
+6. Use `bitbucket_get_commits` and `bitbucket_get_commit_changes` to understand the code history changes
 
 ## Analysis Focus
 
@@ -60,19 +45,16 @@ When analyzing code, you should follow these steps:
 - Check for code with high cyclomatic complexity
 - Identify algorithms that may cause performance issues
 - Check for unnecessary resource consumption
-- Identify computationally intensive operations that can be optimized
 
 ### Database Operation Efficiency Analysis
 - Detect N+1 query issues
 - Identify queries missing indexes
 - Check if transactions are used properly
-- Identify batch operations that can be optimized
 
 ### Hard-coded Detection
 - Detect hard-coded strings in the code
 - Identify hard-coded numeric values
 - Find hard-coded URLs that should use constants or configurations
-- Detect hard-coded business logic parameters
 
 ### Code Duplication Detection
 - Identify completely duplicated code segments
