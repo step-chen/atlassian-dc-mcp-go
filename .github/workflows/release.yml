@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to create a release
+      packages: write # Required to push to GHCR
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.0'
+
+      - name: Build for all platforms
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o dist/atlassian-dc-mcp-server-linux-amd64 -ldflags="-s -w -extldflags '-static'" ./cmd/server
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -a -o dist/atlassian-dc-mcp-server-windows-amd64.exe -ldflags="-s -w -extldflags '-static'" ./cmd/server
+          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -a -o dist/atlassian-dc-mcp-server-darwin-amd64 -ldflags="-s -w -extldflags '-static'" ./cmd/server
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/atlassian-dc-mcp-server-linux-amd64
+            dist/atlassian-dc-mcp-server-windows-amd64.exe
+            dist/atlassian-dc-mcp-server-darwin-amd64
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
