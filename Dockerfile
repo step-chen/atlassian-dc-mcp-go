@@ -3,11 +3,9 @@
 FROM golang:1.25-alpine AS builder
 
 # Add image metadata following OCI standard
-LABEL maintainer="https://github.com/step-chen"
-LABEL org.opencontainers.image.description="Atlassian Data Center MCP (Model Context Protocol) - A Go-based Model Context Protocol service for managing Atlassian Data Center products"
-LABEL org.opencontainers.image.url="https://github.com/step-chen/atlassian-dc-mcp-go"
-LABEL org.opencontainers.image.source="https://github.com/step-chen/atlassian-dc-mcp-go"
-LABEL org.opencontainers.image.vendor="https://github.com/step-chen"
+LABEL org.opencontainers.image.authors="https://github.com/step-chen" \
+      org.opencontainers.image.description="Atlassian Data Center MCP (Model Context Protocol) - A Go-based Model Context Protocol service for managing Atlassian Data Center products" \
+      org.opencontainers.image.vendor="https.github.com/step-chen"
 
 # Install ca-certificates which will be copied to the final image.
 RUN apk --no-cache add ca-certificates
