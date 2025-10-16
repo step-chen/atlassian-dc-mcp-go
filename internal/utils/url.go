@@ -57,6 +57,10 @@ func BuildHttpRequest(method, baseURL string, pathParams []string, queryParams u
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
+	if body != nil {
+		req.Header.Set("Content-Type", string(AcceptJSON))
+	}
+
 	req.Header.Set("Authorization", "Bearer "+token)
 	//  "application/json" or "text/plain"
 	req.Header.Set("Accept", string(accept))
