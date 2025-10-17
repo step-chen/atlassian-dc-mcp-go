@@ -10,25 +10,17 @@ The `.lingma/rules` directory in the project contains the following rule files:
 
 ## How to Use
 
-To use these rules, you need to copy them to your user's personal path. The specific steps are as follows:
+To use these rules, they must be configured at the project level. Lingma rules only support project-level configuration, not user-level configuration.
 
-### 1. Copy Rule Files
+### 1. Project-Level Rule Configuration
 
-Copy the rule files from the `.lingma/rules` directory to the `.lingma/rules` folder in your user directory:
+The rules are already configured in this project's `.lingma/rules` directory. When using this project, Lingma will automatically load these rules.
 
-```bash
-# Create target directory
-mkdir -p ~/.lingma/rules
-
-# Copy rule files
-cp .lingma/rules/*.md ~/.lingma/rules/
-```
-
-:warning: **Important Note**: After copying or modifying any rule files, you must restart VS Code for the changes to take effect. The Lingma extension caches rule configurations at startup, so any modifications require a restart to be recognized.
+:warning: **Important Note**: Lingma rules only support project-level configuration. You cannot copy these rules to a user-level directory as they are specifically designed to work with this project's structure and MCP services.
 
 ### 2. Using Rules in Tongyi Lingma
 
-After completing the above steps, you can use these rules in Tongyi Lingma through trigger words:
+Once you have the project open, you can use these rules in Tongyi Lingma through trigger words:
 
 1. **Code Review Rules**:
    - When conducting code reviews on Bitbucket PRs, you can use the `/review` command
@@ -60,10 +52,9 @@ This example demonstrates how to integrate the MCP service with Lingma to create
 
 You can also create your own custom rules based on the provided example:
 
-1. Copy the [code_review.md](../.lingma/rules/code_review.md) file as a template
-2. Modify the rule content as needed for your specific use cases
-3. Save the new rule file to the `~/.lingma/rules/` directory
-4. **Important**: Restart VS Code for the changes to take effect
-5. Use the new rule in Tongyi Lingma
+1. Create new rule files in the project's `.lingma/rules/` directory
+2. Follow the format shown in the existing rule files
+3. **Important**: Restart VS Code for the changes to take effect
+4. Use the new rule in Tongyi Lingma
 
 By using this example rule, you can see how to integrate the MCP service with Lingma to automate code review processes, ensuring consistency in code quality and security standards.
