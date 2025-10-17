@@ -4,32 +4,30 @@
 # Server port (default is 8090 if not specified)
 port: 8090
 
-# Client timeout in seconds (default is 60 seconds if not specified)
-client_timeout: 60
-
 # Transport configuration - optimal structure for enabling multiple transports
 transport:
   # List of transport modes to enable
   modes:
     - http
     - sse
-  
+    - stdio
   # HTTP transport configuration
   http:
     path: "/mcp"
-  
   # SSE transport configuration
   sse:
     path: "/sse"
-  
   # Stdio transport configuration
   stdio:
     enabled: true
 
+# Client timeout in seconds (default is 60 seconds if not specified)
+client_timeout: 60
+
 # Logging configuration
 logging:
   # Development mode enables human-friendly console output
-  development: true
+  development: false
   
   # Log level (debug, info, warn, error, fatal)
   level: "info"
@@ -42,7 +40,7 @@ logging:
   file_level: "debug"
 
 jira:
-  url: "https://jira.example.com"
+  url: "https://your-jira-instance.domain"
   token: "your-jira-api-token"
   permissions:
     # Note: READ permissions are always enabled and cannot be disabled
@@ -56,7 +54,7 @@ jira:
     jira_add_worklogs: false
 
 confluence:
-  url: "https://confluence.example.com"
+  url: "https://your-confluence-instance.domain"
   token: "your-confluence-api-token"
   permissions:
     # Note: READ permissions are always enabled and cannot be disabled
@@ -67,7 +65,7 @@ confluence:
     confluence_add_comment: false
 
 bitbucket:
-  url: "https://bitbucket.example.com"
+  url: "https://your-bitbucket-instance.domain"
   token: "your-bitbucket-api-token"
   permissions:
     # Note: READ permissions are always enabled and cannot be disabled
