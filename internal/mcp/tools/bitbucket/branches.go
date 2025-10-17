@@ -42,6 +42,16 @@ func (h *Handler) getBranchHandler(ctx context.Context, req *mcp.CallToolRequest
 	return nil, branchInfo, nil
 }
 
+// createBranchHandler handles creating a new branch
+func (h *Handler) createBranchHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.CreateBranchInput) (*mcp.CallToolResult, types.MapOutput, error) {
+	branch, err := h.client.CreateBranch(input)
+	if err != nil {
+		return nil, nil, fmt.Errorf("create branch failed: %w", err)
+	}
+
+	return nil, branch, nil
+}
+
 // AddBranchTools registers the branch-related tools with the MCP server
 func AddBranchTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
@@ -49,4 +59,9 @@ func AddBranchTools(server *mcp.Server, client *bitbucket.BitbucketClient, permi
 	utils.RegisterTool[bitbucket.GetBranchesInput, types.MapOutput](server, "bitbucket_get_branches", "Get branches for a repository", handler.getBranchesHandler)
 	utils.RegisterTool[bitbucket.GetDefaultBranchInput, types.MapOutput](server, "bitbucket_get_default_branch", "Get the default branch of a repository", handler.getDefaultBranchHandler)
 	utils.RegisterTool[bitbucket.GetBranchInput, types.MapOutput](server, "bitbucket_get_branch_info_by_commit_id", "Get branch information by commit ID", handler.getBranchHandler)
+	
+	// Only register write operations if write permission is enabled
+	if permissions["bitbucket_create_branch"] {
+		utils.RegisterTool[bitbucket.CreateBranchInput, types.MapOutput](server, "bitbucket_create_branch", "Create a new branch in a repository", handler.createBranchHandler)
+	}
 }

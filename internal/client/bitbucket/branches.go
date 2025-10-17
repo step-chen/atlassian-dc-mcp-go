@@ -2,6 +2,8 @@
 package bitbucket
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -95,6 +97,44 @@ func (c *BitbucketClient) GetBranch(input GetBranchInput) (types.MapOutput, erro
 		[]string{"rest", "branch-utils", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "branches", "info", input.CommitId},
 		queryParams,
 		nil,
+		&branch,
+		utils.AcceptJSON,
+	); err != nil {
+		return nil, err
+	}
+
+	return branch, nil
+}
+
+// CreateBranch creates a new branch in the specified repository.
+//
+// This function makes an HTTP POST request to the Bitbucket API to create a new branch.
+// The authenticated user must have an effective REPO_WRITE permission to call this resource.
+// If branch permissions are set up in the repository, the authenticated user must also
+// have access to the branch name that is to be created.
+//
+// Parameters:
+//   - input: CreateBranchInput containing the parameters for the request
+//
+// Returns:
+//   - types.MapOutput: The created branch data retrieved from the API
+//   - error: An error if the request fails
+func (c *BitbucketClient) CreateBranch(input CreateBranchInput) (types.MapOutput, error) {
+	payload := make(types.MapOutput)
+	utils.SetRequestBodyParam(payload, "name", input.Name)
+	utils.SetRequestBodyParam(payload, "startPoint", input.StartPoint)
+
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal branch data: %w", err)
+	}
+
+	var branch types.MapOutput
+	if err := c.executeRequest(
+		http.MethodPost,
+		[]string{"rest", "branch-utils", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "branches"},
+		nil,
+		jsonPayload,
 		&branch,
 		utils.AcceptJSON,
 	); err != nil {

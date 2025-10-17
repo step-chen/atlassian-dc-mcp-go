@@ -23,3 +23,10 @@ type GetBranchInput struct {
 type GetDefaultBranchInput struct {
 	CommonInput
 }
+
+// CreateBranchInput represents the input parameters for creating a branch
+type CreateBranchInput struct {
+	CommonInput
+	Name       string `json:"name" jsonschema:"required,Name of the branch to be created"`
+	StartPoint string `json:"startPoint" jsonschema:"required,Commit ID from which the branch is created"`
+}
