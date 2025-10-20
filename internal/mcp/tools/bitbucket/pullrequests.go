@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 	"atlassian-dc-mcp-go/internal/mcp/utils"
@@ -81,6 +82,83 @@ func (h *Handler) addPullRequestCommentHandler(ctx context.Context, req *mcp.Cal
 	}
 
 	return nil, comment, nil
+}
+
+// addPullRequestCommentV2Handler handles adding an enhanced comment to a pull request
+func (h *Handler) addPullRequestCommentV2Handler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.AddPullRequestCommentV2Input) (*mcp.CallToolResult, types.MapOutput, error) {
+	// 注意：参数验证现在在客户端内部处理
+	
+	comment, err := h.client.AddPullRequestCommentV2(input)
+	if err != nil {
+		isInlineComment := input.FilePath != nil && input.LineNumber != nil
+		commentType := ""
+		if isInlineComment {
+			commentType = "inline "
+		}
+		return nil, nil, fmt.Errorf("error adding %scomment to pull request: %w", commentType, err)
+	}
+
+	// 构造响应
+	response := make(types.MapOutput)
+	message := "Comment added successfully"
+	if input.Suggestion != nil {
+		message = "Comment with code suggestion added successfully"
+	} else if input.FilePath != nil && input.LineNumber != nil {
+		message = "Inline comment added successfully"
+	} else if input.CodeSnippet != nil {
+		message = "Comment added using code snippet successfully"
+	}
+	
+	response["message"] = message
+	
+	// 构造评论信息
+	commentInfo := make(types.MapOutput)
+	if id, ok := comment["id"]; ok {
+		commentInfo["id"] = id
+	}
+	
+	if text, ok := comment["text"]; ok {
+		commentInfo["text"] = text
+	}
+	
+	if author, ok := comment["author"].(types.MapOutput); ok {
+		if displayName, ok := author["displayName"]; ok {
+			commentInfo["author"] = displayName
+		}
+	}
+	
+	if createdDate, ok := comment["createdDate"]; ok {
+		if createdDateFloat, ok := createdDate.(float64); ok {
+			t := time.Unix(int64(createdDateFloat)/1000, 0)
+			commentInfo["created_on"] = t.Format("2006-01-02 15:04:05")
+		}
+	}
+	
+	isInlineComment := input.FilePath != nil && input.LineNumber != nil
+	if isInlineComment {
+		commentInfo["file_path"] = input.FilePath
+		commentInfo["line_number"] = input.LineNumber
+		lineType := "CONTEXT"
+		if input.LineType != nil {
+			lineType = *input.LineType
+		}
+		commentInfo["line_type"] = lineType
+	}
+	
+	if input.Suggestion != nil {
+		commentInfo["has_suggestion"] = true
+		suggestionLines := fmt.Sprintf("%d", *input.LineNumber)
+		if input.SuggestionEndLine != nil {
+			suggestionLines = fmt.Sprintf("%d-%d", *input.LineNumber, *input.SuggestionEndLine)
+		}
+		commentInfo["suggestion_lines"] = suggestionLines
+	} else {
+		commentInfo["has_suggestion"] = false
+	}
+	
+	response["comment"] = commentInfo
+
+	return nil, response, nil
 }
 
 // getPullRequestChangesHandler handles getting pull request changes
@@ -267,5 +345,6 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient, 
 
 	if permissions["bitbucket_add_pull_request_comment"] {
 		utils.RegisterTool[bitbucket.AddPullRequestCommentInput, types.MapOutput](server, "bitbucket_add_pull_request_comment", "Add a comment to a pull request", handler.addPullRequestCommentHandler)
+		utils.RegisterTool[bitbucket.AddPullRequestCommentV2Input, types.MapOutput](server, "bitbucket_add_pull_request_comment_v2", "Add an enhanced comment to a pull request. Supports general comments, replies, inline comments, and code suggestions", handler.addPullRequestCommentV2Handler)
 	}
 }

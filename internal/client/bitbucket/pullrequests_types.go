@@ -63,6 +63,23 @@ type AddPullRequestCommentInput struct {
 	CommentText   string `json:"commentText" jsonschema:"required,The text of the comment to add"`
 }
 
+// AddPullRequestCommentV2Input represents the enhanced input parameters for adding a pull request comment
+// Supports general comments, replies, inline comments, and code suggestions
+type AddPullRequestCommentV2Input struct {
+	CommonInput
+	PullRequestID     int     `json:"pullRequestId" jsonschema:"required,The pull request ID"`
+	CommentText       string  `json:"commentText" jsonschema:"required,The main comment text. For suggestions, this is the explanation before the code suggestion."`
+	CodeSnippet       *string `json:"codeSnippet,omitempty" jsonschema:"Exact code text from the diff to find and comment on. Use this instead of line_number for auto-detection. Must match exactly including whitespace (optional)"`
+	FilePath          *string `json:"filePath,omitempty" jsonschema:"File path for inline comment. Required for inline comments. Example: src/components/Button.js (optional)"`
+	LineNumber        *int    `json:"lineNumber,omitempty" jsonschema:"Exact line number in the file. Use this OR code_snippet, not both. Required with file_path unless using code_snippet (optional)"`
+	LineType          *string `json:"lineType,omitempty" jsonschema:"Type of line: ADDED (green/new lines), REMOVED (red/deleted lines), or CONTEXT (unchanged lines). Default: CONTEXT"`
+	MatchStrategy     *string `json:"matchStrategy,omitempty" jsonschema:"How to handle multiple matches when using code_snippet. \"strict\": fail with detailed error showing all matches. \"best\": automatically pick the highest confidence match. Default: \"strict\""`
+	ParentCommentID   *int    `json:"parentCommentId,omitempty" jsonschema:"ID of comment to reply to. Use this to create threaded conversations (optional)"`
+	Suggestion        *string `json:"suggestion,omitempty" jsonschema:"Replacement code for a suggestion. Creates a suggestion block that can be applied in Bitbucket UI. Requires file_path and line_number. For multi-line, include newlines in the string (optional)"`
+	SuggestionEndLine *int    `json:"suggestionEndLine,omitempty" jsonschema:"For multi-line suggestions: the last line number to replace. If not provided, only replaces the single line at line_number (optional)"`
+	SearchContext     *string `json:"searchContext,omitempty" jsonschema:"Additional context lines to help locate the exact position when using code_snippet. Useful when the same code appears multiple times (optional)"`
+}
+
 // DeclinePullRequestInput represents the input parameters for declining a pull request
 type DeclinePullRequestInput struct {
 	CommonInput
@@ -161,4 +178,28 @@ type GetPullRequestDiffStreamInput struct {
 type TestPullRequestCanMergeInput struct {
 	CommonInput
 	PullRequestID int `json:"pullRequestId" jsonschema:"required,The pull request ID"`
+}
+
+// SearchContext represents additional context lines to help locate the exact position when using code_snippet
+type SearchContext struct {
+	Before []string `json:"before,omitempty" jsonschema:"Array of code lines that appear BEFORE the target line. Helps disambiguate when code_snippet appears multiple times"`
+	After  []string `json:"after,omitempty" jsonschema:"Array of code lines that appear AFTER the target line. Helps disambiguate when code_snippet appears multiple times"`
+}
+
+// ResolvedLineInfo represents the information about a resolved line in a pull request diff
+type ResolvedLineInfo struct {
+	LineNumber int    `json:"lineNumber"`
+	FilePath   string `json:"filePath"`
+	LineType   string `json:"lineType"`
+}
+
+// ResolveLineFromCodeInput represents the input parameters for resolving a line number from a code snippet
+type ResolveLineFromCodeInput struct {
+	CommonInput
+	PullRequestID int           `json:"pullRequestId" jsonschema:"required,The pull request ID"`
+	CodeSnippet   string        `json:"codeSnippet" jsonschema:"required,The code snippet to find"`
+	FilePath      *string       `json:"filePath,omitempty" jsonschema:"File path to filter matches. If not provided, will return matches from any file"`
+	LineType      *string       `json:"lineType,omitempty" jsonschema:"Type of line to match: ADDED, REMOVED, or CONTEXT. If not provided, will match any line type"`
+	MatchStrategy *string       `json:"matchStrategy,omitempty" jsonschema:"How to handle multiple matches. \"strict\": fail with detailed error. \"best\": automatically pick the best match"`
+	SearchContext *SearchContext `json:"searchContext,omitempty" jsonschema:"Additional context to help disambiguate matches"`
 }

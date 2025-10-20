@@ -30,4 +30,3 @@ type GetRepositoryTasksInput struct {
 	PaginationInput
 	Markup string `json:"markup,omitempty" jsonschema:"Markup formatting option"`
 }
-
