@@ -56,16 +56,9 @@ type GetPullRequestCommentsInput struct {
 	States        string `json:"states,omitempty" jsonschema:"Filter comments by states"`
 }
 
-// AddPullRequestCommentInput represents the input parameters for adding a pull request comment
-type AddPullRequestCommentInput struct {
-	CommonInput
-	PullRequestID int    `json:"pullRequestId" jsonschema:"required,The pull request ID"`
-	CommentText   string `json:"commentText" jsonschema:"required,The text of the comment to add"`
-}
-
-// AddPullRequestCommentV2Input represents the enhanced input parameters for adding a pull request comment
+// AddPullRequestCommentInput represents the enhanced input parameters for adding a pull request comment
 // Supports general comments, replies, inline comments, and code suggestions
-type AddPullRequestCommentV2Input struct {
+type AddPullRequestCommentInput struct {
 	CommonInput
 	PullRequestID     int     `json:"pullRequestId" jsonschema:"required,The pull request ID"`
 	CommentText       string  `json:"commentText" jsonschema:"required,The main comment text. For suggestions, this is the explanation before the code suggestion."`
@@ -191,15 +184,20 @@ type ResolvedLineInfo struct {
 	LineNumber int    `json:"lineNumber"`
 	FilePath   string `json:"filePath"`
 	LineType   string `json:"lineType"`
+	Confidence int    `json:"confidence"`
+
+	// Internal fields for processing, not for serialization
+	hunkBody      []string `json:"-"`
+	hunkLineIndex int      `json:"-"`
 }
 
 // ResolveLineFromCodeInput represents the input parameters for resolving a line number from a code snippet
 type ResolveLineFromCodeInput struct {
 	CommonInput
-	PullRequestID int           `json:"pullRequestId" jsonschema:"required,The pull request ID"`
-	CodeSnippet   string        `json:"codeSnippet" jsonschema:"required,The code snippet to find"`
-	FilePath      *string       `json:"filePath,omitempty" jsonschema:"File path to filter matches. If not provided, will return matches from any file"`
-	LineType      *string       `json:"lineType,omitempty" jsonschema:"Type of line to match: ADDED, REMOVED, or CONTEXT. If not provided, will match any line type"`
-	MatchStrategy *string       `json:"matchStrategy,omitempty" jsonschema:"How to handle multiple matches. \"strict\": fail with detailed error. \"best\": automatically pick the best match"`
+	PullRequestID int            `json:"pullRequestId" jsonschema:"required,The pull request ID"`
+	CodeSnippet   string         `json:"codeSnippet" jsonschema:"required,The code snippet to find"`
+	FilePath      *string        `json:"filePath,omitempty" jsonschema:"File path to filter matches. If not provided, will return matches from any file"`
+	LineType      *string        `json:"lineType,omitempty" jsonschema:"Type of line to match: ADDED, REMOVED, or CONTEXT. If not provided, will match any line type"`
+	MatchStrategy *string        `json:"matchStrategy,omitempty" jsonschema:"How to handle multiple matches. \"strict\": fail with detailed error. \"best\": automatically pick the best match"`
 	SearchContext *SearchContext `json:"searchContext,omitempty" jsonschema:"Additional context to help disambiguate matches"`
 }

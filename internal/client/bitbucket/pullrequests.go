@@ -11,6 +11,8 @@ import (
 
 	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
+
+	"github.com/sourcegraph/go-diff/diff"
 )
 
 // GetPullRequest retrieves details of a specific pull request.
@@ -114,10 +116,11 @@ func (c *BitbucketClient) GetPullRequestChanges(input GetPullRequestChangesInput
 	return changes, nil
 }
 
-// AddPullRequestComment adds a comment to a specific pull request.
+// AddPullRequestComment adds a comment to a pull request with enhanced functionality
 //
 // This function makes an HTTP POST request to the Bitbucket API to add a comment
-// to a specific pull request.
+// to a pull request. It supports various comment types including general comments,
+// replies to existing comments, inline comments, and code suggestions.
 //
 // Parameters:
 //   - input: AddPullRequestCommentInput containing the parameters for the request
@@ -126,42 +129,6 @@ func (c *BitbucketClient) GetPullRequestChanges(input GetPullRequestChangesInput
 //   - types.MapOutput: The comment data retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) AddPullRequestComment(input AddPullRequestCommentInput) (types.MapOutput, error) {
-	payload := make(types.MapOutput)
-	utils.SetRequestBodyParam(payload, "text", input.CommentText)
-
-	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal comment: %w", err)
-	}
-
-	var comment types.MapOutput
-	if err := c.executeRequest(
-		http.MethodPost,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "comments"},
-		nil,
-		jsonPayload,
-		&comment,
-		utils.AcceptJSON,
-	); err != nil {
-		return nil, err
-	}
-
-	return comment, nil
-}
-
-// AddPullRequestCommentV2 adds a comment to a pull request with enhanced functionality
-//
-// This function makes an HTTP POST request to the Bitbucket API to add a comment
-// to a pull request. It supports various comment types including general comments,
-// replies to existing comments, inline comments, and code suggestions.
-//
-// Parameters:
-//   - input: AddPullRequestCommentV2Input containing the parameters for the request
-//
-// Returns:
-//   - types.MapOutput: The comment data retrieved from the API
-//   - error: An error if the request fails
-func (c *BitbucketClient) AddPullRequestCommentV2(input AddPullRequestCommentV2Input) (types.MapOutput, error) {
 	// Validate input parameters
 	if input.CommentText == "" && input.Suggestion == nil {
 		return nil, fmt.Errorf("either commentText or suggestion must be provided")
@@ -306,16 +273,34 @@ func (c *BitbucketClient) AddPullRequestCommentV2(input AddPullRequestCommentV2I
 
 // resolveLineFromCode resolves a line number from a code snippet in a pull request diff
 func (c *BitbucketClient) resolveLineFromCode(input ResolveLineFromCodeInput) (ResolvedLineInfo, error) {
-	// Get the pull request diff
-	diffInput := GetPullRequestDiffStreamInput{
-		CommonInput: CommonInput{
-			ProjectKey: input.CommonInput.ProjectKey,
-			RepoSlug:   input.CommonInput.RepoSlug,
-		},
-		PullRequestID: input.PullRequestID,
+	var diffStream io.ReadCloser
+	var err error
+
+	// If a file path is provided, get the diff for that specific file.
+	// This is much more efficient than getting the diff for the entire pull request.
+	if input.FilePath != nil && *input.FilePath != "" {
+		diffInput := GetPullRequestDiffInput{
+			CommonInput: CommonInput{
+				ProjectKey: input.ProjectKey,
+				RepoSlug:   input.RepoSlug,
+			},
+			PullRequestID: input.PullRequestID,
+			Path:          *input.FilePath,
+			ContextLines:  "10000", // Use a large number to ensure we get the whole file's diff
+		}
+		diffStream, err = c.GetPullRequestDiff(diffInput)
+	} else {
+		// Fallback to getting the full diff if no file path is provided
+		diffInput := GetPullRequestDiffStreamInput{
+			CommonInput: CommonInput{
+				ProjectKey: input.ProjectKey,
+				RepoSlug:   input.RepoSlug,
+			},
+			PullRequestID: input.PullRequestID,
+		}
+		diffStream, err = c.GetPullRequestDiffStreamRaw(diffInput)
 	}
 
-	diffStream, err := c.GetPullRequestDiffStreamRaw(diffInput)
 	if err != nil {
 		return ResolvedLineInfo{}, fmt.Errorf("failed to get pull request diff: %w", err)
 	}
@@ -327,60 +312,71 @@ func (c *BitbucketClient) resolveLineFromCode(input ResolveLineFromCodeInput) (R
 		return ResolvedLineInfo{}, fmt.Errorf("failed to read diff content: %w", err)
 	}
 
-	// Split diff into lines
-	diffLines := strings.Split(string(diffContent), "\n")
+	fileDiffs, err := diff.ParseMultiFileDiff(diffContent)
+	if err != nil {
+		return ResolvedLineInfo{}, fmt.Errorf("failed to parse diff: %w", err)
+	}
 
-	// Find all matches of the code snippet
 	var matches []ResolvedLineInfo
-	for i, line := range diffLines {
-		// Check if this line matches our code snippet
-		if strings.Contains(line, input.CodeSnippet) {
-			// Determine line type based on diff line prefix
-			var lineType string
-			if strings.HasPrefix(line, "+") {
-				lineType = "ADDED"
-			} else if strings.HasPrefix(line, "-") {
-				lineType = "REMOVED"
-			} else {
-				lineType = "CONTEXT"
-			}
+	for _, fileDiff := range fileDiffs {
+		filePath := fileDiff.NewName
+		if input.FilePath != nil && filePath != *input.FilePath {
+			continue
+		}
 
-			// Only consider matches of the correct line type
-			if input.LineType != nil && lineType != *input.LineType {
-				continue
-			}
+		for _, hunk := range fileDiff.Hunks {
+			hunkLines := strings.Split(string(hunk.Body), "\n")
+			// We need to track the line number within the hunk for context matching
+			hunkLineIndex := 0
+			// Tracks the line number in the destination file
+			currentDestLine := hunk.NewStartLine
 
-			// Calculate line number in the destination file
-			lineNumber := c.calculateLineNumber(diffLines, i, lineType)
-
-			// If we have a file path filter, check if this match is in the correct file
-			if input.FilePath != nil {
-				// Find the file header for this line
-				filePath := c.findFilePathForLine(diffLines, i)
-				if filePath != *input.FilePath {
-					continue
+			for _, line := range hunkLines {
+				var lineType, lineContent string
+				switch {
+				case strings.HasPrefix(line, "+"):
+					lineType = "ADDED"
+					lineContent = strings.TrimPrefix(line, "+")
+				case strings.HasPrefix(line, "-"):
+					lineType = "REMOVED"
+					lineContent = strings.TrimPrefix(line, "-")
+				default:
+					lineType = "CONTEXT"
+					lineContent = strings.TrimPrefix(line, " ")
 				}
 
-				matches = append(matches, ResolvedLineInfo{
-					LineNumber: lineNumber,
-					FilePath:   filePath,
-					LineType:   lineType,
-				})
-			} else {
-				// If no file path filter, find the file path for this match
-				filePath := c.findFilePathForLine(diffLines, i)
-				matches = append(matches, ResolvedLineInfo{
-					LineNumber: lineNumber,
-					FilePath:   filePath,
-					LineType:   lineType,
-				})
+				if strings.Contains(lineContent, input.CodeSnippet) {
+					if input.LineType == nil || *input.LineType == lineType {
+						match := ResolvedLineInfo{
+							LineNumber: int(currentDestLine),
+							FilePath:   filePath,
+							LineType:   lineType,
+							// Store hunk context for confidence calculation
+							hunkBody:      hunkLines,
+							hunkLineIndex: hunkLineIndex,
+						}
+						matches = append(matches, match)
+					}
+				}
+
+				// Only increment destination line number for ADDED and CONTEXT lines
+				if lineType != "REMOVED" {
+					currentDestLine++
+				}
+				hunkLineIndex++
 			}
 		}
 	}
 
 	// Filter matches based on search context if provided
 	if input.SearchContext != nil {
-		matches = c.filterMatchesWithContext(matches, diffLines, input)
+		var filteredMatches []ResolvedLineInfo
+		for _, match := range matches {
+			if c.calculateConfidence(&match, input.SearchContext) > 0 {
+				filteredMatches = append(filteredMatches, match)
+			}
+		}
+		matches = filteredMatches
 	}
 
 	// Handle match strategy
@@ -395,13 +391,22 @@ func (c *BitbucketClient) resolveLineFromCode(input ResolveLineFromCodeInput) (R
 
 	switch matchStrategy {
 	case "best":
-		// For "best" strategy, return the first match (could be enhanced with better logic)
-		return matches[0], nil
+		var bestMatch ResolvedLineInfo
+		maxConfidence := -1
+
+		for _, match := range matches {
+			confidence := c.calculateConfidence(&match, input.SearchContext)
+			if confidence > maxConfidence {
+				maxConfidence = confidence
+				bestMatch = match
+				bestMatch.Confidence = confidence
+			}
+		}
+		return bestMatch, nil
 	case "strict":
 		fallthrough
 	default:
 		if len(matches) > 1 {
-			// Collect details about all matches for error message
 			var matchDetails []string
 			for _, match := range matches {
 				matchDetails = append(matchDetails, fmt.Sprintf("line %d in file %s", match.LineNumber, match.FilePath))
@@ -412,13 +417,52 @@ func (c *BitbucketClient) resolveLineFromCode(input ResolveLineFromCodeInput) (R
 	}
 }
 
+// calculateConfidence calculates a confidence score for a match based on its context.
+func (c *BitbucketClient) calculateConfidence(match *ResolvedLineInfo, searchContext *SearchContext) int {
+	if searchContext == nil {
+		return 1 // Base confidence for any match without context
+	}
+
+	confidence := 1
+	hunkLines := match.hunkBody
+	matchIndex := match.hunkLineIndex
+
+	// Check context before
+	if len(searchContext.Before) > 0 {
+		for i, expectedLine := range searchContext.Before {
+			actualIndex := matchIndex - len(searchContext.Before) + i
+			if actualIndex >= 0 && actualIndex < len(hunkLines) {
+				actualLine := strings.TrimLeft(hunkLines[actualIndex], "+- ")
+				if strings.Contains(actualLine, expectedLine) {
+					confidence++
+				}
+			}
+		}
+	}
+
+	// Check context after
+	if len(searchContext.After) > 0 {
+		for i, expectedLine := range searchContext.After {
+			actualIndex := matchIndex + 1 + i
+			if actualIndex < len(hunkLines) {
+				actualLine := strings.TrimLeft(hunkLines[actualIndex], "+- ")
+				if strings.Contains(actualLine, expectedLine) {
+					confidence++
+				}
+			}
+		}
+	}
+
+	return confidence
+}
+
 // MergePullRequestOptions represents the options for merging a pull request.
 type MergePullRequestOptions struct {
 	Version     *int    `json:"version,omitempty"`
 	AutoMerge   *bool   `json:"autoMerge,omitempty"`
 	AutoSubject *string `json:"autoSubject,omitempty"`
 	Message     *string `json:"message,omitempty"`
-	StrategyId  *string `json:"strategyId,omitempty"`
+	StrategyId  *string `json:"strategy,omitempty"`
 }
 
 // MergePullRequest merges a specific pull request.
@@ -845,186 +889,6 @@ func (c *BitbucketClient) TestPullRequestCanMerge(input TestPullRequestCanMergeI
 	}
 
 	return mergeStatus, nil
-}
-
-// calculateLineNumber calculates the line number in the destination file
-func (c *BitbucketClient) calculateLineNumber(diffLines []string, matchIndex int, lineType string) int {
-	lineNumber := 0
-
-	// Look backwards from the match index to find the nearest hunk header
-	for i := matchIndex; i >= 0; i-- {
-		line := diffLines[i]
-		// Check for hunk header pattern like @@ -10,7 +10,7 @@
-		if strings.HasPrefix(line, "@@") && strings.Contains(line, "@@") {
-			// Extract destination line number from hunk header
-			parts := strings.Split(line, " ")
-			if len(parts) >= 4 {
-				destPart := parts[2] // +10,7 part
-				destPart = strings.TrimPrefix(destPart, "+")
-				lineNumStr := strings.Split(destPart, ",")[0]
-				if baseLineNum, err := strconv.Atoi(lineNumStr); err == nil {
-					// Count lines from the hunk header to our match
-					linesSinceHunkStart := matchIndex - i
-
-					// Adjust count based on line types in between
-					adjustment := 0
-					for j := i + 1; j <= matchIndex; j++ {
-						hunkLine := diffLines[j]
-						// Skip context and added lines when counting removed lines
-						if lineType == "REMOVED" && !strings.HasPrefix(hunkLine, "-") {
-							adjustment++
-						}
-						// Skip context and removed lines when counting added lines
-						if lineType == "ADDED" && !strings.HasPrefix(hunkLine, "+") {
-							adjustment++
-						}
-					}
-
-					lineNumber = baseLineNum + linesSinceHunkStart - adjustment - 1
-					break
-				}
-			}
-		}
-	}
-
-	// Fallback to simple calculation if we couldn't determine from hunk header
-	if lineNumber == 0 {
-		lineNumber = matchIndex + 1
-	}
-
-	return lineNumber
-}
-
-// filterMatchesWithContext filters matches based on search context
-func (c *BitbucketClient) filterMatchesWithContext(matches []ResolvedLineInfo, diffLines []string, input ResolveLineFromCodeInput) []ResolvedLineInfo {
-	if input.SearchContext == nil {
-		return matches
-	}
-
-	// Filter matches based on context
-	var filteredMatches []ResolvedLineInfo
-	for _, match := range matches {
-		// Find the position of this match in the diff
-		matchPosition := c.findMatchPosition(diffLines, match.FilePath, input.CodeSnippet)
-		if matchPosition == -1 {
-			continue
-		}
-
-		// Check context before the match
-		contextBeforeMatch := true
-		if input.SearchContext.Before != nil {
-			contextBeforeMatch = c.checkContextBefore(diffLines, matchPosition, input.SearchContext.Before)
-		}
-
-		// Check context after the match
-		contextAfterMatch := true
-		if input.SearchContext.After != nil {
-			contextAfterMatch = c.checkContextAfter(diffLines, matchPosition, input.SearchContext.After)
-		}
-
-		// If both context checks pass, include this match
-		if contextBeforeMatch && contextAfterMatch {
-			filteredMatches = append(filteredMatches, match)
-		}
-	}
-
-	return filteredMatches
-}
-
-// findMatchPosition finds the position of a match in the diff lines
-func (c *BitbucketClient) findMatchPosition(diffLines []string, filePath string, codeSnippet string) int {
-	// First, find the file section
-	fileStart := -1
-	for i, line := range diffLines {
-		if strings.HasPrefix(line, "+++ b/"+filePath) || strings.HasPrefix(line, "--- a/"+filePath) {
-			fileStart = i
-			break
-		}
-	}
-
-	if fileStart == -1 {
-		return -1
-	}
-
-	// Then, find the line within that file
-	for i := fileStart; i < len(diffLines); i++ {
-		// Stop if we reach the next file section
-		if i > fileStart && (strings.HasPrefix(diffLines[i], "+++ b/") || strings.HasPrefix(diffLines[i], "--- a/")) {
-			break
-		}
-
-		// Check if this line contains our code snippet
-		if strings.Contains(diffLines[i], codeSnippet) {
-			return i
-		}
-	}
-
-	return -1
-}
-
-// checkContextBefore checks if the context before a match position matches the expected context
-func (c *BitbucketClient) checkContextBefore(diffLines []string, matchPosition int, expectedContext []string) bool {
-	// Compare the lines before the match position with the expected context
-	for i, contextLine := range expectedContext {
-		contextPosition := matchPosition - len(expectedContext) + i
-		if contextPosition < 0 || contextPosition >= len(diffLines) {
-			return false
-		}
-
-		// Compare the content (skip diff prefixes +/- for context lines)
-		actualLine := strings.TrimPrefix(strings.TrimPrefix(diffLines[contextPosition], "+"), "-")
-		expectedLine := strings.TrimPrefix(strings.TrimPrefix(contextLine, "+"), "-")
-
-		if actualLine != expectedLine {
-			return false
-		}
-	}
-
-	return true
-}
-
-// checkContextAfter checks if the context after a match position matches the expected context
-func (c *BitbucketClient) checkContextAfter(diffLines []string, matchPosition int, expectedContext []string) bool {
-	// Compare the lines after the match position with the expected context
-	for i, contextLine := range expectedContext {
-		contextPosition := matchPosition + 1 + i
-		if contextPosition >= len(diffLines) {
-			return false
-		}
-
-		// Compare the content (skip diff prefixes +/- for context lines)
-		actualLine := strings.TrimPrefix(strings.TrimPrefix(diffLines[contextPosition], "+"), "-")
-		expectedLine := strings.TrimPrefix(strings.TrimPrefix(contextLine, "+"), "-")
-
-		if actualLine != expectedLine {
-			return false
-		}
-	}
-
-	return true
-}
-
-// findFilePathForLine finds the file path for a given line in the diff
-func (c *BitbucketClient) findFilePathForLine(diffLines []string, lineIndex int) string {
-	// Look backwards from the line index to find the nearest file header
-	for i := lineIndex; i >= 0; i-- {
-		line := diffLines[i]
-		// Check for diff file header pattern like "+++ b/path/to/file"
-		if strings.HasPrefix(line, "+++") {
-			// Extract file path (remove "+++ b/")
-			filePath := strings.TrimPrefix(line, "+++ b/")
-			return filePath
-		}
-		// Also check for "--- a/path/to/file" in case of removed files
-		if strings.HasPrefix(line, "--- a/") {
-			// Extract file path (remove "--- a/")
-			filePath := strings.TrimPrefix(line, "--- a/")
-			return filePath
-		}
-	}
-
-	// If no file header found, return empty string
-	return ""
 }
 
 // formatSuggestionComment formats a comment with a code suggestion
