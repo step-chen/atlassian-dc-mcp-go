@@ -129,126 +129,13 @@ func (c *BitbucketClient) GetPullRequestChanges(input GetPullRequestChangesInput
 //   - types.MapOutput: The comment data retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) AddPullRequestComment(input AddPullRequestCommentInput) (types.MapOutput, error) {
-	// Validate input parameters
 	if input.CommentText == "" && input.Suggestion == nil {
 		return nil, fmt.Errorf("either commentText or suggestion must be provided")
 	}
 
-	// Initialize variables for line number and line type
-	var lineNumber *int
-	var lineType string
-
-	// Set default line type
-	if input.LineType != nil {
-		lineType = *input.LineType
-	} else {
-		lineType = "CONTEXT"
-	}
-
-	// If code snippet is provided, resolve line number from code
-	if input.CodeSnippet != nil {
-		// Convert SearchContext from string to struct if provided
-		var searchContext *SearchContext
-		if input.SearchContext != nil {
-			if err := json.Unmarshal([]byte(*input.SearchContext), &searchContext); err != nil {
-				return nil, fmt.Errorf("failed to parse search context: %w", err)
-			}
-		}
-
-		// Create input for resolving line number
-		resolveInput := ResolveLineFromCodeInput{
-			CommonInput: CommonInput{
-				ProjectKey: input.ProjectKey,
-				RepoSlug:   input.RepoSlug,
-			},
-			PullRequestID: input.PullRequestID,
-			CodeSnippet:   *input.CodeSnippet,
-			FilePath:      input.FilePath,
-			LineType:      input.LineType,
-			SearchContext: searchContext,
-		}
-
-		// Resolve line number from code snippet
-		resolvedInfo, err := c.resolveLineFromCode(resolveInput)
-		if err != nil {
-			return nil, fmt.Errorf("failed to resolve line from code snippet: %w", err)
-		}
-
-		lineNumber = &resolvedInfo.LineNumber
-		if input.FilePath == nil {
-			input.FilePath = &resolvedInfo.FilePath
-		}
-	} else {
-		lineNumber = input.LineNumber
-	}
-
-	// Format comment with suggestion if provided
-	finalCommentText := input.CommentText
-	if input.Suggestion != nil {
-		if input.FilePath == nil || lineNumber == nil {
-			return nil, fmt.Errorf("suggestions require file_path and line_number to be specified")
-		}
-
-		suggestionEndLine := lineNumber
-		if input.SuggestionEndLine != nil {
-			suggestionEndLine = input.SuggestionEndLine
-		}
-
-		// Format code suggestion comment
-		finalCommentText = c.formatSuggestionComment(input.CommentText, *input.Suggestion, *lineNumber, *suggestionEndLine)
-	}
-
-	// Create the payload
-	payload := make(types.MapOutput)
-	utils.SetRequestBodyParam(payload, "text", finalCommentText)
-
-	// Handle reply to existing comment
-	if input.ParentCommentID != nil {
-		parent := make(types.MapOutput)
-		parent["id"] = *input.ParentCommentID
-		utils.SetRequestBodyParam(payload, "parent", parent)
-	}
-
-	// Handle inline comments and code suggestions
-	if input.FilePath != nil {
-		anchor := make(types.MapOutput)
-		utils.SetRequestBodyParam(anchor, "path", *input.FilePath)
-
-		// Handle line-based anchor
-		if lineNumber != nil {
-			utils.SetRequestBodyParam(anchor, "line", *lineNumber)
-			utils.SetRequestBodyParam(anchor, "lineType", lineType)
-
-			// Set file type based on line type
-			fileType := "TO"
-			if lineType == "REMOVED" {
-				fileType = "FROM"
-			}
-			utils.SetRequestBodyParam(anchor, "fileType", fileType)
-		}
-
-		// Handle snippet-based anchor
-		if input.CodeSnippet != nil {
-			utils.SetRequestBodyParam(anchor, "snippet", *input.CodeSnippet)
-			matchStrategy := "strict"
-			if input.MatchStrategy != nil {
-				matchStrategy = *input.MatchStrategy
-			}
-			utils.SetRequestBodyParam(anchor, "matchStrategy", matchStrategy)
-		}
-
-		utils.SetRequestBodyParam(anchor, "diffType", "EFFECTIVE")
-		utils.SetRequestBodyParam(payload, "anchor", anchor)
-	}
-
-	// Handle code suggestions
-	if input.Suggestion != nil {
-		suggestion := make(types.MapOutput)
-		utils.SetRequestBodyParam(suggestion, "content", *input.Suggestion)
-		if input.SuggestionEndLine != nil {
-			utils.SetRequestBodyParam(suggestion, "endLine", *input.SuggestionEndLine)
-		}
-		utils.SetRequestBodyParam(payload, "suggestion", suggestion)
+	payload, err := c.buildCommentPayload(input)
+	if err != nil {
+		return nil, err
 	}
 
 	jsonPayload, err := json.Marshal(payload)
@@ -271,52 +158,170 @@ func (c *BitbucketClient) AddPullRequestComment(input AddPullRequestCommentInput
 	return comment, nil
 }
 
-// resolveLineFromCode resolves a line number from a code snippet in a pull request diff
+// buildCommentPayload builds the payload for adding a comment to a pull request.
+func (c *BitbucketClient) buildCommentPayload(input AddPullRequestCommentInput) (*CommentPayload, error) {
+	var lineNumber *int
+	var lineType string
+
+	if input.LineType != nil {
+		lineType = *input.LineType
+	} else {
+		lineType = "CONTEXT"
+	}
+
+	if input.CodeSnippet != nil {
+		resolvedInfo, err := c.resolveLineNumber(input)
+		if err != nil {
+			return nil, fmt.Errorf("failed to resolve line from code snippet: %w", err)
+		}
+		lineNumber = &resolvedInfo.LineNumber
+		if input.FilePath == nil {
+			input.FilePath = &resolvedInfo.FilePath
+		}
+	} else {
+		lineNumber = input.LineNumber
+	}
+
+	finalCommentText := input.CommentText
+	if input.Suggestion != nil {
+		if input.FilePath == nil || lineNumber == nil {
+			return nil, fmt.Errorf("suggestions require file_path and line_number to be specified")
+		}
+		suggestionEndLine := lineNumber
+		if input.SuggestionEndLine != nil {
+			suggestionEndLine = input.SuggestionEndLine
+		}
+		finalCommentText = c.formatSuggestionComment(input.CommentText, *input.Suggestion, *lineNumber, *suggestionEndLine)
+	}
+
+	payload := &CommentPayload{
+		Text: finalCommentText,
+	}
+
+	if input.ParentCommentID != nil {
+		payload.Parent = &ParentID{ID: *input.ParentCommentID}
+	}
+
+	if input.FilePath != nil {
+		payload.Anchor = &Anchor{
+			Path:     *input.FilePath,
+			DiffType: "EFFECTIVE",
+		}
+
+		if lineNumber != nil {
+			payload.Anchor.Line = lineNumber
+			payload.Anchor.LineType = lineType
+			payload.Anchor.FileType = "TO"
+			if lineType == "REMOVED" {
+				payload.Anchor.FileType = "FROM"
+			}
+		}
+
+		if input.CodeSnippet != nil {
+			payload.Anchor.Snippet = input.CodeSnippet
+			matchStrategy := "strict"
+			if input.MatchStrategy != nil {
+				matchStrategy = *input.MatchStrategy
+			}
+			payload.Anchor.MatchStrategy = matchStrategy
+		}
+	}
+
+	if input.Suggestion != nil {
+		payload.Suggestion = &Suggestion{
+			Content: *input.Suggestion,
+		}
+		if input.SuggestionEndLine != nil {
+			payload.Suggestion.EndLine = input.SuggestionEndLine
+		}
+	}
+
+	return payload, nil
+}
+
+// resolveLineNumber resolves a line number from a code snippet in a pull request diff.
+func (c *BitbucketClient) resolveLineNumber(input AddPullRequestCommentInput) (ResolvedLineInfo, error) {
+	var searchContext *SearchContext
+	if input.SearchContext != nil {
+		if err := json.Unmarshal([]byte(*input.SearchContext), &searchContext); err != nil {
+			return ResolvedLineInfo{}, fmt.Errorf("failed to parse search context: %w", err)
+		}
+	}
+
+	resolveInput := ResolveLineFromCodeInput{
+		CommonInput: CommonInput{
+			ProjectKey: input.ProjectKey,
+			RepoSlug:   input.RepoSlug,
+		},
+		PullRequestID: input.PullRequestID,
+		CodeSnippet:   *input.CodeSnippet,
+		FilePath:      input.FilePath,
+		LineType:      input.LineType,
+		SearchContext: searchContext,
+	}
+
+	return c.resolveLineFromCode(resolveInput)
+}
+
+// resolveLineFromCode resolves a line number from a code snippet in a pull request diff.
+// It's a multi-step process:
+// 1. Fetch and parse the diff for the pull request.
+// 2. Find all potential matches for the given code snippet within the diff.
+// 3. Calculate the confidence of each match and select the best one based on the chosen strategy.
 func (c *BitbucketClient) resolveLineFromCode(input ResolveLineFromCodeInput) (ResolvedLineInfo, error) {
+	fileDiffs, err := c.getAndParseDiff(input)
+	if err != nil {
+		return ResolvedLineInfo{}, err
+	}
+
+	matches := c.findMatchesInDiff(fileDiffs, input)
+
+	return c.selectBestMatch(matches, input)
+}
+
+// getAndParseDiff fetches the pull request diff and parses it into a structured format.
+// It efficiently fetches only the required file's diff if a file path is provided.
+func (c *BitbucketClient) getAndParseDiff(input ResolveLineFromCodeInput) ([]*diff.FileDiff, error) {
 	var diffStream io.ReadCloser
 	var err error
 
-	// If a file path is provided, get the diff for that specific file.
-	// This is much more efficient than getting the diff for the entire pull request.
 	if input.FilePath != nil && *input.FilePath != "" {
 		diffInput := GetPullRequestDiffInput{
-			CommonInput: CommonInput{
-				ProjectKey: input.ProjectKey,
-				RepoSlug:   input.RepoSlug,
-			},
+			CommonInput:   input.CommonInput,
 			PullRequestID: input.PullRequestID,
 			Path:          *input.FilePath,
 			ContextLines:  "10000", // Use a large number to ensure we get the whole file's diff
 		}
 		diffStream, err = c.GetPullRequestDiff(diffInput)
 	} else {
-		// Fallback to getting the full diff if no file path is provided
 		diffInput := GetPullRequestDiffStreamInput{
-			CommonInput: CommonInput{
-				ProjectKey: input.ProjectKey,
-				RepoSlug:   input.RepoSlug,
-			},
+			CommonInput:   input.CommonInput,
 			PullRequestID: input.PullRequestID,
 		}
 		diffStream, err = c.GetPullRequestDiffStreamRaw(diffInput)
 	}
 
 	if err != nil {
-		return ResolvedLineInfo{}, fmt.Errorf("failed to get pull request diff: %w", err)
+		return nil, fmt.Errorf("failed to get pull request diff: %w", err)
 	}
 	defer diffStream.Close()
 
-	// Read the diff content
+	// TODO: Reading the entire diff into memory can be a bottleneck for very large PRs.
+	// Consider using a streaming parser or limiting the read size if this becomes an issue.
 	diffContent, err := io.ReadAll(diffStream)
 	if err != nil {
-		return ResolvedLineInfo{}, fmt.Errorf("failed to read diff content: %w", err)
+		return nil, fmt.Errorf("failed to read diff content: %w", err)
 	}
 
 	fileDiffs, err := diff.ParseMultiFileDiff(diffContent)
 	if err != nil {
-		return ResolvedLineInfo{}, fmt.Errorf("failed to parse diff: %w", err)
+		return nil, fmt.Errorf("failed to parse diff: %w", err)
 	}
+	return fileDiffs, nil
+}
 
+// findMatchesInDiff scans through parsed file diffs to find all occurrences of a code snippet.
+func (c *BitbucketClient) findMatchesInDiff(fileDiffs []*diff.FileDiff, input ResolveLineFromCodeInput) []ResolvedLineInfo {
 	var matches []ResolvedLineInfo
 	for _, fileDiff := range fileDiffs {
 		filePath := fileDiff.NewName
@@ -326,12 +331,9 @@ func (c *BitbucketClient) resolveLineFromCode(input ResolveLineFromCodeInput) (R
 
 		for _, hunk := range fileDiff.Hunks {
 			hunkLines := strings.Split(string(hunk.Body), "\n")
-			// We need to track the line number within the hunk for context matching
-			hunkLineIndex := 0
-			// Tracks the line number in the destination file
 			currentDestLine := hunk.NewStartLine
 
-			for _, line := range hunkLines {
+			for i, line := range hunkLines {
 				var lineType, lineContent string
 				switch {
 				case strings.HasPrefix(line, "+"):
@@ -348,40 +350,49 @@ func (c *BitbucketClient) resolveLineFromCode(input ResolveLineFromCodeInput) (R
 				if strings.Contains(lineContent, input.CodeSnippet) {
 					if input.LineType == nil || *input.LineType == lineType {
 						match := ResolvedLineInfo{
-							LineNumber: int(currentDestLine),
-							FilePath:   filePath,
-							LineType:   lineType,
-							// Store hunk context for confidence calculation
+							LineNumber:    int(currentDestLine),
+							FilePath:      filePath,
+							LineType:      lineType,
 							hunkBody:      hunkLines,
-							hunkLineIndex: hunkLineIndex,
+							hunkLineIndex: i,
 						}
 						matches = append(matches, match)
 					}
 				}
 
-				// Only increment destination line number for ADDED and CONTEXT lines
 				if lineType != "REMOVED" {
 					currentDestLine++
 				}
-				hunkLineIndex++
 			}
 		}
 	}
+	return matches
+}
 
-	// Filter matches based on search context if provided
+// selectBestMatch filters matches based on context and applies the matching strategy.
+func (c *BitbucketClient) selectBestMatch(matches []ResolvedLineInfo, input ResolveLineFromCodeInput) (ResolvedLineInfo, error) {
+	if len(matches) == 0 {
+		return ResolvedLineInfo{}, fmt.Errorf("no matches found for code snippet")
+	}
+
+	// Calculate confidence for all matches first
+	for i := range matches {
+		matches[i].Confidence = c.calculateConfidence(&matches[i], input.SearchContext)
+	}
+
+	// Filter out matches with zero confidence if a search context was provided
 	if input.SearchContext != nil {
 		var filteredMatches []ResolvedLineInfo
 		for _, match := range matches {
-			if c.calculateConfidence(&match, input.SearchContext) > 0 {
+			if match.Confidence > 0 {
 				filteredMatches = append(filteredMatches, match)
 			}
 		}
 		matches = filteredMatches
 	}
 
-	// Handle match strategy
 	if len(matches) == 0 {
-		return ResolvedLineInfo{}, fmt.Errorf("no matches found for code snippet")
+		return ResolvedLineInfo{}, fmt.Errorf("no matches found for code snippet after applying search context")
 	}
 
 	matchStrategy := "strict"
@@ -389,32 +400,27 @@ func (c *BitbucketClient) resolveLineFromCode(input ResolveLineFromCodeInput) (R
 		matchStrategy = *input.MatchStrategy
 	}
 
-	switch matchStrategy {
-	case "best":
+	if matchStrategy == "best" {
 		var bestMatch ResolvedLineInfo
 		maxConfidence := -1
-
 		for _, match := range matches {
-			confidence := c.calculateConfidence(&match, input.SearchContext)
-			if confidence > maxConfidence {
-				maxConfidence = confidence
+			if match.Confidence > maxConfidence {
+				maxConfidence = match.Confidence
 				bestMatch = match
-				bestMatch.Confidence = confidence
 			}
 		}
 		return bestMatch, nil
-	case "strict":
-		fallthrough
-	default:
-		if len(matches) > 1 {
-			var matchDetails []string
-			for _, match := range matches {
-				matchDetails = append(matchDetails, fmt.Sprintf("line %d in file %s", match.LineNumber, match.FilePath))
-			}
-			return ResolvedLineInfo{}, fmt.Errorf("multiple matches found for code snippet: %s. Please provide more context or use 'best' match strategy", strings.Join(matchDetails, ", "))
-		}
-		return matches[0], nil
 	}
+
+	// "strict" strategy is the default
+	if len(matches) > 1 {
+		var matchDetails []string
+		for _, match := range matches {
+			matchDetails = append(matchDetails, fmt.Sprintf("line %d in file %s (confidence: %d)", match.LineNumber, match.FilePath, match.Confidence))
+		}
+		return ResolvedLineInfo{}, fmt.Errorf("multiple matches found for code snippet: %s. Please provide more context or use 'best' match strategy", strings.Join(matchDetails, ", "))
+	}
+	return matches[0], nil
 }
 
 // calculateConfidence calculates a confidence score for a match based on its context.

@@ -201,3 +201,33 @@ type ResolveLineFromCodeInput struct {
 	MatchStrategy *string        `json:"matchStrategy,omitempty" jsonschema:"How to handle multiple matches. \"strict\": fail with detailed error. \"best\": automatically pick the best match"`
 	SearchContext *SearchContext `json:"searchContext,omitempty" jsonschema:"Additional context to help disambiguate matches"`
 }
+
+// CommentPayload defines the structure for the Bitbucket API to add a comment.
+type CommentPayload struct {
+	Text       string      `json:"text"`
+	Parent     *ParentID   `json:"parent,omitempty"`
+	Anchor     *Anchor     `json:"anchor,omitempty"`
+	Suggestion *Suggestion `json:"suggestion,omitempty"`
+}
+
+// ParentID specifies the parent comment for a reply.
+type ParentID struct {
+	ID int `json:"id"`
+}
+
+// Anchor defines where an inline comment should be placed.
+type Anchor struct {
+	Path          string  `json:"path"`
+	Line          *int    `json:"line,omitempty"`
+	LineType      string  `json:"lineType,omitempty"`
+	FileType      string  `json:"fileType,omitempty"`
+	DiffType      string  `json:"diffType,omitempty"`
+	Snippet       *string `json:"snippet,omitempty"`
+	MatchStrategy string  `json:"matchStrategy,omitempty"`
+}
+
+// Suggestion defines a code suggestion.
+type Suggestion struct {
+	Content string `json:"content"`
+	EndLine *int   `json:"endLine,omitempty"`
+}
