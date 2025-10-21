@@ -8,7 +8,10 @@ import (
 	"io"
 	"path/filepath"
 	"regexp"
+	"runtime"
+	"sort"
 	"strings"
+	"sync"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 	"atlassian-dc-mcp-go/internal/mcp/utils"
@@ -161,6 +164,58 @@ func matchAny(patterns []string, s string) (bool, error) {
 	return false, nil
 }
 
+// diffChunk represents a single file's diff to be processed.
+type diffChunk struct {
+	index    int
+	filePath string
+	content  string
+}
+
+// processedChunk holds the result of processing a diffChunk.
+type processedChunk struct {
+	index   int
+	content string
+	include bool
+	err     error
+}
+
+// processChunk is executed by worker goroutines to filter a diff chunk.
+func processChunk(task diffChunk, results chan<- processedChunk, includePatterns, excludePatterns []string) {
+	hasIncludePatterns := len(includePatterns) > 0
+	hasExcludePatterns := len(excludePatterns) > 0
+
+	// Default to include if no include patterns are given
+	included := !hasIncludePatterns
+	if hasIncludePatterns {
+		match, err := matchAny(includePatterns, task.filePath)
+		if err != nil {
+			results <- processedChunk{err: fmt.Errorf("error matching include pattern for %s: %w", task.filePath, err)}
+			return
+		}
+		if match {
+			included = true
+		}
+	}
+
+	excluded := false
+	if hasExcludePatterns {
+		match, err := matchAny(excludePatterns, task.filePath)
+		if err != nil {
+			results <- processedChunk{err: fmt.Errorf("error matching exclude pattern for %s: %w", task.filePath, err)}
+			return
+		}
+		if match {
+			excluded = true
+		}
+	}
+
+	if included && !excluded {
+		results <- processedChunk{index: task.index, content: task.content, include: true}
+	} else {
+		results <- processedChunk{index: task.index, include: false}
+	}
+}
+
 // getPullRequestDiffStreamHandler handles streaming the diff for a pull request
 func (h *Handler) getPullRequestDiffStreamHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestDiffStreamInput) (*mcp.CallToolResult, DiffOutput, error) {
 	stream, err := h.client.GetPullRequestDiffStreamRaw(input)
@@ -169,57 +224,55 @@ func (h *Handler) getPullRequestDiffStreamHandler(ctx context.Context, req *mcp.
 	}
 	defer stream.Close()
 
-	hasIncludePatterns := len(input.IncludePatterns) > 0
-	hasExcludePatterns := len(input.ExcludePatterns) > 0
+	// --- Concurrency Setup ---
+	numWorkers := runtime.NumCPU()
+	tasks := make(chan diffChunk, numWorkers)
+	results := make(chan processedChunk, numWorkers)
+	var wg sync.WaitGroup
 
-	result := &mcp.CallToolResult{
-		Content: []mcp.Content{},
+	// --- Worker Pool ---
+	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for task := range tasks {
+				processChunk(task, results, input.IncludePatterns, input.ExcludePatterns)
+			}
+		}()
 	}
 
+	// --- Result Aggregation ---
+	var processedChunks []processedChunk
+	var aggregationErr error
+	var aggWg sync.WaitGroup
+	aggWg.Add(1)
+	go func() {
+		defer aggWg.Done()
+		for res := range results {
+			if res.err != nil {
+				// Capture the first error and stop processing
+				if aggregationErr == nil {
+					aggregationErr = res.err
+				}
+				continue
+			}
+			if res.include {
+				processedChunks = append(processedChunks, res)
+			}
+		}
+	}()
+
+	// --- Main Parsing Loop ---
 	scanner := bufio.NewScanner(stream)
 	var currentDiff strings.Builder
 	var currentFilePath string
-	// Regex to extract file path from "diff --git a/path/to/file b/path/to/file"
+	chunkIndex := 0
 	re := regexp.MustCompile(`^diff --git a/(.+) b/(.+)`)
 
-	processChunk := func() error {
-		if currentDiff.Len() == 0 || currentFilePath == "" {
-			return nil
-		}
-
-		// Default to include if no include patterns are given
-		included := !hasIncludePatterns
-		if hasIncludePatterns {
-			match, err := matchAny(input.IncludePatterns, currentFilePath)
-			if err != nil {
-				return fmt.Errorf("error matching include pattern: %w", err)
-			}
-			if match {
-				included = true
-			}
-		}
-
-		excluded := false
-		if hasExcludePatterns {
-			match, err := matchAny(input.ExcludePatterns, currentFilePath)
-			if err != nil {
-				return fmt.Errorf("error matching exclude pattern: %w", err)
-			}
-			if match {
-				excluded = true
-			}
-		}
-
-		if included && !excluded {
-			result.Content = append(result.Content, &mcp.TextContent{
-				Text: currentDiff.String(),
-			})
-		}
-
-		return nil
-	}
-
 	for scanner.Scan() {
+		if aggregationErr != nil {
+			break // Stop scanning if an error occurred in a worker
+		}
 		select {
 		case <-ctx.Done():
 			return nil, DiffOutput{}, ctx.Err()
@@ -228,31 +281,60 @@ func (h *Handler) getPullRequestDiffStreamHandler(ctx context.Context, req *mcp.
 
 		line := scanner.Text()
 		if matches := re.FindStringSubmatch(line); len(matches) > 2 {
-			// This is a new file diff header. Process the previous chunk.
-			if err := processChunk(); err != nil {
-				return nil, DiffOutput{}, err
+			// New file diff header. Dispatch the previous chunk if it exists.
+			if currentDiff.Len() > 0 && currentFilePath != "" {
+				tasks <- diffChunk{
+					index:    chunkIndex,
+					filePath: currentFilePath,
+					content:  currentDiff.String(),
+				}
+				chunkIndex++
 			}
 
 			// Start a new chunk
 			currentDiff.Reset()
-			// The file path is in the second capture group (b path)
-			currentFilePath = matches[2]
+			currentFilePath = matches[2] // File path from the 'b' side
 		}
 
 		currentDiff.WriteString(line)
 		currentDiff.WriteString("\n")
 	}
 
-	// Process the last chunk after the loop
-	if err := processChunk(); err != nil {
-		return nil, DiffOutput{}, err
+	// Dispatch the last chunk
+	if currentDiff.Len() > 0 && currentFilePath != "" {
+		tasks <- diffChunk{
+			index:    chunkIndex,
+			filePath: currentFilePath,
+			content:  currentDiff.String(),
+		}
 	}
 
-	if err := scanner.Err(); err != nil {
-		return nil, DiffOutput{}, fmt.Errorf("reading pull request diff stream failed: %w", err)
+	close(tasks)   // All tasks have been dispatched
+	wg.Wait()      // Wait for all workers to finish
+	close(results) // Close results channel
+	aggWg.Wait()   // Wait for aggregation to finish
+
+	if scanner.Err() != nil {
+		return nil, DiffOutput{}, fmt.Errorf("reading pull request diff stream failed: %w", scanner.Err())
+	}
+	if aggregationErr != nil {
+		return nil, DiffOutput{}, aggregationErr
 	}
 
-	return result, DiffOutput{}, nil
+	// Sort by original index to maintain order
+	sort.Slice(processedChunks, func(i, j int) bool {
+		return processedChunks[i].index < processedChunks[j].index
+	})
+
+	// Build final result
+	finalResult := &mcp.CallToolResult{
+		Content: make([]mcp.Content, len(processedChunks)),
+	}
+	for i, pc := range processedChunks {
+		finalResult.Content[i] = &mcp.TextContent{Text: pc.content}
+	}
+
+	return finalResult, DiffOutput{}, nil
 }
 
 // getPullRequestDiffHandler handles getting the diff for a specific file in a pull request
