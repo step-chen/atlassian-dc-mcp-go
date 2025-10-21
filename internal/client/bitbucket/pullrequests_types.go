@@ -162,9 +162,11 @@ type GetPullRequestDiffInput struct {
 // GetPullRequestDiffStreamInput represents the input parameters for streaming pull request diff
 type GetPullRequestDiffStreamInput struct {
 	CommonInput
-	PullRequestID int    `json:"pullRequestId" jsonschema:"required,The pull request ID"`
-	ContextLines  *int   `json:"contextLines,omitempty" jsonschema:"Number of context lines to include"`
-	Whitespace    string `json:"whitespace,omitempty" jsonschema:"Whitespace handling option"`
+	PullRequestID   int      `json:"pullRequestId" jsonschema:"required,The pull request ID"`
+	ContextLines    *int     `json:"contextLines,omitempty" jsonschema:"Number of context lines to include"`
+	Whitespace      string   `json:"whitespace,omitempty" jsonschema:"Whitespace handling option"`
+	ExcludePatterns []string `json:"exclude_patterns,omitempty" jsonschema:"Array of glob patterns to exclude (e.g., [\"*.lock\", \"*.svg\"])"`
+	IncludePatterns []string `json:"include_patterns,omitempty" jsonschema:"Array of glob patterns to include (e.g., [\"*.go\", \"src/**/*.js\"])"`
 }
 
 // GetPullRequestMergeStatusInput represents the input parameters for getting pull request merge status

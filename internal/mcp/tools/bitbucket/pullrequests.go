@@ -1,10 +1,14 @@
 package bitbucket
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"fmt"
 	"io"
+	"path/filepath"
+	"regexp"
+	"strings"
 
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 	"atlassian-dc-mcp-go/internal/mcp/utils"
@@ -143,6 +147,20 @@ func (h *Handler) getPullRequestCommentHandler(ctx context.Context, req *mcp.Cal
 	return nil, comment, nil
 }
 
+// matchAny checks if a string matches any of the glob patterns.
+func matchAny(patterns []string, s string) (bool, error) {
+	for _, pattern := range patterns {
+		matched, err := filepath.Match(pattern, s)
+		if err != nil {
+			return false, err
+		}
+		if matched {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 // getPullRequestDiffStreamHandler handles streaming the diff for a pull request
 func (h *Handler) getPullRequestDiffStreamHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestDiffStreamInput) (*mcp.CallToolResult, DiffOutput, error) {
 	stream, err := h.client.GetPullRequestDiffStreamRaw(input)
@@ -151,14 +169,90 @@ func (h *Handler) getPullRequestDiffStreamHandler(ctx context.Context, req *mcp.
 	}
 	defer stream.Close()
 
-	// Read the entire stream into a string
-	var buf bytes.Buffer
-	_, err = io.Copy(&buf, stream)
-	if err != nil {
+	hasIncludePatterns := len(input.IncludePatterns) > 0
+	hasExcludePatterns := len(input.ExcludePatterns) > 0
+
+	result := &mcp.CallToolResult{
+		Content: []mcp.Content{},
+	}
+
+	scanner := bufio.NewScanner(stream)
+	var currentDiff strings.Builder
+	var currentFilePath string
+	// Regex to extract file path from "diff --git a/path/to/file b/path/to/file"
+	re := regexp.MustCompile(`^diff --git a/(.+) b/(.+)`)
+
+	processChunk := func() error {
+		if currentDiff.Len() == 0 || currentFilePath == "" {
+			return nil
+		}
+
+		// Default to include if no include patterns are given
+		included := !hasIncludePatterns
+		if hasIncludePatterns {
+			match, err := matchAny(input.IncludePatterns, currentFilePath)
+			if err != nil {
+				return fmt.Errorf("error matching include pattern: %w", err)
+			}
+			if match {
+				included = true
+			}
+		}
+
+		excluded := false
+		if hasExcludePatterns {
+			match, err := matchAny(input.ExcludePatterns, currentFilePath)
+			if err != nil {
+				return fmt.Errorf("error matching exclude pattern: %w", err)
+			}
+			if match {
+				excluded = true
+			}
+		}
+
+		if included && !excluded {
+			result.Content = append(result.Content, &mcp.TextContent{
+				Text: currentDiff.String(),
+			})
+		}
+
+		return nil
+	}
+
+	for scanner.Scan() {
+		select {
+		case <-ctx.Done():
+			return nil, DiffOutput{}, ctx.Err()
+		default:
+		}
+
+		line := scanner.Text()
+		if matches := re.FindStringSubmatch(line); len(matches) > 2 {
+			// This is a new file diff header. Process the previous chunk.
+			if err := processChunk(); err != nil {
+				return nil, DiffOutput{}, err
+			}
+
+			// Start a new chunk
+			currentDiff.Reset()
+			// The file path is in the second capture group (b path)
+			currentFilePath = matches[2]
+		}
+
+		currentDiff.WriteString(line)
+		currentDiff.WriteString("\n")
+	}
+
+	// Process the last chunk after the loop
+	if err := processChunk(); err != nil {
+		return nil, DiffOutput{}, err
+	}
+
+	if err := scanner.Err(); err != nil {
 		return nil, DiffOutput{}, fmt.Errorf("reading pull request diff stream failed: %w", err)
 	}
 
-	return nil, DiffOutput{Diff: buf.String()}, nil
+	return result, DiffOutput{}, nil
 }
 
 // getPullRequestDiffHandler handles getting the diff for a specific file in a pull request
