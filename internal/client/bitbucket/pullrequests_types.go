@@ -64,12 +64,12 @@ type AddPullRequestCommentInput struct {
 	CommentText       string  `json:"commentText" jsonschema:"required,The main comment text. For suggestions, this is the explanation before the code suggestion."`
 	CodeSnippet       *string `json:"codeSnippet,omitempty" jsonschema:"Exact code text from the diff to find and comment on. Use this instead of line_number for auto-detection. Must match exactly including whitespace (optional)"`
 	FilePath          *string `json:"filePath,omitempty" jsonschema:"File path for inline comment. Required for inline comments. Example: src/components/Button.js (optional)"`
-	LineNumber        *int    `json:"lineNumber,omitempty" jsonschema:"Exact line number in the file. Use this OR code_snippet, not both. Required with file_path unless using code_snippet (optional)"`
+	LineNumber        *string `json:"lineNumber,omitempty" jsonschema:"Exact line number in the file. Use this OR code_snippet, not both. Required with file_path unless using code_snippet (optional)"`
 	LineType          *string `json:"lineType,omitempty" jsonschema:"Type of line: ADDED (green/new lines), REMOVED (red/deleted lines), or CONTEXT (unchanged lines). Default: CONTEXT"`
 	MatchStrategy     *string `json:"matchStrategy,omitempty" jsonschema:"How to handle multiple matches when using code_snippet. \"strict\": fail with detailed error showing all matches. \"best\": automatically pick the highest confidence match. Default: \"strict\""`
-	ParentCommentID   *int    `json:"parentCommentId,omitempty" jsonschema:"ID of comment to reply to. Use this to create threaded conversations (optional)"`
+	ParentCommentID   *string `json:"parentCommentId,omitempty" jsonschema:"ID of comment to reply to. Use this to create threaded conversations (optional)"`
 	Suggestion        *string `json:"suggestion,omitempty" jsonschema:"Replacement code for a suggestion. Creates a suggestion block that can be applied in Bitbucket UI. Requires file_path and line_number. For multi-line, include newlines in the string (optional)"`
-	SuggestionEndLine *int    `json:"suggestionEndLine,omitempty" jsonschema:"For multi-line suggestions: the last line number to replace. If not provided, only replaces the single line at line_number (optional)"`
+	SuggestionEndLine *string `json:"suggestionEndLine,omitempty" jsonschema:"For multi-line suggestions: the last line number to replace. If not provided, only replaces the single line at line_number (optional)"`
 	SearchContext     *string `json:"searchContext,omitempty" jsonschema:"Additional context lines to help locate the exact position when using code_snippet. Useful when the same code appears multiple times (optional)"`
 }
 
@@ -149,7 +149,7 @@ type GetPullRequestDiffInput struct {
 	PullRequestID int    `json:"pullRequestId" jsonschema:"required,The pull request ID"`
 	Path          string `json:"path" jsonschema:"required,Path to the file"`
 	SrcPath       string `json:"srcPath,omitempty" jsonschema:"Source path for comparison"`
-	ContextLines  string `json:"contextLines,omitempty" jsonschema:"Number of context lines to include"`
+	ContextLines  *int   `json:"contextLines,omitempty" jsonschema:"Number of context lines to include"`
 	SinceId       string `json:"sinceId,omitempty" jsonschema:"Filter changes since a specific time"`
 	UntilId       string `json:"untilId,omitempty" jsonschema:"Filter changes until a specific time"`
 	Whitespace    string `json:"whitespace,omitempty" jsonschema:"Whitespace handling option"`
@@ -163,7 +163,7 @@ type GetPullRequestDiffInput struct {
 type GetPullRequestDiffStreamInput struct {
 	CommonInput
 	PullRequestID int    `json:"pullRequestId" jsonschema:"required,The pull request ID"`
-	ContextLines  int    `json:"contextLines,omitempty" jsonschema:"Number of context lines to include"`
+	ContextLines  *int   `json:"contextLines,omitempty" jsonschema:"Number of context lines to include"`
 	Whitespace    string `json:"whitespace,omitempty" jsonschema:"Whitespace handling option"`
 }
 

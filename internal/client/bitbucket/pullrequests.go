@@ -146,7 +146,7 @@ func (c *BitbucketClient) AddPullRequestComment(input AddPullRequestCommentInput
 	var comment types.MapOutput
 	if err := c.executeRequest(
 		http.MethodPost,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "comments"},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(int(input.PullRequestID)), "comments"},
 		nil,
 		jsonPayload,
 		&comment,
@@ -178,8 +178,12 @@ func (c *BitbucketClient) buildCommentPayload(input AddPullRequestCommentInput) 
 		if input.FilePath == nil {
 			input.FilePath = &resolvedInfo.FilePath
 		}
-	} else {
-		lineNumber = input.LineNumber
+	} else if input.LineNumber != nil {
+		ln, err := strconv.Atoi(*input.LineNumber)
+		if err != nil {
+			return nil, fmt.Errorf("invalid lineNumber: %w", err)
+		}
+		lineNumber = &ln
 	}
 
 	finalCommentText := input.CommentText
@@ -189,7 +193,11 @@ func (c *BitbucketClient) buildCommentPayload(input AddPullRequestCommentInput) 
 		}
 		suggestionEndLine := lineNumber
 		if input.SuggestionEndLine != nil {
-			suggestionEndLine = input.SuggestionEndLine
+			sel, err := strconv.Atoi(*input.SuggestionEndLine)
+			if err != nil {
+				return nil, fmt.Errorf("invalid suggestionEndLine: %w", err)
+			}
+			suggestionEndLine = &sel
 		}
 		finalCommentText = c.formatSuggestionComment(input.CommentText, *input.Suggestion, *lineNumber, *suggestionEndLine)
 	}
@@ -199,7 +207,11 @@ func (c *BitbucketClient) buildCommentPayload(input AddPullRequestCommentInput) 
 	}
 
 	if input.ParentCommentID != nil {
-		payload.Parent = &ParentID{ID: *input.ParentCommentID}
+		pci, err := strconv.Atoi(*input.ParentCommentID)
+		if err != nil {
+			return nil, fmt.Errorf("invalid parentCommentId: %w", err)
+		}
+		payload.Parent = &ParentID{ID: pci}
 	}
 
 	if input.FilePath != nil {
@@ -232,7 +244,11 @@ func (c *BitbucketClient) buildCommentPayload(input AddPullRequestCommentInput) 
 			Content: *input.Suggestion,
 		}
 		if input.SuggestionEndLine != nil {
-			payload.Suggestion.EndLine = input.SuggestionEndLine
+			sel, err := strconv.Atoi(*input.SuggestionEndLine)
+			if err != nil {
+				return nil, fmt.Errorf("invalid suggestionEndLine: %w", err)
+			}
+			payload.Suggestion.EndLine = &sel
 		}
 	}
 
@@ -253,7 +269,7 @@ func (c *BitbucketClient) resolveLineNumber(input AddPullRequestCommentInput) (R
 			ProjectKey: input.ProjectKey,
 			RepoSlug:   input.RepoSlug,
 		},
-		PullRequestID: input.PullRequestID,
+		PullRequestID: int(input.PullRequestID),
 		CodeSnippet:   *input.CodeSnippet,
 		FilePath:      input.FilePath,
 		LineType:      input.LineType,
@@ -286,11 +302,12 @@ func (c *BitbucketClient) getAndParseDiff(input ResolveLineFromCodeInput) ([]*di
 	var err error
 
 	if input.FilePath != nil && *input.FilePath != "" {
+		contextLines := 10000
 		diffInput := GetPullRequestDiffInput{
 			CommonInput:   input.CommonInput,
 			PullRequestID: input.PullRequestID,
 			Path:          *input.FilePath,
-			ContextLines:  "10000", // Use a large number to ensure we get the whole file's diff
+			ContextLines:  &contextLines, // Use a large number to ensure we get the whole file's diff
 		}
 		diffStream, err = c.GetPullRequestDiff(diffInput)
 	} else {
@@ -535,7 +552,9 @@ type DeclinePullRequestOptions struct {
 func (c *BitbucketClient) GetPullRequestDiff(input GetPullRequestDiffInput) (io.ReadCloser, error) {
 	queryParams := make(url.Values)
 	utils.SetQueryParam(queryParams, "srcPath", input.SrcPath, "")
-	utils.SetQueryParam(queryParams, "contextLines", input.ContextLines, "")
+	if input.ContextLines != nil {
+		queryParams.Set("contextLines", strconv.Itoa(*input.ContextLines))
+	}
 	utils.SetQueryParam(queryParams, "sinceId", input.SinceId, "")
 	utils.SetQueryParam(queryParams, "untilId", input.UntilId, "")
 	utils.SetQueryParam(queryParams, "whitespace", input.Whitespace, "")
@@ -858,7 +877,9 @@ func (c *BitbucketClient) GetPullRequestComments(input GetPullRequestCommentsInp
 //   - error: An error if the request fails
 func (c *BitbucketClient) GetPullRequestDiffStreamRaw(input GetPullRequestDiffStreamInput) (io.ReadCloser, error) {
 	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "contextLines", strconv.Itoa(input.ContextLines), 0)
+	if input.ContextLines != nil {
+		queryParams.Set("contextLines", strconv.Itoa(*input.ContextLines))
+	}
 	utils.SetQueryParam(queryParams, "whitespace", input.Whitespace, "")
 
 	return c.executeStreamRequest(
