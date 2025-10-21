@@ -2,10 +2,8 @@ package bitbucket
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -345,14 +343,138 @@ func (h *Handler) getPullRequestDiffHandler(ctx context.Context, req *mcp.CallTo
 	}
 	defer stream.Close()
 
-	// Read the entire stream into a string
-	var buf bytes.Buffer
-	_, err = io.Copy(&buf, stream)
-	if err != nil {
+	// If no patterns are specified, return the entire diff as before
+	hasIncludePatterns := len(input.IncludePatterns) > 0
+	hasExcludePatterns := len(input.ExcludePatterns) > 0
+	if !hasIncludePatterns && !hasExcludePatterns {
+		var diffContent strings.Builder
+		scanner := bufio.NewScanner(stream)
+		for scanner.Scan() {
+			select {
+			case <-ctx.Done():
+				return nil, DiffOutput{}, ctx.Err()
+			default:
+			}
+			diffContent.WriteString(scanner.Text())
+			diffContent.WriteString("\n")
+		}
+
+		if err := scanner.Err(); err != nil {
+			return nil, DiffOutput{}, fmt.Errorf("reading pull request diff failed: %w", err)
+		}
+
+		return nil, DiffOutput{Diff: diffContent.String()}, nil
+	}
+
+	// Process diff with filtering when patterns are specified
+	var processedChunks []processedChunk
+	var currentDiff strings.Builder
+	var currentFilePath string
+	chunkIndex := 0
+	re := regexp.MustCompile(`^diff --git a/(.+) b/(.+)`)
+
+	scanner := bufio.NewScanner(stream)
+	for scanner.Scan() {
+		select {
+		case <-ctx.Done():
+			return nil, DiffOutput{}, ctx.Err()
+		default:
+		}
+
+		line := scanner.Text()
+		if matches := re.FindStringSubmatch(line); len(matches) > 2 {
+			// New file diff header. Process the previous chunk if it exists.
+			if currentDiff.Len() > 0 && currentFilePath != "" {
+				// Apply filtering
+				include := !hasIncludePatterns
+				if hasIncludePatterns {
+					match, err := matchAny(input.IncludePatterns, currentFilePath)
+					if err != nil {
+						return nil, DiffOutput{}, fmt.Errorf("error matching include pattern for %s: %w", currentFilePath, err)
+					}
+					if match {
+						include = true
+					}
+				}
+
+				exclude := false
+				if hasExcludePatterns {
+					match, err := matchAny(input.ExcludePatterns, currentFilePath)
+					if err != nil {
+						return nil, DiffOutput{}, fmt.Errorf("error matching exclude pattern for %s: %w", currentFilePath, err)
+					}
+					if match {
+						exclude = true
+					}
+				}
+
+				if include && !exclude {
+					processedChunks = append(processedChunks, processedChunk{
+						index:   chunkIndex,
+						content: currentDiff.String(),
+					})
+				}
+				chunkIndex++
+			}
+
+			// Start a new chunk
+			currentDiff.Reset()
+			currentFilePath = matches[2] // File path from the 'b' side
+		}
+
+		currentDiff.WriteString(line)
+		currentDiff.WriteString("\n")
+	}
+
+	// Process the last chunk
+	if currentDiff.Len() > 0 && currentFilePath != "" {
+		// Apply filtering
+		include := !hasIncludePatterns
+		if hasIncludePatterns {
+			match, err := matchAny(input.IncludePatterns, currentFilePath)
+			if err != nil {
+				return nil, DiffOutput{}, fmt.Errorf("error matching include pattern for %s: %w", currentFilePath, err)
+			}
+			if match {
+				include = true
+			}
+		}
+
+		exclude := false
+		if hasExcludePatterns {
+			match, err := matchAny(input.ExcludePatterns, currentFilePath)
+			if err != nil {
+				return nil, DiffOutput{}, fmt.Errorf("error matching exclude pattern for %s: %w", currentFilePath, err)
+			}
+			if match {
+				exclude = true
+			}
+		}
+
+		if include && !exclude {
+			processedChunks = append(processedChunks, processedChunk{
+				index:   chunkIndex,
+				content: currentDiff.String(),
+			})
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
 		return nil, DiffOutput{}, fmt.Errorf("reading pull request diff failed: %w", err)
 	}
 
-	return nil, DiffOutput{Diff: buf.String()}, nil
+	// Sort by original index to maintain order
+	sort.Slice(processedChunks, func(i, j int) bool {
+		return processedChunks[i].index < processedChunks[j].index
+	})
+
+	// Build final result
+	var diffContent strings.Builder
+	for _, pc := range processedChunks {
+		diffContent.WriteString(pc.content)
+	}
+
+	return nil, DiffOutput{Diff: diffContent.String()}, nil
 }
 
 // testPullRequestCanMergeHandler handles testing if a pull request can be merged

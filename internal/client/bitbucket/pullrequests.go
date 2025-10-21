@@ -306,7 +306,7 @@ func (c *BitbucketClient) getAndParseDiff(input ResolveLineFromCodeInput) ([]*di
 		diffInput := GetPullRequestDiffInput{
 			CommonInput:   input.CommonInput,
 			PullRequestID: input.PullRequestID,
-			Path:          *input.FilePath,
+			Path:          input.FilePath,
 			ContextLines:  &contextLines, // Use a large number to ensure we get the whole file's diff
 		}
 		diffStream, err = c.GetPullRequestDiff(diffInput)
@@ -554,6 +554,9 @@ func (c *BitbucketClient) GetPullRequestDiff(input GetPullRequestDiffInput) (io.
 	utils.SetQueryParam(queryParams, "srcPath", input.SrcPath, "")
 	if input.ContextLines != nil {
 		queryParams.Set("contextLines", strconv.Itoa(*input.ContextLines))
+	} else {
+		// Set default value of 3 for ContextLines
+		queryParams.Set("contextLines", "3")
 	}
 	utils.SetQueryParam(queryParams, "sinceId", input.SinceId, "")
 	utils.SetQueryParam(queryParams, "untilId", input.UntilId, "")
@@ -565,7 +568,7 @@ func (c *BitbucketClient) GetPullRequestDiff(input GetPullRequestDiffInput) (io.
 
 	return c.executeStreamRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "diff", input.Path},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "diff", *input.Path},
 		queryParams,
 		nil,
 		utils.AcceptText,
@@ -879,6 +882,9 @@ func (c *BitbucketClient) GetPullRequestDiffStreamRaw(input GetPullRequestDiffSt
 	queryParams := make(url.Values)
 	if input.ContextLines != nil {
 		queryParams.Set("contextLines", strconv.Itoa(*input.ContextLines))
+	} else {
+		// Set default value of 3 for ContextLines
+		queryParams.Set("contextLines", "3")
 	}
 	utils.SetQueryParam(queryParams, "whitespace", input.Whitespace, "")
 

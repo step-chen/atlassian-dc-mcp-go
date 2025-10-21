@@ -146,17 +146,19 @@ type UpdatePullRequestStatusInput struct {
 // GetPullRequestDiffInput represents the input parameters for getting a diff within a pull request
 type GetPullRequestDiffInput struct {
 	CommonInput
-	PullRequestID int    `json:"pullRequestId" jsonschema:"required,The pull request ID"`
-	Path          string `json:"path" jsonschema:"required,Path to the file"`
-	SrcPath       string `json:"srcPath,omitempty" jsonschema:"Source path for comparison"`
-	ContextLines  *int   `json:"contextLines,omitempty" jsonschema:"Number of context lines to include"`
-	SinceId       string `json:"sinceId,omitempty" jsonschema:"Filter changes since a specific time"`
-	UntilId       string `json:"untilId,omitempty" jsonschema:"Filter changes until a specific time"`
-	Whitespace    string `json:"whitespace,omitempty" jsonschema:"Whitespace handling option"`
-	WithComments  string `json:"withComments,omitempty" jsonschema:"Include comments in response"`
-	DiffType      string `json:"diffType,omitempty" jsonschema:"Filter by diff type"`
-	AvatarScheme  string `json:"avatarScheme,omitempty" jsonschema:"Avatar scheme"`
-	AvatarSize    string `json:"avatarSize,omitempty" jsonschema:"Avatar size"`
+	PullRequestID   int      `json:"pullRequestId" jsonschema:"required,The pull request ID"`
+	Path            *string  `json:"path,omitempty" jsonschema:"Path to the file"`
+	SrcPath         string   `json:"srcPath,omitempty" jsonschema:"Source path for comparison"`
+	ContextLines    *int     `json:"contextLines,omitempty" jsonschema:"Number of context lines to include"`
+	SinceId         string   `json:"sinceId,omitempty" jsonschema:"Filter changes since a specific time"`
+	UntilId         string   `json:"untilId,omitempty" jsonschema:"Filter changes until a specific time"`
+	Whitespace      string   `json:"whitespace,omitempty" jsonschema:"Whitespace handling option"`
+	WithComments    string   `json:"withComments,omitempty" jsonschema:"Include comments in response"`
+	DiffType        string   `json:"diffType,omitempty" jsonschema:"Filter by diff type"`
+	AvatarScheme    string   `json:"avatarScheme,omitempty" jsonschema:"Avatar scheme"`
+	AvatarSize      string   `json:"avatarSize,omitempty" jsonschema:"Avatar size"`
+	ExcludePatterns []string `json:"exclude_patterns,omitempty" jsonschema:"Array of glob patterns to exclude (e.g., [\"*.lock\", \"*.svg\"])"`
+	IncludePatterns []string `json:"include_patterns,omitempty" jsonschema:"Array of glob patterns to include (e.g., [\"*.go\", \"src/**/*.js\"])"`
 }
 
 // GetPullRequestDiffStreamInput represents the input parameters for streaming pull request diff
