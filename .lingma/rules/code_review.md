@@ -13,17 +13,11 @@ The review includes:
 1. Code quality review - checking for potential bugs, readability, maintainability, and performance
 2. Database operation review - focusing on efficiency and security
 
-## Simplified Usage
+## Usage
 
-To simplify the code review process, you can use these commands:
+To review a PR, use the following command:
 
-- `/review` - Automatically review current PR
 - `/review PROJECT/REPO/PR-123` - Review the PR with the specified ID in the given project and repository
-- `/review quick` - Quick review mode, focusing on critical issues
-- `/review detailed` - Detailed review mode, providing comprehensive analysis
-- `/review security` - Review security aspects
-- `/review performance` - Review performance aspects
-- `/review style` - Review code style aspects
 
 Note: For the `/review PROJECT/REPO/PR-123` command to work properly, you need to specify the project key, repository slug, and pull request ID in the format `PROJECT/REPO/PR-ID`.
 
@@ -31,38 +25,12 @@ Note: For the `/review PROJECT/REPO/PR-123` command to work properly, you need t
 
 When reviewing a PR, you should follow these steps:
 
-1. First, use `bitbucket_get_pull_request` to get the basic information about the PR
-2. For quick review mode, use `bitbucket_get_pull_request_changes` to get a summary of changed files
-3. For detailed review, use `bitbucket_get_pull_request_diff_stream` to get the complete diff for comprehensive review
-4. For file-specific analysis, use `bitbucket_get_pull_request_diff` to get diffs for specific files
-5. Additionally, you can use `bitbucket_get_pull_request_activities` and `bitbucket_get_pull_request_comments` to get context about the PR discussion
-6. For commit-level analysis, use `bitbucket_get_pull_request_commits` to get individual commits in the PR
-7. For detailed commit analysis, use `bitbucket_get_commit_changes` to see changes in specific commits
-8. To understand code evolution, use `bitbucket_get_commit_comments` and `bitbucket_get_commit_comment` to see commit-level discussions
-
-## Review Modes and Tool Usage Strategy
-
-Different review modes should use different tools to optimize efficiency:
-
-### Quick Review Mode
-- Use `bitbucket_get_pull_request` to get PR metadata
-- Use `bitbucket_get_pull_request_changes` to identify changed files
-- Focus only on critical issues in the changed files
-- Skip detailed diff analysis
-
-### Detailed Review Mode
-- Use `bitbucket_get_pull_request` to get PR metadata
-- Use `bitbucket_get_pull_request_changes` to identify changed files
-- Use `bitbucket_get_pull_request_diff_stream` to get complete diff
-- Analyze code quality, security, and performance in depth
-
-### Security/Performance/Style Specific Reviews
-- Use `bitbucket_get_pull_request` to get PR metadata
-- Use `bitbucket_get_pull_request_changes` to identify changed files
-- Use `bitbucket_get_pull_request_diff` to analyze specific files related to the review focus
-- Apply specialized review criteria to the relevant code sections
-
-This approach is more efficient than iterating through files individually and provides better context for code review.
+1. First, get the basic information about the PR
+2. Get existing comments and activities to understand the discussion context
+3. Get a summary of changed files
+4. Get the complete diff for comprehensive review
+5. For issues found, check if similar comments already exist to avoid duplication
+6. Add new comments directly to the PR for issues that haven't been mentioned
 
 ## Review Criteria
 

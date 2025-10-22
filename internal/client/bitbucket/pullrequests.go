@@ -566,9 +566,13 @@ func (c *BitbucketClient) GetPullRequestDiff(input GetPullRequestDiffInput) (io.
 	utils.SetQueryParam(queryParams, "avatarScheme", input.AvatarScheme, "")
 	utils.SetQueryParam(queryParams, "avatarSize", input.AvatarSize, "")
 
+	path := ""
+	if input.Path != nil {
+		path = *input.Path
+	}
 	return c.executeStreamRequest(
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "diff", *input.Path},
+		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "diff", path},
 		queryParams,
 		nil,
 		utils.AcceptText,
