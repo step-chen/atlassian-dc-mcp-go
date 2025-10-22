@@ -241,4 +241,5 @@ func (s *Server) addBitbucketTools() {
 	bitbucketTools.AddAttachmentTools(s.mcpServer, s.bitbucketClient, permissions)
 	bitbucketTools.AddTagTools(s.mcpServer, s.bitbucketClient, permissions)
 	bitbucketTools.AddRepositoryTools(s.mcpServer, s.bitbucketClient, permissions)
+	bitbucketTools.AddSearchTools(s.mcpServer, s.bitbucketClient, permissions)
 }

@@ -29,7 +29,7 @@ func (h *Handler) searchCodeHandler(ctx context.Context, req *mcp.CallToolReques
 	}
 
 	// Format the result
-	resultText := formatCodeSearchResult(searchResult, input.SearchQuery, input.SearchContext, input.ProjectKey, input.RepoSlug)
+	resultText := formatCodeSearchResult(searchResult, input.SearchQuery, input.SearchContext, input.ProjectKey, input.RepoSlug, input.Limit)
 
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{
@@ -43,48 +43,60 @@ func (h *Handler) searchCodeHandler(ctx context.Context, req *mcp.CallToolReques
 // formatCodeSearchResult formats the search result for display
 func formatCodeSearchResult(
 	result types.MapOutput,
-	searchQuery, searchContext, projectKey, repoSlug string) string {
+	searchQuery, searchContext, projectKey, repoSlug string, limit int) string {
+
+	var resultBuilder strings.Builder
 
 	// Build header
-	resultText := fmt.Sprintf("Code search results for \"%s\"", searchQuery)
+	resultBuilder.WriteString(fmt.Sprintf("Code search results for \"%s\"", searchQuery))
 	if searchContext != "any" && searchContext != "" {
-		resultText += fmt.Sprintf(" (context: %s)", searchContext)
+		resultBuilder.WriteString(fmt.Sprintf(" (context: %s)", searchContext))
 	}
-	resultText += fmt.Sprintf(" in %s", projectKey)
+	resultBuilder.WriteString(fmt.Sprintf(" in %s", projectKey))
 	if repoSlug != "" {
-		resultText += fmt.Sprintf("/%s", repoSlug)
+		resultBuilder.WriteString(fmt.Sprintf("/%s", repoSlug))
 	}
 
 	// Add results
 	codeResults, ok := result["code"].(map[string]interface{})
 	if !ok {
-		resultText += "\n\nNo code results found."
-		return resultText
+		resultBuilder.WriteString("\n\nNo code results found.")
+		return resultBuilder.String()
 	}
 
-	count, _ := codeResults["count"].(float64)
-	values, _ := codeResults["values"].([]interface{})
+	count, ok := codeResults["count"].(float64)
+	if !ok {
+		count = 0
+	}
+	values, ok := codeResults["values"].([]interface{})
+	if !ok {
+		values = []interface{}{}
+	}
 
 	if count == 0 || len(values) == 0 {
-		resultText += "\n\nNo matches found."
-		return resultText
+		resultBuilder.WriteString("\n\nNo matches found.")
+		return resultBuilder.String()
 	}
 
-	resultText += fmt.Sprintf("\n\nFound %d matches:", int(count))
+	resultBuilder.WriteString(fmt.Sprintf("\n\nFound %d matches:", int(count)))
+
+	if limit == 0 {
+		limit = 5 // Default limit
+	}
 
 	// Format each result
 	for i, value := range values {
-		if i >= 5 { // Limit to 5 results for readability
-			resultText += "\n\n... (showing first 5 results)"
+		if i >= limit {
+			resultBuilder.WriteString(fmt.Sprintf("\n\n... (showing first %d results)", limit))
 			break
 		}
 
 		if hit, ok := value.(map[string]interface{}); ok {
-			resultText += formatCodeHit(hit)
+			resultBuilder.WriteString(formatCodeHit(hit))
 		}
 	}
 
-	return resultText
+	return resultBuilder.String()
 }
 
 // formatCodeHit formats a single code search hit
@@ -136,11 +148,9 @@ func formatCodeHit(hit map[string]interface{}) string {
 func AddSearchTools(server *mcp.Server, client *bitbucket.BitbucketClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	if permissions["bitbucket_search_code"] {
-		utils.RegisterTool[bitbucket.SearchCodeInput, types.MapOutput](
-			server,
-			"bitbucket_search_code",
-			"Search for code in Bitbucket repositories with enhanced contextual search capabilities",
-			handler.searchCodeHandler)
-	}
+	utils.RegisterTool[bitbucket.SearchCodeInput, types.MapOutput](
+		server,
+		"bitbucket_search_code",
+		"Search for code in Bitbucket repositories with enhanced contextual search capabilities",
+		handler.searchCodeHandler)
 }

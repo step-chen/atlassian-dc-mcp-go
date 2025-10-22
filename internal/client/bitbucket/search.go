@@ -12,22 +12,23 @@ import (
 
 // SearchCode performs a code search in Bitbucket
 func (c *BitbucketClient) SearchCode(input SearchCodeInput) (types.MapOutput, error) {
+	var queryBuilder strings.Builder
 	// Build the enhanced query string
-	query := fmt.Sprintf("project:%s", input.ProjectKey)
+	queryBuilder.WriteString(fmt.Sprintf("project:%s", input.ProjectKey))
 	if input.RepoSlug != "" {
-		query += fmt.Sprintf(" repo:%s", input.RepoSlug)
+		queryBuilder.WriteString(fmt.Sprintf(" repo:%s", input.RepoSlug))
 	}
 	if input.FilePattern != nil && *input.FilePattern != "" {
-		query += fmt.Sprintf(" path:%s", *input.FilePattern)
+		queryBuilder.WriteString(fmt.Sprintf(" path:%s", *input.FilePattern))
 	}
 
 	// Build smart search patterns
 	smartQuery := c.buildSmartQuery(input.SearchQuery, input.SearchContext)
-	query += fmt.Sprintf(" %s", smartQuery)
+	queryBuilder.WriteString(fmt.Sprintf(" %s", smartQuery))
 
 	// Prepare the request payload
 	payload := BitbucketServerSearchRequest{
-		Query: strings.TrimSpace(query),
+		Query: strings.TrimSpace(queryBuilder.String()),
 		Entities: BitbucketSearchRequestEntities{
 			Code: BitbucketCodeEntity{
 				Start: input.Start,
