@@ -12,6 +12,8 @@ This rule accesses Bitbucket through MCP interface to automatically review code 
 The review includes:
 1. Code quality review - checking for potential bugs, readability, maintainability, and performance
 2. Database operation review - focusing on efficiency and security
+3. Jira Issue requirement compliance review - checking if the implementation matches the requirements
+4. Confluence documentation review - checking if related documentation is updated or created
 
 ## Usage
 
@@ -27,10 +29,12 @@ When reviewing a PR, you should follow these steps:
 
 1. First, get the basic information about the PR
 2. Get existing comments and activities to understand the discussion context
-3. Get a summary of changed files
-4. Get the complete diff for comprehensive review
-5. For issues found, check if similar comments already exist to avoid duplication
-6. Add new comments directly to the PR for issues that haven't been mentioned
+3. Get the related Jira issue information and Jira issue comments to understand requirements and acceptance criteria
+4. Search for related Confluence documentation to understand the context and expected behavior
+5. Get a summary of changed files
+6. Get the complete diff for comprehensive review
+7. For issues found, check if similar comments already exist to avoid duplication
+8. Add new comments directly to the PR for issues that haven't been mentioned
 
 ## Review Criteria
 
@@ -51,6 +55,18 @@ When reviewing a PR, you should follow these steps:
 - Check index usage and N+1 query issues
 - Check batch operation optimization and query complexity
 - Check memory usage
+
+### Jira Issue Requirement Compliance Review
+- Check if all requirements in the Jira issue have been implemented
+- Verify that acceptance criteria are met
+- Ensure the implementation aligns with the issue description
+- Check if any additional changes not mentioned in the issue are introduced
+
+### Confluence Documentation Review
+- Check if related documentation is updated when code changes affect functionality
+- Verify that new features have appropriate documentation
+- Ensure code comments and documentation are consistent
+- Check if links to relevant Confluence pages are provided where necessary
 
 ## Review Report Requirements
 
