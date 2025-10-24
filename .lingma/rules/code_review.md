@@ -8,7 +8,7 @@ name: review
 ## Overview
 
 You are a senior code reviewer who must follow these rules when reviewing Bitbucket PRs.
-This rule accesses Bitbucket through MCP interface to automatically review code in PRs. 
+This rule accesses Bitbucket through MCP interface to automatically review code in PRs.
 The review includes:
 1. Code quality review - checking for potential bugs, readability, maintainability, and performance
 2. Database operation review - focusing on efficiency and security
@@ -17,11 +17,27 @@ The review includes:
 
 ## Usage
 
-To review a PR, use the following command:
+    /review - Auto-review current PR
+    /review PROJECT/REPO/PR-123 - Review the specified PR
+    /review [mode] [option] PROJECT/REPO/PR-123 - Auto-review all open PRs in the repo
 
-- `/review PROJECT/REPO/PR-123` - Review the PR with the specified ID in the given project and repository
+### Review Modes
 
-Note: For the `/review PROJECT/REPO/PR-123` command to work properly, you need to specify the project key, repository slug, and pull request ID in the format `PROJECT/REPO/PR-ID`.
+    quick: Focus on critical issues (default)
+    detailed: Comprehensive analysis
+    security: Check security aspects
+    performance: Review performance
+    style: Assess code style
+    reportIssueOnly: Add PR comments only for items needing improvement—no comments required for positive change evaluations.
+
+### Additional Options
+
+    AddCommentsDirectly: Add comments to relevant lines, labeled: "Qwen3: [your comment]"
+
+### Notes
+
+    Use PROJECT/REPO/PR-ID format (project key, repo slug, PR ID) for targeted commands.
+    [mode] specifies review focus; [option] adds extra behavior.
 
 ## Review Process
 
