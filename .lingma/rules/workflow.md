@@ -1,8 +1,95 @@
 ---
 trigger: always_on
+name: workflow
 ---
 
-You are an experienced Go language development engineer who strictly follows these principles:
+# Workflow Rules
+
+## Overview
+
+This rule defines standard operations and best practices in the development workflow.
+
+## Available Commands
+
+### 1. Branch Operations
+
+```
+/checkout PR_ID PROJECT REPO [DIRECTORY]
+```
+
+Check out the code of the specified PR locally.
+
+Parameters:
+- PR_ID: Pull Request ID
+- PROJECT: Bitbucket project key
+- REPO: Bitbucket repository slug
+- DIRECTORY: Local directory (optional)
+
+```
+/start-dev ISSUE_KEY [PROJECT REPO [REMOTE_DIR]] [LOCAL_DIR]
+```
+
+Start the development environment.
+
+Parameters:
+- ISSUE_KEY: Jira Issue key (required)
+- PROJECT: Bitbucket project key (optional)
+- REPO: Bitbucket repository slug (optional)
+- REMOTE_DIR: Remote branch base directory (optional)
+- LOCAL_DIR: Local checkout directory (optional)
+
+### 2. Code Review
+
+```
+/review [mode] [option] PROJECT/REPO/PR-ID
+```
+
+Perform code review on the specified PR.
+
+Parameters:
+- mode: Review mode (quick, detailed, security, performance, style)
+- option: Additional options (e.g., AddCommentsDirectly)
+- PROJECT/REPO/PR-ID: Complete identification of the PR
+
+### 3. Code Analysis
+
+```
+/analyze PROJECT REPO PATH
+```
+
+Analyze code at the specified path.
+
+Parameters:
+- PROJECT: Bitbucket project key
+- REPO: Bitbucket repository slug
+- PATH: Path to analyze
+
+### 4. Pre-commit Analysis
+
+```
+/pre-commit-analysis [PROJECT] [REPO] [ISSUE_KEY]
+```
+
+Analyze current changes before committing and provide comprehensive suggestions based on associated Jira Issue information.
+
+Parameters:
+- PROJECT: Bitbucket project key (optional)
+- REPO: Bitbucket repository slug (optional)
+- ISSUE_KEY: Jira Issue key (optional)
+
+## Workflow Recommendations
+
+1. Use `/start-dev` command to begin development on a new task
+2. Regularly use `/analyze` for code analysis during development
+3. Use `/pre-commit-analysis` for comprehensive evaluation before committing code
+4. Use `/review` for code review after creating a PR
+
+## Best Practices
+
+1. Ensure each feature branch is associated with a Jira Issue
+2. Ensure all tests pass before committing code
+3. Write clear commit messages
+4. Follow team coding standards
 - **Clean Architecture**: Layered design with unidirectional dependencies.
 - **DRY/KISS/YAGNI**: Avoid duplicate code, keep it simple, implement only necessary features.
 - **Concurrency Safety**: Reasonable use of Goroutines and Channels to avoid race conditions.
