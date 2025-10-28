@@ -17,27 +17,41 @@ This rule accesses Bitbucket through the MCP interface to automatically analyze 
 
 ## Usage
 
-To use this code analysis feature, use the following command:
+```
+/analyze [MyLocalCodePath] [options]
+```
 
-- `/analyze PROJECT REPO PATH` - Analyze code in the specified path under project and repository
+MyLocalCodePath: Local path to the code repository (optional, if provided will analyze local code directly without accessing Bitbucket)
+
+options:
+    -p PROJECT: Bitbucket project key (optional)
+    -r REPO: Bitbucket repository slug (optional)
+    -d PATH: Path to the code directory to analyze under project and repository (optional)
+    -u URL: Bitbucket URL to extract PROJECT and REPO information (optional)
+        From a path like "projects/PROJECT_KEY/repos/REPO_SLUG/browse/PATH", 
+        the system can extract PROJECT_KEY and REPO_SLUG to set PROJECT and REPO automatically.
 
 Examples:
-- `/analyze MYPROJECT myrepo internal/service` - Analyze code in the internal/service directory under the myrepo repository of MYPROJECT project
+- `/analyze /path/to/local/code` - Analyze local code directly without accessing Bitbucket
+- `/analyze -p MYPROJECT -r myrepo -d internal/service` - Analyze code in the internal/service directory under the myrepo repository of MYPROJECT project
+- `/analyze -u projects/PROJECT_KEY/repos/REPO_SLUG/browse/PATH` - Analyze code with PROJECT_KEY, REPO_SLUG AND PATH extracted from the URL path
 
 ## Analysis Process
 
 When analyzing code, you should follow these steps:
 
-1. First use `bitbucket_get_repository` to get basic repository information
-2. Use `bitbucket_get_files` to get the file list under the specified directory, recording every file path to be analyzed
-3. For each directory encountered, recursively use `bitbucket_get_files` to get files in subdirectories, recording every file path to be analyzed
-4. For each file, use `bitbucket_get_file_content` to get the file content
-5. Analyze the file content and identify the following issues:
-   - Code efficiency issues
-   - Database operation efficiency issues
-   - Hard-coded values
-   - Duplicate or similar code segments
-6. Use `bitbucket_get_commits` and `bitbucket_get_commit_changes` to understand the code history changes
+1. If MyLocalCodePath is provided, analyze local code directly without accessing Bitbucket
+2. If MyLocalCodePath is not provided:
+   - First retrieve basic repository information using PROJECT and REPO parameters or extracting from URL
+   - Get the file list under the specified directory (using PATH parameter or extracting from URL), recording every file path to be analyzed
+   - For each directory encountered, recursively get files in subdirectories, recording every file path to be analyzed
+   - For each file, retrieve the file content
+   - Analyze the file content and identify the following issues:
+     - Code efficiency issues
+     - Database operation efficiency issues
+     - Hard-coded values
+     - Duplicate or similar code segments
+3. Review commit history and changes to understand the code history (for Bitbucket repository analysis)
 
 ## Analysis Focus
 

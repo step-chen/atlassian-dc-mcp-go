@@ -1,6 +1,6 @@
 ---
 trigger: always_on
-name: pre-commit
+name: pre_commit
 ---
 
 # Pre-commit Analysis Rules
@@ -17,7 +17,7 @@ The analysis includes:
 ## Usage
 
 ```
-/pre-commit MyLocalCodePath [options]
+/pre_commit MyLocalCodePath [options]
 ```
 
 MyLocalCodePath: Local path to the code repository with changes.
@@ -27,9 +27,13 @@ options:
     -r REPO: Bitbucket repository slug (optional)
     -k ISSUE_KEY: Jira issue key (optional; auto-extracted from branch name if missing)
     -b BRANCH: Repository branch name (optional; uses default branch, typically controlled/XXX, if missing)
+    -u URL: Bitbucket URL to extract PROJECT and REPO information (optional)
+        From a path like "projects/PROJECT_KEY/repos/REPO_SLUG/browse/PATH", 
+        the system can extract PROJECT_KEY and REPO_SLUG to set -p and -r options automatically.
 
 examples:
-- /pre-commit MyLocalCodePath -p MYPROJECT -r MyRepo -k JIRA-123 -b MyBranch - Analyzes current changes in MYPROJECT/MyRepo (branch MyBranch), with JIRA-123 context included.
+- /pre_commit MyLocalCodePath -p MYPROJECT -r MyRepo -k JIRA-123 -b MyBranch - Analyzes current changes in MYPROJECT/MyRepo (branch MyBranch), with JIRA-123 context included.
+- /pre_commit MyLocalCodePath -u projects/PROJECT_KEY/repos/REPO_SLUG/browse/PATH - Analyzes current changes with PROJECT_KEY and REPO_SLUG extracted from the URL path
 
 ## Analysis Process
 
@@ -64,7 +68,7 @@ When running this analysis, the system will:
 ## Examples
 
 ```
-/pre-commit MyLocalCodePath -p MYPROJECT -r MyRepo -k JIRA-123 -b MyBranch
+/pre_commit MyLocalCodePath -p MYPROJECT -r MyRepo -k JIRA-123 -b MyBranch
 ```
 
 This command analyzes current changes in the MYPROJECT project's myrepo repository and provides comprehensive suggestions. If JIRA-123 information is available, it will also be considered in the analysis.
