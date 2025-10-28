@@ -17,27 +17,53 @@ The review includes:
 
 ## Usage
 
-    /review - Auto-review current PR
-    /review PROJECT/REPO/PR-123 - Review the specified PR
-    /review [mode] [option] PROJECT/REPO/PR-123 - Auto-review all open PRs in the repo
+```
+/review [options]
+```
+
+options:
+    -p PROJECT: Bitbucket project key (optional)
+    -r REPO: Bitbucket repository slug (optional)
+    -i PR_ID: Pull Request ID (optional)
+    -m MODE: Review mode (quick, detailed, security, performance, style, reportIssueOnly) (optional)
+    -a: Add comments directly to relevant lines, labeled: "Qwen3: [your comment]" (optional)
+    -u URL: Bitbucket URL to extract PROJECT, REPO, and PR information (optional)
+        From a path like "projects/PROJECT_KEY/repos/REPO_SLUG/pull-requests/PR_ID", 
+        the system can extract PROJECT_KEY, REPO_SLUG, and PR_ID to identify the PR automatically.
+
+Examples:
+- `/review` - Auto-review current PR
+- `/review -p PROJECT -r REPO -i PR-123` - Review the specified PR
+- `/review -m quick -a -p PROJECT -r REPO -i PR-123` - Quick review of the specified PR with direct comments
+- `/review -u projects/PROJECT_KEY/repos/REPO_SLUG/pull-requests/PR_ID` - Review PR with PROJECT_KEY, REPO_SLUG, and PR_ID extracted from the URL path
+- `/review -m quick -a -u projects/PROJECT_KEY/repos/REPO_SLUG/pull-requests/PR_ID` - Quick review with direct comments using URL path
 
 ### Review Modes
 
-    quick: Focus on critical issues (default)
-    detailed: Comprehensive analysis
-    security: Check security aspects
-    performance: Review performance
-    style: Assess code style
-    reportIssueOnly: Add PR comments only for items needing improvement—no comments required for positive change evaluations.
+```
+quick: Focus on critical issues (default)
+detailed: Comprehensive analysis
+security: Check security aspects
+performance: Review performance
+style: Assess code style
+reportIssueOnly: Add PR comments only for items needing improvement—no comments required for positive change evaluations.
+
+```
 
 ### Additional Options
 
-    AddCommentsDirectly: Add comments to relevant lines, labeled: "Qwen3: [your comment]"
+```
+-a: Add comments directly to relevant lines, labeled: "Qwen3: [your comment]"
+
+```
 
 ### Notes
 
-    Use PROJECT/REPO/PR-ID format (project key, repo slug, PR ID) for targeted commands.
-    [mode] specifies review focus; [option] adds extra behavior.
+```
+Use -p PROJECT -r REPO -i PR-ID format (project key, repo slug, PR ID) for targeted commands.
+-m specifies review focus; -a adds direct comment behavior.
+
+```
 
 ## Review Process
 

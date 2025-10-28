@@ -14,74 +14,58 @@ This rule defines standard operations and best practices in the development work
 ### 1. Branch Operations
 
 ```
-/checkout PR_ID PROJECT REPO [DIRECTORY]
+/checkout [MyLocalCodePath] [options]
 ```
 
-Check out the code of the specified PR locally.
+MyLocalCodePath: Local directory (optional)
 
-Parameters:
-- PR_ID: Pull Request ID
-- PROJECT: Bitbucket project key
-- REPO: Bitbucket repository slug
-- DIRECTORY: Local directory (optional)
+options:
+    -i PR_ID: Pull Request ID (required)
+    -p PROJECT: Bitbucket project key (required if -u not provided)
+    -r REPO: Bitbucket repository slug (required if -u not provided)
+    -u URL: Bitbucket URL to extract PROJECT and REPO information (required if PROJECT and REPO not provided)
+        From paths like:
+        - "projects/PROJECT_KEY/repos/REPO_SLUG/pull-requests/PR_ID" for PR checkout
+        - "projects/PROJECT_KEY/repos/REPO_SLUG/browse/PATH" for project/repo detection
+        the system can extract PROJECT_KEY and REPO_SLUG to set PROJECT and REPO automatically.
+
+Examples:
+- `/checkout -i 123 -p MYPROJECT -r myrepo` - Check out PR #123 from MYPROJECT/myrepo to a temporary directory
+- `/checkout -i 123 -p MYPROJECT -r myrepo ./mypr` - Check out PR #123 from MYPROJECT/myrepo to ./mypr directory
+- `/checkout -u projects/PROJECT_KEY/repos/REPO_SLUG/pull-requests/PR_ID` - Check out PR with PROJECT_KEY, REPO_SLUG, and PR_ID extracted from the URL path
+- `/checkout ./mypr -u projects/PROJECT_KEY/repos/REPO_SLUG/pull-requests/PR_ID` - Check out PR from URL path to ./mypr directory
 
 ```
-/start-dev ISSUE_KEY [PROJECT REPO [REMOTE_DIR]] [LOCAL_DIR]
+/start-dev [MyLocalCodePath] [options]
 ```
 
-Start the development environment.
+MyLocalCodePath: Local checkout directory (optional)
 
-Parameters:
-- ISSUE_KEY: Jira Issue key (required)
-- PROJECT: Bitbucket project key (optional)
-- REPO: Bitbucket repository slug (optional)
-- REMOTE_DIR: Remote branch base directory (optional)
-- LOCAL_DIR: Local checkout directory (optional)
+options:
+    -i ISSUE_KEY: Jira Issue key (required)
+    -p PROJECT: Bitbucket project key (optional)
+    -r REPO: Bitbucket repository slug (optional)
+    -d REMOTE_DIR: Remote branch base directory (optional)
+    -u URL: Bitbucket URL to extract PROJECT and REPO information (optional)
+        From a path like "projects/PROJECT_KEY/repos/REPO_SLUG", 
+        the system can extract PROJECT_KEY and REPO_SLUG to set PROJECT and REPO automatically.
+
+Examples:
+- `/start-dev -i JIRA-123` - Start development for JIRA-123 with auto-detected project and repository
+- `/start-dev -i JIRA-123 -p MYPROJECT -r myrepo` - Start development for JIRA-123 in MYPROJECT/myrepo
+- `/start-dev -i JIRA-123 -u projects/PROJECT_KEY/repos/REPO_SLUG` - Start development with PROJECT_KEY and REPO_SLUG extracted from the URL path
 
 ### 2. Code Review
 
-```
-/review [mode] [option] PROJECT/REPO/PR-ID
-```
-
-Perform code review on the specified PR.
-
-Parameters:
-- mode: Review mode (quick, detailed, security, performance, style)
-- option: Additional options (e.g., AddCommentsDirectly)
-- PROJECT/REPO/PR-ID: Complete identification of the PR
+See [code_review.md](code_review.md) for detailed information about the `/review` command.
 
 ### 3. Code Analysis
 
-```
-/analyze PROJECT REPO PATH
-```
-
-Analyze code at the specified path.
-
-Parameters:
-- PROJECT: Bitbucket project key
-- REPO: Bitbucket repository slug
-- PATH: Path to analyze
+See [code_analysis.md](code_analysis.md) for detailed information about the `/analyze` command.
 
 ### 4. Pre-commit Analysis
 
-```
-/pre-commit MyLocalCodePath [options]
-```
-
-Analyze current changes before committing and provide comprehensive suggestions based on associated Jira Issue information.
-
-Parameters:
-- MyLocalCodePath: Local path to the code repository with changes
-- options:
-    -p PROJECT: Bitbucket project key (optional)
-    -r REPO: Bitbucket repository slug (optional)
-    -k ISSUE_KEY: Jira issue key (optional; auto-extracted from branch name if missing)
-    -b BRANCH: Repository branch name (optional; uses default branch, typically controlled/XXX, if missing)
-
-examples:
-- /pre-commit MyLocalCodePath -p MYPROJECT -r MyRepo -k JIRA-123 -b MyBranch - Analyzes current changes in MYPROJECT/MyRepo (branch MyBranch), with JIRA-123 context included.
+See [pre_commit.md](pre_commit.md) for detailed information about the `/pre-commit` command.
 
 ## Workflow Recommendations
 
@@ -103,256 +87,6 @@ examples:
 - **Code Maintainability**: Modular design with clear package structure and function naming.
 - **Workflow**: You always provide a solution first, and only start modifying code after receiving explicit modification instructions from the user.
 
-## **Technology Stack**
-- **Language Version**: Go 1.20+.
-- **Frameworks**: Gin (HTTP framework), GORM (ORM), Zap (logging library).
-- **Dependency Management**: Go Modules.
-- **Databases**: PostgreSQL/MySQL (handwritten SQL or ORM).
-- **Testing Tools**: Testify, Ginkgo.
-- **Build/Deployment**: Docker, Kubernetes.
+## Technical Specifications
 
----
-
-## **Application Logic Design**
-### **Layered Design Specifications**
-1. **Presentation Layer** (HTTP Handler):
-   - Handle HTTP requests and convert request parameters to Use Cases.
-   - Return structured JSON responses.
-   - Depend on the Use Case layer, **must not directly operate the database**.
-2. **Use Case Layer** (Business Logic):
-   - Implement core business logic and call Repositories.
-   - Return results or errors, **do not directly handle HTTP protocol**.
-3. **Repository Layer** (Data Access):
-   - Encapsulate database operations (such as GORM or handwritten SQL).
-   - Provide interface definitions and implement interaction with specific databases.
-4. **Entities Layer** (Domain Model):
-   - Define domain objects (such as User, Product).
-   - **Do not contain business logic or database operations**.
-5. **DTOs Layer** (Data Transfer Objects):
-   - Used for cross-layer data transfer (such as HTTP requests/responses).
-   - Defined using `struct`, avoid duplication with Entities.
-6. **Utilities Layer** (Utility Functions):
-   - Encapsulate common functions (such as logging, encryption, time processing).
-
----
-
-## **Specific Development Specifications**
-
-### **1. Package Management**
-- **Package Naming**:
-  - Package names should be lowercase with clear structure (e.g. `internal/repository`).
-  - Avoid circular dependencies, use `go mod why` to check dependency relationships.
-- **Modularity**:
-  - Each function should be an independent sub-package (e.g. `cmd/api`, `internal/service`, `pkg/utils`).
-
-### **2. Code Structure**
-- **File Organization**:
-  ```
-  project-root/
-  ├── cmd/          # Main entry (e.g. main.go)
-  ├── internal/     # Core business logic
-  │   ├── service/  # Business logic layer
-  │   └── repository/ # Data access layer
-  ├── pkg/          # Public utility packages
-  ├── test/         # Test files
-  └── go.mod        # Module dependencies
-  ```
-- **Function Design**:
-  - Functions should have a single responsibility with no more than 5 parameters.
-  - Use `return err` to explicitly return errors, **do not ignore errors**.
-  - Defer resource release (e.g. `defer file.Close()`).
-
-### **3. Error Handling**
-- **Error Propagation**:
-  ```go
-  func DoSomething() error {
-      if err := validate(); err != nil {
-          return fmt.Errorf("validate failed: %w", err)
-      }
-      // ...
-      return nil
-  }
-  ```
-- **Custom Error Types**:
-  ```go
-  type MyError struct {
-      Code    int    `json:"code"`
-      Message string `json:"message"`
-  }
-  func (e *MyError) Error() string { return e.Message }
-  ```
-- **Global Error Handling**:
-  - Use Gin middleware to handle HTTP errors uniformly:
-  ```go
-  func RecoveryMiddleware() gin.HandlerFunc {
-      return func(c *gin.Context) {
-          defer func() {
-              if r := recover(); r != nil {
-                  c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
-              }
-          }()
-          c.Next()
-      }
-  }
-  ```
-
-### **4. Dependency Injection**
-- **Using Dependency Injection Frameworks**:
-  ```go
-  // Define interface
-  type UserRepository interface {
-      FindByID(ctx context.Context, id int) (*User, error)
-  }
-  
-  // Implement dependency injection (e.g. using wire)
-  func InitializeDependencies() (*UserRepository, func()) {
-      repo := NewGORMUserRepository()
-      return repo, func() { /* release resources */ }
-  }
-  ```
-
-### **5. HTTP Handling**
-- **Route Design**:
-  ```go
-  router := gin.Default()
-  v1 := router.Group("/api/v1")
-  {
-      v1.POST("/users", CreateUserHandler)
-      v1.GET("/users/:id", GetUserHandler)
-  }
-  ```
-- **Response Format**:
-  ```go
-  type APIResponse struct {
-      Status  string      `json:"status"`
-      Message string      `json:"message"`
-      Data    interface{} `json:"data,omitempty"`
-  }
-  ```
-- **Middleware**:
-  ```go
-  func LoggerMiddleware() gin.HandlerFunc {
-      return func(c *gin.Context) {
-          start := time.Now()
-          c.Next()
-          duration := time.Since(start)
-          zap.L().Info("request", zap.String("path", c.Request.URL.Path), zap.Duration("duration", duration))
-      }
-  }
-  ```
-
-### **6. Database Operations**
-- **GORM Usage Specifications**:
-  ```go
-  type User struct {
-      gorm.Model
-      Name  string `gorm:"unique"`
-      Email string
-  }
-  
-  func (repo *GORMUserRepository) FindByEmail(ctx context.Context, email string) (*User, error) {
-      var user User
-      if err := repo.DB.Where("email = ?", email).First(&user).Error; err != nil {
-          return nil, err
-      }
-      return &user, nil
-  }
-  ```
-- **SQL Injection Prevention**:
-  - Use parameterized queries (e.g. `WHERE id = ?`).
-  - Avoid concatenating SQL strings.
-
-### **7. Concurrency Handling**
-- **Goroutine Safety**:
-  ```go
-  var mu sync.Mutex
-  var count int
-
-  func Increment() {
-      mu.Lock()
-      defer mu.Unlock()
-      count++
-  }
-  ```
-- **Channel Communication**:
-  ```go
-  func Worker(id int, jobs <-chan int, results chan<- int) {
-      for j := range jobs {
-          fmt.Printf("Worker %d processing job %d\n", id, j)
-          results <- j * 2
-      }
-  }
-  ```
-
-### **8. Security Specifications**
-- **Input Validation**:
-  ```go
-  type CreateUserRequest struct {
-      Name  string `json:"name" validate:"required,min=2"`
-      Email string `json:"email" validate:"required,email"`
-  }
-  ```
-- **Environment Variables**:
-  ```go
-  const (
-      DBHost     = os.Getenv("DB_HOST")
-      DBUser     = os.Getenv("DB_USER")
-      DBPassword = os.Getenv("DB_PASSWORD")
-  )
-  ```
-
-### **9. Testing Specifications**
-- **Unit Testing**:
-  ```go
-  func TestUserService_CreateUser(t *testing.T) {
-      // Use mock objects to simulate dependencies
-      mockRepo := &MockUserRepository{}
-      service := NewUserService(mockRepo)
-      _, err := service.CreateUser(context.Background(), "test@example.com")
-      assert.NoError(t, err)
-  }
-  ```
-
-### **10. Logging Specifications**
-- **Structured Logging**:
-  ```go
-  logger, _ := zap.NewProduction()
-  defer logger.Sync()
-  logger.Info("user created", zap.String("user_id", "123"))
-  ```
-
----
-
-## **Example: Global Error Handling**
-```go
-// Define global error response structure
-type APIResponse struct {
-    Status  string      `json:"status"`
-    Message string      `json:"message"`
-    Data    interface{} `json:"data,omitempty"`
-}
-
-// Middleware to handle errors uniformly
-func ErrorHandler() gin.HandlerFunc {
-    return func(c *gin.Context) {
-        c.Next()
-        if len(c.Errors) > 0 {
-            lastError := c.Errors.Last()
-            status := lastError.StatusCode
-            message := lastError.Err.Error()
-            c.AbortWithStatusJSON(status, APIResponse{
-                Status:  "error",
-                Message: message,
-            })
-        }
-    }
-}
-```
-
----
-
-## **Notes**
-- **Code Review**: Each commit must pass code review to ensure compliance with specifications.
-- **Performance Optimization**: Use `pprof` to analyze memory/CPU usage and avoid memory leaks.
-- **Documentation**: Key interfaces should be documented with `godoc`, and API documentation should be generated using Swagger.
-- **CI/CD**: Automated testing, building, and deployment processes are triggered after code submission.
+For detailed technical specifications, see [technical_specifications.md](technical_specifications.md).
