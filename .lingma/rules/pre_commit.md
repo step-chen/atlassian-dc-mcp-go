@@ -17,13 +17,19 @@ The analysis includes:
 ## Usage
 
 ```
-/pre-commit [PROJECT] [REPO] [ISSUE_KEY]
+/pre-commit MyLocalCodePath [options]
 ```
 
-Parameters:
-- PROJECT: Bitbucket project key (optional)
-- REPO: Bitbucket repository slug (optional)
-- ISSUE_KEY: Jira Issue key (optional, will attempt to extract from branch name if all three parameters are provided)
+MyLocalCodePath: Local path to the code repository with changes.
+
+options:
+    -p PROJECT: Bitbucket project key (optional)
+    -r REPO: Bitbucket repository slug (optional)
+    -k ISSUE_KEY: Jira issue key (optional; auto-extracted from branch name if missing)
+    -b BRANCH: Repository branch name (optional; uses default branch, typically controlled/XXX, if missing)
+
+examples:
+- /pre-commit MyLocalCodePath -p MYPROJECT -r MyRepo -k JIRA-123 -b MyBranch - Analyzes current changes in MYPROJECT/MyRepo (branch MyBranch), with JIRA-123 context included.
 
 ## Analysis Process
 
@@ -31,7 +37,7 @@ When running this analysis, the system will:
 
 1. Retrieve current workspace code changes
 2. Analyze code changes for potential issues and improvements
-3. If PROJECT, REPO, and ISSUE_KEY are provided:
+3. If PROJECT, REPO, BRANCH and ISSUE_KEY are provided:
    - Get detailed Jira Issue information
    - Retrieve comments on the Jira Issue to understand discussion context
 4. Provide comprehensive suggestions for improvement, incorporating issue context when available
@@ -58,7 +64,7 @@ When running this analysis, the system will:
 ## Examples
 
 ```
-/pre-commit MYPROJECT myrepo JIRA-123
+/pre-commit MyLocalCodePath -p MYPROJECT -r MyRepo -k JIRA-123 -b MyBranch
 ```
 
 This command analyzes current changes in the MYPROJECT project's myrepo repository and provides comprehensive suggestions. If JIRA-123 information is available, it will also be considered in the analysis.
