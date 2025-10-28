@@ -67,21 +67,27 @@ Parameters:
 ### 4. Pre-commit Analysis
 
 ```
-/pre-commit-analysis [PROJECT] [REPO] [ISSUE_KEY]
+/pre-commit MyLocalCodePath [options]
 ```
 
 Analyze current changes before committing and provide comprehensive suggestions based on associated Jira Issue information.
 
 Parameters:
-- PROJECT: Bitbucket project key (optional)
-- REPO: Bitbucket repository slug (optional)
-- ISSUE_KEY: Jira Issue key (optional)
+- MyLocalCodePath: Local path to the code repository with changes
+- options:
+    -p PROJECT: Bitbucket project key (optional)
+    -r REPO: Bitbucket repository slug (optional)
+    -k ISSUE_KEY: Jira issue key (optional; auto-extracted from branch name if missing)
+    -b BRANCH: Repository branch name (optional; uses default branch, typically controlled/XXX, if missing)
+
+examples:
+- /pre-commit MyLocalCodePath -p MYPROJECT -r MyRepo -k JIRA-123 -b MyBranch - Analyzes current changes in MYPROJECT/MyRepo (branch MyBranch), with JIRA-123 context included.
 
 ## Workflow Recommendations
 
 1. Use `/start-dev` command to begin development on a new task
 2. Regularly use `/analyze` for code analysis during development
-3. Use `/pre-commit-analysis` for comprehensive evaluation before committing code
+3. Use `/pre-commit` for comprehensive evaluation before committing code
 4. Use `/review` for code review after creating a PR
 
 ## Best Practices
