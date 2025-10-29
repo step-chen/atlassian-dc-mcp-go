@@ -2,10 +2,13 @@
 package bitbucket
 
 import (
+	"context"
 	"fmt"
 	"io"
-	"net/http"
 	"net/url"
+	"time"
+
+	"github.com/hashicorp/go-retryablehttp"
 
 	"atlassian-dc-mcp-go/internal/config"
 	"atlassian-dc-mcp-go/internal/utils"
@@ -14,14 +17,18 @@ import (
 // BitbucketClient represents a client for interacting with Bitbucket Data Center APIs
 type BitbucketClient struct {
 	Config       *config.BitbucketConfig
-	HTTPClient   *http.Client
+	HTTPClient   *retryablehttp.Client
 	ClientConfig *utils.HTTPClientConfig
 }
 
 // NewBitbucketClient creates a new Bitbucket client with the provided configuration.
 func NewBitbucketClient(cfg *config.BitbucketConfig) *BitbucketClient {
 	clientConfig := utils.DefaultHTTPClientConfig()
-	httpClient := utils.NewHTTPClient(clientConfig)
+	// 使用配置中的超时时间
+	if cfg.Timeout > 0 {
+		clientConfig.Timeout = time.Duration(cfg.Timeout) * time.Second
+	}
+	httpClient := utils.NewRetryableHTTPClient(clientConfig)
 
 	return &BitbucketClient{
 		Config:       cfg,
@@ -37,7 +44,7 @@ func (c *BitbucketClient) executeRequest(method string, pathParams []string, que
 	}
 
 	// Execute the request with retry mechanism
-	err = utils.ExecuteHTTPRequestWithRetry(c.HTTPClient, req, "Bitbucket", result, c.ClientConfig)
+	err = utils.ExecuteHTTPRequestWithRetry(c.HTTPClient, req, "Bitbucket", result)
 	if err != nil {
 		return fmt.Errorf("request failed: %w", err)
 	}
@@ -52,8 +59,23 @@ func (c *BitbucketClient) executeStreamRequest(method string, pathParams []strin
 		return nil, fmt.Errorf("failed to build request: %w", err)
 	}
 
+	// Create a context with timeout
+	ctx := context.Background()
+	if c.Config.Timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, time.Duration(c.Config.Timeout)*time.Second)
+		defer cancel()
+	}
+	req = req.WithContext(ctx)
+
+	// Convert the request to a retryable request
+	retryableReq, err := retryablehttp.FromRequest(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert request: %w", err)
+	}
+
 	// Execute the request
-	resp, err := c.HTTPClient.Do(req)
+	resp, err := c.HTTPClient.Do(retryableReq)
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %w", err)
 	}

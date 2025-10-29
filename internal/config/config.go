@@ -18,18 +18,21 @@ type JiraConfig struct {
 	URL         string      `mapstructure:"url"`
 	Token       string      `mapstructure:"token"`
 	Permissions Permissions `mapstructure:"permissions"`
+	Timeout     int         `mapstructure:"timeout"`
 }
 
 type ConfluenceConfig struct {
 	URL         string      `mapstructure:"url"`
 	Token       string      `mapstructure:"token"`
 	Permissions Permissions `mapstructure:"permissions"`
+	Timeout     int         `mapstructure:"timeout"`
 }
 
 type BitbucketConfig struct {
 	URL         string      `mapstructure:"url"`
 	Token       string      `mapstructure:"token"`
 	Permissions Permissions `mapstructure:"permissions"`
+	Timeout     int         `mapstructure:"timeout"`
 }
 
 type TransportConfig struct {
@@ -85,6 +88,19 @@ func (c *Config) Validate() error {
 	// Validate client timeout
 	if c.ClientTimeout <= 0 {
 		c.ClientTimeout = 60 // default to 60 seconds
+	}
+
+	// Apply global client timeout to individual services if not set
+	if c.Jira.Timeout <= 0 {
+		c.Jira.Timeout = c.ClientTimeout
+	}
+	
+	if c.Confluence.Timeout <= 0 {
+		c.Confluence.Timeout = c.ClientTimeout
+	}
+	
+	if c.Bitbucket.Timeout <= 0 {
+		c.Bitbucket.Timeout = c.ClientTimeout
 	}
 
 	if c.Jira.URL != "" {

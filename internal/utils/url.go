@@ -79,9 +79,23 @@ func HandleHTTPError(resp *http.Response, service string) error {
 		strErr = "forbidden"
 	case http.StatusNotFound:
 		strErr = "not found"
+	case http.StatusTooManyRequests:
+		strErr = "too many requests"
+	case http.StatusInternalServerError:
+		strErr = "internal server error"
+	case http.StatusBadGateway:
+		strErr = "bad gateway"
+	case http.StatusServiceUnavailable:
+		strErr = "service unavailable"
+	case http.StatusGatewayTimeout:
+		strErr = "gateway timeout"
 	default:
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			return nil
+		} else if resp.StatusCode >= 400 && resp.StatusCode < 500 {
+			strErr = "client error"
+		} else if resp.StatusCode >= 500 {
+			strErr = "server error"
 		} else {
 			strErr = "unknown error"
 		}
@@ -89,6 +103,13 @@ func HandleHTTPError(resp *http.Response, service string) error {
 
 	bodyBytes, _ := io.ReadAll(resp.Body)
 	bodyString := string(bodyBytes)
+
+	logging.GetLogger().Warn("HTTP request failed",
+		zap.String("service", service),
+		zap.Int("status_code", resp.StatusCode),
+		zap.String("error", strErr),
+		zap.String("response_body", bodyString))
+
 	return fmt.Errorf("[%s] %s : %d - %s", service, strErr, resp.StatusCode, bodyString)
 }
 
@@ -120,45 +141,47 @@ func SetQueryParam(params url.Values, key string, value any, invalid any) {
 				return
 			}
 		}
-
-		// If we get here, the slice is not empty, so process it
-		for _, s := range slice {
-			params.Add(key, s)
-		}
+		params[key] = slice
 		return
 	}
 
-	// For non-slice types, use the original comparison
-	if value == invalid {
-		return
-	}
-
+	// Handle pointer types
 	switch v := value.(type) {
-	case int:
-		if v > 0 {
-			params.Set(key, strconv.Itoa(v))
-		}
-	case string:
-		if v != "" {
-			params.Set(key, v)
-		}
-	case bool:
-		params.Set(key, strconv.FormatBool(v))
 	case *string:
-		if v != nil && *v != "" {
+		if v != nil && *v != "" && *v != invalid {
 			params.Set(key, *v)
 		}
+		return
 	case *int:
 		if v != nil && *v > 0 {
 			params.Set(key, strconv.Itoa(*v))
 		}
+		return
 	case *bool:
 		if v != nil {
 			params.Set(key, strconv.FormatBool(*v))
 		}
+		return
 	default:
-		if valStr := fmt.Sprintf("%v", v); valStr != "" {
-			params.Set(key, valStr)
+		// For all other types, compare with invalid value
+		if value != invalid {
+			// Special handling for basic types
+			switch val := value.(type) {
+			case string:
+				if val != "" {
+					params.Set(key, val)
+				}
+			case int:
+				if val > 0 {
+					params.Set(key, strconv.Itoa(val))
+				}
+			case bool:
+				params.Set(key, strconv.FormatBool(val))
+			default:
+				if valStr := fmt.Sprintf("%v", val); valStr != "" {
+					params.Set(key, valStr)
+				}
+			}
 		}
 	}
 }
@@ -224,6 +247,11 @@ func SetRequestBodyParam(params map[string]interface{}, key string, value interf
 func ExecuteHTTPRequest(client *http.Client, req *http.Request, service string, result interface{}) error {
 	resp, err := client.Do(req)
 	if err != nil {
+		logging.GetLogger().Error("HTTP request failed",
+			zap.String("service", service),
+			zap.String("method", req.Method),
+			zap.String("url", req.URL.String()),
+			zap.Error(err))
 		return fmt.Errorf("[%s] request failed: %w", service, err)
 	}
 	defer resp.Body.Close()
@@ -234,9 +262,20 @@ func ExecuteHTTPRequest(client *http.Client, req *http.Request, service string, 
 
 	if result != nil {
 		if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+			logging.GetLogger().Error("Failed to decode HTTP response",
+				zap.String("service", service),
+				zap.String("method", req.Method),
+				zap.String("url", req.URL.String()),
+				zap.Error(err))
 			return fmt.Errorf("[%s] failed to decode response: %w", service, err)
 		}
 	}
+
+	logging.GetLogger().Debug("HTTP request successful",
+		zap.String("service", service),
+		zap.String("method", req.Method),
+		zap.String("url", req.URL.String()),
+		zap.Int("status_code", resp.StatusCode))
 
 	return nil
 }

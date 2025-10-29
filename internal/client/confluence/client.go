@@ -3,29 +3,39 @@ package confluence
 
 import (
 	"fmt"
-	"net/http"
 	"net/url"
+	"time"
+
+	"github.com/hashicorp/go-retryablehttp"
 
 	"atlassian-dc-mcp-go/internal/config"
 	"atlassian-dc-mcp-go/internal/utils"
+	"atlassian-dc-mcp-go/internal/utils/logging"
+
+	"go.uber.org/zap"
 )
 
 // ConfluenceClient represents a client for interacting with Confluence Data Center APIs
 type ConfluenceClient struct {
 	Config       *config.ConfluenceConfig
-	HTTPClient   *http.Client
+	HTTPClient   *retryablehttp.Client
 	ClientConfig *utils.HTTPClientConfig
+	Logger       *zap.Logger
 }
 
 // NewConfluenceClient creates a new Confluence client with the provided configuration.
-func NewConfluenceClient(config *config.ConfluenceConfig) *ConfluenceClient {
+func NewConfluenceClient(cfg *config.ConfluenceConfig) *ConfluenceClient {
 	clientConfig := utils.DefaultHTTPClientConfig()
-	httpClient := utils.NewHTTPClient(clientConfig)
+	if cfg.Timeout > 0 {
+		clientConfig.Timeout = time.Duration(cfg.Timeout) * time.Second
+	}
+	httpClient := utils.NewRetryableHTTPClient(clientConfig)
 
 	return &ConfluenceClient{
-		Config:       config,
+		Config:       cfg,
 		HTTPClient:   httpClient,
 		ClientConfig: clientConfig,
+		Logger:       logging.GetLogger(),
 	}
 }
 
@@ -36,7 +46,7 @@ func (c *ConfluenceClient) executeRequest(method string, pathSegments []string, 
 		return fmt.Errorf("failed to build request: %w", err)
 	}
 
-	if err := utils.ExecuteHTTPRequestWithRetry(c.HTTPClient, req, "confluence", result, c.ClientConfig); err != nil {
+	if err := utils.ExecuteHTTPRequestWithRetry(c.HTTPClient, req, "confluence", result); err != nil {
 		return err
 	}
 

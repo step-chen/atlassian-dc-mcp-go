@@ -2,10 +2,13 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/hashicorp/go-retryablehttp"
 )
 
 // HTTPClientConfig defines the configuration for HTTP clients
@@ -30,8 +33,9 @@ func DefaultHTTPClientConfig() *HTTPClientConfig {
 	}
 }
 
-// NewHTTPClient creates a new HTTP client with the provided configuration
-func NewHTTPClient(config *HTTPClientConfig) *http.Client {
+// NewRetryableHTTPClient creates a new retryable HTTP client with the provided configuration
+func NewRetryableHTTPClient(config *HTTPClientConfig) *retryablehttp.Client {
+	// Create base transport with the provided configuration
 	transport := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
@@ -46,42 +50,49 @@ func NewHTTPClient(config *HTTPClientConfig) *http.Client {
 		ExpectContinueTimeout: 1 * time.Second,
 	}
 
-	return &http.Client{
+	// Create base HTTP client
+	httpClient := &http.Client{
 		Transport: transport,
 		Timeout:   config.Timeout,
 	}
+
+	// Create retryable client
+	client := retryablehttp.NewClient()
+	client.HTTPClient = httpClient
+	client.RetryMax = config.RetryAttempts
+	client.RetryWaitMin = config.RetryDelay
+	client.RetryWaitMax = config.RetryDelay * 10
+	client.Logger = nil // Disable logging, we'll handle it ourselves
+
+	return client
 }
 
-// ExecuteHTTPRequestWithRetry executes an HTTP request with retry logic
-func ExecuteHTTPRequestWithRetry(client *http.Client, req *http.Request, service string, result interface{}, config *HTTPClientConfig) error {
-	var lastErr error
-
-	attempts := 1
-	if config != nil {
-		attempts += config.RetryAttempts
+// ExecuteHTTPRequestWithRetry executes an HTTP request with retry logic using hashicorp/go-retryablehttp
+func ExecuteHTTPRequestWithRetry(client *retryablehttp.Client, req *http.Request, service string, result interface{}) error {
+	// Convert http.Request to retryablehttp.Request
+	retryReq, err := retryablehttp.FromRequest(req)
+	if err != nil {
+		return fmt.Errorf("[%s] failed to convert request: %w", service, err)
 	}
 
-	for i := 0; i < attempts; i++ {
-		// Clone the request for retries since the body might be consumed
-		clonedReq := req.Clone(req.Context())
-		if req.Body != nil {
-			// For simplicity, we assume the body can be cloned/recreated
-			// In a more robust implementation, we would need to handle this more carefully
-			clonedReq.Body = req.Body
-		}
+	// Execute the request with retry mechanism
+	resp, err := client.Do(retryReq)
+	if err != nil {
+		return fmt.Errorf("[%s] request failed: %w", service, err)
+	}
+	defer resp.Body.Close()
 
-		err := ExecuteHTTPRequest(client, clonedReq, service, result)
-		if err == nil {
-			return nil
-		}
+	// Check for HTTP errors
+	if err := HandleHTTPError(resp, service); err != nil {
+		return err
+	}
 
-		lastErr = err
-
-		// If this is not the last attempt, wait before retrying
-		if i < attempts-1 && config != nil && config.RetryDelay > 0 {
-			time.Sleep(config.RetryDelay)
+	// Decode response if needed
+	if result != nil {
+		if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+			return fmt.Errorf("[%s] failed to decode response: %w", service, err)
 		}
 	}
 
-	return fmt.Errorf("request failed after %d attempts: %w", attempts, lastErr)
+	return nil
 }

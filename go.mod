@@ -4,6 +4,7 @@ go 1.25.0
 
 require (
 	github.com/fsnotify/fsnotify v1.9.0
+	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/sourcegraph/go-diff v0.7.0
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
@@ -13,6 +14,7 @@ require (
 
 require (
 	github.com/google/jsonschema-go v0.3.0 // indirect
+	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 )
 

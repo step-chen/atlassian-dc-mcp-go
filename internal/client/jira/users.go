@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/hashicorp/go-retryablehttp"
+
 	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils"
 )
@@ -100,7 +102,13 @@ func (c *JiraClient) GetCurrentUser() (types.MapOutput, error) {
 		return nil, fmt.Errorf("failed to build request: %w", err)
 	}
 
-	resp, err := c.HTTPClient.Do(req)
+	// Convert the request to a retryable request
+	retryableReq, err := retryablehttp.FromRequest(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert request: %w", err)
+	}
+
+	resp, err := c.HTTPClient.Do(retryableReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}

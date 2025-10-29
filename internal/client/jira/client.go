@@ -3,29 +3,39 @@ package jira
 
 import (
 	"fmt"
-	"net/http"
 	"net/url"
+	"time"
+
+	"github.com/hashicorp/go-retryablehttp"
 
 	"atlassian-dc-mcp-go/internal/config"
 	"atlassian-dc-mcp-go/internal/utils"
+	"atlassian-dc-mcp-go/internal/utils/logging"
+
+	"go.uber.org/zap"
 )
 
 // JiraClient represents a client for interacting with Jira Data Center APIs
 type JiraClient struct {
 	Config       *config.JiraConfig
-	HTTPClient   *http.Client
+	HTTPClient   *retryablehttp.Client
 	ClientConfig *utils.HTTPClientConfig
+	Logger       *zap.Logger
 }
 
 // NewJiraClient creates a new Jira client with the provided configuration.
-func NewJiraClient(config *config.JiraConfig) *JiraClient {
+func NewJiraClient(cfg *config.JiraConfig) *JiraClient {
 	clientConfig := utils.DefaultHTTPClientConfig()
-	httpClient := utils.NewHTTPClient(clientConfig)
+	if cfg.Timeout > 0 {
+		clientConfig.Timeout = time.Duration(cfg.Timeout) * time.Second
+	}
+	httpClient := utils.NewRetryableHTTPClient(clientConfig)
 
 	return &JiraClient{
-		Config:       config,
+		Config:       cfg,
 		HTTPClient:   httpClient,
 		ClientConfig: clientConfig,
+		Logger:       logging.GetLogger(),
 	}
 }
 
@@ -36,7 +46,7 @@ func (c *JiraClient) executeRequest(method string, pathSegments []string, queryP
 		return fmt.Errorf("failed to build request: %w", err)
 	}
 
-	if err := utils.ExecuteHTTPRequestWithRetry(c.HTTPClient, req, "jira", result, c.ClientConfig); err != nil {
+	if err := utils.ExecuteHTTPRequestWithRetry(c.HTTPClient, req, "jira", result); err != nil {
 		return err
 	}
 
