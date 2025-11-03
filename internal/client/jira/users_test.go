@@ -51,26 +51,26 @@ func TestGetUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var result types.MapOutput
+			var output types.MapOutput
 			var err error
 
 			switch tt.testType {
 			case "byname":
-				result, err = client.GetUserByName(GetUserByNameInput{
+				output, err = client.GetUserByName(GetUserByNameInput{
 					Username: tt.username,
 				})
 			case "bykey":
-				result, err = client.GetUserByKey(GetUserByKeyInput{
+				output, err = client.GetUserByKey(GetUserByKeyInput{
 					Key: tt.userKey,
 				})
 			}
 
 			if tt.expectError {
 				assert.Error(t, err)
-				assert.Nil(t, result)
+				assert.Nil(t, output)
 			} else {
 				if err == nil {
-					assert.NotNil(t, result)
+					assert.NotNil(t, output)
 				} else {
 					t.Logf("%s completed. Error (may be expected): %v", tt.name, err)
 				}

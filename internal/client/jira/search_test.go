@@ -1,11 +1,10 @@
 package jira
 
 import (
+	"atlassian-dc-mcp-go/internal/client/testutils"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"atlassian-dc-mcp-go/internal/client/testutils"
 )
 
 func TestSearchIssues(t *testing.T) {

@@ -83,7 +83,7 @@ func SetupIntegrationTest(t *testing.T) (*JiraClient, error) {
 	return client, nil
 }
 
-func newJiraIntegrationClient() (*config.JiraConfig, *JiraClient, error) {
+func newJiraIntegrationClient() (*config.ClientConfig, *JiraClient, error) {
 	jiraConfig, client, err := testutils.NewIntegrationClient(func(cfg *config.Config) (interface{}, interface{}, error) {
 		if cfg.Jira.URL == "" || cfg.Jira.Token == "" {
 			return nil, nil, nil
@@ -101,5 +101,5 @@ func newJiraIntegrationClient() (*config.JiraConfig, *JiraClient, error) {
 		return nil, nil, nil
 	}
 
-	return jiraConfig.(*config.JiraConfig), client.(*JiraClient), nil
+	return jiraConfig.(*config.ClientConfig), client.(*JiraClient), nil
 }

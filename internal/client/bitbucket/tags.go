@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
-	"atlassian-dc-mcp-go/internal/utils"
 )
 
 // GetTags retrieves tags with filtering options.
@@ -20,25 +20,26 @@ import (
 //   - types.MapOutput: The tags data retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) GetTags(input GetTagsInput) (types.MapOutput, error) {
-	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "filterText", input.FilterText, "")
-	utils.SetQueryParam(queryParams, "orderBy", input.OrderBy, "")
-	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
-	utils.SetQueryParam(queryParams, "start", input.Start, 0)
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "filterText", input.FilterText, "")
+	client.SetQueryParam(queryParams, "orderBy", input.OrderBy, "")
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var tags types.MapOutput
-	if err := c.executeRequest(
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "tags"},
 		queryParams,
 		nil,
-		&tags,
-		utils.AcceptJSON,
+		client.AcceptJSON,
+		&output,
 	); err != nil {
 		return nil, err
 	}
 
-	return tags, nil
+	return output, nil
 }
 
 // GetTag retrieves a specific tag.
@@ -53,17 +54,18 @@ func (c *BitbucketClient) GetTags(input GetTagsInput) (types.MapOutput, error) {
 //   - types.MapOutput: The tag data retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) GetTag(input GetTagInput) (types.MapOutput, error) {
-	var tag types.MapOutput
-	if err := c.executeRequest(
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "tags", input.Name},
 		nil,
 		nil,
-		&tag,
-		utils.AcceptJSON,
+		client.AcceptJSON,
+		&output,
 	); err != nil {
 		return nil, err
 	}
 
-	return tag, nil
+	return output, nil
 }

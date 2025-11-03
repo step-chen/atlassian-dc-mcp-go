@@ -1,13 +1,12 @@
 package jira
 
 import (
+	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
-
-	"atlassian-dc-mcp-go/internal/utils"
 )
 
 // SearchIssues searches for issues using JQL.
@@ -40,22 +39,30 @@ func (c *JiraClient) SearchIssues(input SearchIssuesInput) (types.MapOutput, err
 		}
 	}
 
-	payload := make(types.MapOutput)
-	utils.SetRequestBodyParam(payload, "jql", finalJQL)
-	utils.SetRequestBodyParam(payload, "maxResults", input.MaxResults)
-	utils.SetRequestBodyParam(payload, "startAt", input.StartAt)
-	utils.SetRequestBodyParam(payload, "fields", input.Fields)
+	payload := types.MapOutput{}
+	client.SetRequestBodyParam(payload, "jql", finalJQL)
+	client.SetRequestBodyParam(payload, "maxResults", input.MaxResults)
+	client.SetRequestBodyParam(payload, "startAt", input.StartAt)
+	client.SetRequestBodyParam(payload, "fields", input.Fields)
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	var result types.MapOutput
-	err = c.executeRequest(http.MethodPost, []string{"rest", "api", "2", "search"}, nil, jsonPayload, &result, utils.AcceptJSON)
+	var output types.MapOutput
+	err = client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodPost,
+		[]string{"rest", "api", "2", "search"},
+		nil,
+		jsonPayload,
+		client.AcceptJSON,
+		&output,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return output, nil
 }

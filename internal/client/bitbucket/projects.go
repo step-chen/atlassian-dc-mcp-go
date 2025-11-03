@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
-	"atlassian-dc-mcp-go/internal/utils"
 )
 
 // GetProjects retrieves a list of projects from Bitbucket.
@@ -20,25 +20,26 @@ import (
 //   - types.MapOutput: The projects data retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) GetProjects(input GetProjectsInput) (types.MapOutput, error) {
-	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
-	utils.SetQueryParam(queryParams, "start", input.Start, 0)
-	utils.SetQueryParam(queryParams, "name", input.Name, "")
-	utils.SetQueryParam(queryParams, "permission", input.Permission, "")
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
+	client.SetQueryParam(queryParams, "name", input.Name, "")
+	client.SetQueryParam(queryParams, "permission", input.Permission, "")
 
-	var projects types.MapOutput
-	if err := c.executeRequest(
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects"},
 		queryParams,
 		nil,
-		&projects,
-		utils.AcceptJSON,
+		client.AcceptJSON,
+		&output,
 	); err != nil {
 		return nil, err
 	}
 
-	return projects, nil
+	return output, nil
 }
 
 // GetProject retrieves details of a specific project from Bitbucket.
@@ -53,19 +54,20 @@ func (c *BitbucketClient) GetProjects(input GetProjectsInput) (types.MapOutput, 
 //   - types.MapOutput: The project data retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) GetProject(input GetProjectInput) (types.MapOutput, error) {
-	var project types.MapOutput
-	if err := c.executeRequest(
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey},
 		nil,
 		nil,
-		&project,
-		utils.AcceptJSON,
+		client.AcceptJSON,
+		&output,
 	); err != nil {
 		return nil, err
 	}
 
-	return project, nil
+	return output, nil
 }
 
 // GetProjectPrimaryEnhancedEntityLink retrieves the primary enhanced entity link for a project.
@@ -80,19 +82,20 @@ func (c *BitbucketClient) GetProject(input GetProjectInput) (types.MapOutput, er
 //   - types.MapOutput: The entity link data retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) GetProjectPrimaryEnhancedEntityLink(input GetProjectPrimaryEnhancedEntityLinkInput) (types.MapOutput, error) {
-	var entityLink types.MapOutput
-	if err := c.executeRequest(
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "jira", "latest", "projects", input.ProjectKey, "primary-enhanced-entitylink"},
 		nil,
 		nil,
-		&entityLink,
-		utils.AcceptJSON,
+		client.AcceptJSON,
+		&output,
 	); err != nil {
 		return nil, err
 	}
 
-	return entityLink, nil
+	return output, nil
 }
 
 // GetProjectTasks retrieves tasks associated with a specific project.
@@ -107,24 +110,25 @@ func (c *BitbucketClient) GetProjectPrimaryEnhancedEntityLink(input GetProjectPr
 //   - types.MapOutput: The tasks data retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) GetProjectTasks(input GetProjectTasksInput) (types.MapOutput, error) {
-	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "markup", input.Markup, "")
-	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
-	utils.SetQueryParam(queryParams, "start", input.Start, 0)
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "markup", input.Markup, "")
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var tasks types.MapOutput
-	if err := c.executeRequest(
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "default-tasks", "latest", "projects", input.ProjectKey, "tasks"},
 		queryParams,
 		nil,
-		&tasks,
-		utils.AcceptJSON,
+		client.AcceptJSON,
+		&output,
 	); err != nil {
 		return nil, err
 	}
 
-	return tasks, nil
+	return output, nil
 }
 
 // GetRepositoryTasks retrieves tasks associated with a specific repository.
@@ -139,22 +143,23 @@ func (c *BitbucketClient) GetProjectTasks(input GetProjectTasksInput) (types.Map
 //   - types.MapOutput: The tasks data retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) GetRepositoryTasks(input GetRepositoryTasksInput) (types.MapOutput, error) {
-	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "markup", input.Markup, "")
-	utils.SetQueryParam(queryParams, "limit", input.Limit, 0)
-	utils.SetQueryParam(queryParams, "start", input.Start, 0)
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "markup", input.Markup, "")
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	var tasks types.MapOutput
-	if err := c.executeRequest(
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "default-tasks", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "tasks"},
 		queryParams,
 		nil,
-		&tasks,
-		utils.AcceptJSON,
+		client.AcceptJSON,
+		&output,
 	); err != nil {
 		return nil, err
 	}
 
-	return tasks, nil
+	return output, nil
 }

@@ -1,9 +1,10 @@
 package confluence
 
 import (
+	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
-	"atlassian-dc-mcp-go/internal/utils"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 )
@@ -22,14 +23,22 @@ func (c *ConfluenceClient) GetSpace(input GetSpaceInput) (types.MapOutput, error
 	}
 
 	params := url.Values{}
-	utils.SetQueryParam(params, "expand", input.Expand, []string{})
+	client.SetQueryParam(params, "expand", input.Expand, []string{})
 
-	var space types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "space", input.SpaceKey}, params, nil, &space, utils.AcceptJSON); err != nil {
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodGet,
+		[]string{"rest", "api", "space", input.SpaceKey},
+		params,
+		nil,
+		client.AcceptJSON,
+		&output,
+	); err != nil {
 		return nil, err
 	}
 
-	return space, nil
+	return output, nil
 }
 
 // GetContentsInSpace retrieves contents in a specific space.
@@ -46,16 +55,24 @@ func (c *ConfluenceClient) GetContentsInSpace(input GetContentsInSpaceInput) (ty
 	}
 
 	params := url.Values{}
-	utils.SetQueryParam(params, "start", input.Start, 0)
-	utils.SetQueryParam(params, "limit", input.Limit, 0)
-	utils.SetQueryParam(params, "expand", input.Expand, []string{})
+	client.SetQueryParam(params, "start", input.Start, 0)
+	client.SetQueryParam(params, "limit", input.Limit, 0)
+	client.SetQueryParam(params, "expand", input.Expand, []string{})
 
-	var contents types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "space", input.SpaceKey, "content"}, params, nil, &contents, utils.AcceptJSON); err != nil {
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodGet,
+		[]string{"rest", "api", "space", input.SpaceKey, "content"},
+		params,
+		nil,
+		client.AcceptJSON,
+		&output,
+	); err != nil {
 		return nil, err
 	}
 
-	return contents, nil
+	return output, nil
 }
 
 // GetContentsByType retrieves contents of a specific type in a space.
@@ -76,16 +93,24 @@ func (c *ConfluenceClient) GetContentsByType(input GetContentsByTypeInput) (type
 	}
 
 	params := url.Values{}
-	utils.SetQueryParam(params, "start", input.Start, 0)
-	utils.SetQueryParam(params, "limit", input.Limit, 0)
-	utils.SetQueryParam(params, "expand", input.Expand, []string{})
+	client.SetQueryParam(params, "start", input.Start, 0)
+	client.SetQueryParam(params, "limit", input.Limit, 0)
+	client.SetQueryParam(params, "expand", input.Expand, []string{})
 
-	var contents types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "space", input.SpaceKey, "content", input.ContentType}, params, nil, &contents, utils.AcceptJSON); err != nil {
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodGet,
+		[]string{"rest", "api", "space", input.SpaceKey, "content", input.ContentType},
+		params,
+		nil,
+		client.AcceptJSON,
+		&output,
+	); err != nil {
 		return nil, err
 	}
 
-	return contents, nil
+	return output, nil
 }
 
 // GetSpacesByKey retrieves spaces based on various filters.
@@ -102,25 +127,33 @@ func (c *ConfluenceClient) GetSpacesByKey(input GetSpacesByKeyInput) (types.MapO
 	}
 
 	params := url.Values{}
-	utils.SetQueryParam(params, "start", input.Start, 0)
-	utils.SetQueryParam(params, "limit", input.Limit, 0)
-	utils.SetQueryParam(params, "expand", input.Expand, []string{})
-	utils.SetQueryParam(params, "spaceKeys", input.SpaceKeys, "")
-	utils.SetQueryParam(params, "spaceIds", strings.Join(input.SpaceIds, ","), "")
-	utils.SetQueryParam(params, "spaceId", input.SpaceId, []string{})
-	utils.SetQueryParam(params, "spaceKeySingle", input.SpaceKeySingle, "")
-	utils.SetQueryParam(params, "type", input.Type, "")
-	utils.SetQueryParam(params, "status", input.Status, "")
-	utils.SetQueryParam(params, "label", input.Label, []string{})
-	utils.SetQueryParam(params, "contentLabel", input.ContentLabel, []string{})
-	utils.SetQueryParam(params, "favourite", input.Favourite, (*bool)(nil))
-	utils.SetQueryParam(params, "hasRetentionPolicy", input.HasRetentionPolicy, (*bool)(nil))
-	utils.SetQueryParam(params, "spaceKey", input.Keys, []string{})
+	client.SetQueryParam(params, "start", input.Start, 0)
+	client.SetQueryParam(params, "limit", input.Limit, 0)
+	client.SetQueryParam(params, "expand", input.Expand, []string{})
+	client.SetQueryParam(params, "spaceKeys", input.SpaceKeys, "")
+	client.SetQueryParam(params, "spaceIds", strings.Join(input.SpaceIds, ","), "")
+	client.SetQueryParam(params, "spaceId", input.SpaceId, []string{})
+	client.SetQueryParam(params, "spaceKeySingle", input.SpaceKeySingle, "")
+	client.SetQueryParam(params, "type", input.Type, "")
+	client.SetQueryParam(params, "status", input.Status, "")
+	client.SetQueryParam(params, "label", input.Label, []string{})
+	client.SetQueryParam(params, "contentLabel", input.ContentLabel, []string{})
+	client.SetQueryParam(params, "favourite", input.Favourite, (*bool)(nil))
+	client.SetQueryParam(params, "hasRetentionPolicy", input.HasRetentionPolicy, (*bool)(nil))
+	client.SetQueryParam(params, "spaceKey", input.Keys, []string{})
 
-	var spaces types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "space"}, params, nil, &spaces, utils.AcceptJSON); err != nil {
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodGet,
+		[]string{"rest", "api", "space"},
+		params,
+		nil,
+		client.AcceptJSON,
+		&output,
+	); err != nil {
 		return nil, err
 	}
 
-	return spaces, nil
+	return output, nil
 }

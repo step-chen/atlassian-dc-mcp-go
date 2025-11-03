@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
-	"atlassian-dc-mcp-go/internal/utils"
 )
 
 // GetComments retrieves comments for a specific issue.
@@ -19,20 +19,27 @@ import (
 //   - types.MapOutput: The comments data
 //   - error: An error if the request fails
 func (c *JiraClient) GetComments(input GetCommentsInput) (types.MapOutput, error) {
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
+	client.SetQueryParam(queryParams, "maxResults", input.MaxResults, 0)
+	client.SetQueryParam(queryParams, "orderBy", input.OrderBy, "")
+	client.SetQueryParam(queryParams, "expand", input.Expand, "")
 
-	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
-	utils.SetQueryParam(queryParams, "maxResults", input.MaxResults, 0)
-	utils.SetQueryParam(queryParams, "expand", input.Expand, "")
-	utils.SetQueryParam(queryParams, "orderBy", input.OrderBy, "")
-
-	var comments types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "issue", input.IssueKey, "comment"}, queryParams, nil, &comments, utils.AcceptJSON)
+	var output types.MapOutput
+	err := client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodGet,
+		[]string{"rest", "api", "2", "issue", input.IssueKey, "comment"},
+		queryParams,
+		nil,
+		client.AcceptJSON,
+		&output,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return comments, nil
+	return output, nil
 }
 
 // AddComment adds a comment to a specific issue.
@@ -44,20 +51,27 @@ func (c *JiraClient) GetComments(input GetCommentsInput) (types.MapOutput, error
 //   - types.MapOutput: The added comment data
 //   - error: An error if the request fails
 func (c *JiraClient) AddComment(input AddCommentInput) (types.MapOutput, error) {
-
-	payload := make(types.MapOutput)
-	utils.SetRequestBodyParam(payload, "body", input.Comment)
+	payload := types.MapOutput{}
+	client.SetRequestBodyParam(payload, "body", input.Comment)
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal payload: %w", err)
+		return nil, fmt.Errorf("failed to marshal request body: %w", err)
 	}
 
-	var result types.MapOutput
-	err = c.executeRequest(http.MethodPost, []string{"rest", "api", "2", "issue", input.IssueKey, "comment"}, nil, jsonPayload, &result, utils.AcceptJSON)
+	var output types.MapOutput
+	err = client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodPost,
+		[]string{"rest", "api", "2", "issue", input.IssueKey, "comment"},
+		nil,
+		jsonPayload,
+		client.AcceptJSON,
+		&output,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return output, nil
 }

@@ -1,12 +1,11 @@
 package jira
 
 import (
+	"atlassian-dc-mcp-go/internal/client/testutils"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"atlassian-dc-mcp-go/internal/client/testutils"
 )
 
 func TestGetProject(t *testing.T) {
@@ -76,10 +75,10 @@ func TestGetAllProjects(t *testing.T) {
 
 	t.Run("GetAllProjects", func(t *testing.T) {
 		result, err := client.GetAllProjects(GetAllProjectsInput{
-			Expand:         "",
-			Recent:         0,
+			Expand:          "",
+			Recent:          0,
 			IncludeArchived: false,
-			BrowseArchive:  false,
+			BrowseArchive:   false,
 		})
 
 		assert.NoError(t, err)

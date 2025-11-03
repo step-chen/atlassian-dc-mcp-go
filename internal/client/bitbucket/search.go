@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
-	"atlassian-dc-mcp-go/internal/utils"
 )
 
 // SearchCode performs a code search in Bitbucket
@@ -43,19 +43,20 @@ func (c *BitbucketClient) SearchCode(input SearchCodeInput) (types.MapOutput, er
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	var searchResult types.MapOutput
-	if err := c.executeRequest(
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
 		http.MethodPost,
 		[]string{"rest", "search", "latest", "search"},
 		nil,
 		jsonPayload,
-		&searchResult,
-		utils.AcceptJSON,
+		client.AcceptJSON,
+		&output,
 	); err != nil {
 		return nil, err
 	}
 
-	return searchResult, nil
+	return output, nil
 }
 
 // buildSmartQuery creates enhanced search queries based on context
@@ -65,9 +66,7 @@ func (c *BitbucketClient) buildSmartQuery(searchTerm, context string) string {
 	var queryParts []string
 	if context != "any" {
 		if contextPatterns, ok := patterns[context]; ok {
-			for _, pattern := range contextPatterns {
-				queryParts = append(queryParts, pattern)
-			}
+			queryParts = append(queryParts, contextPatterns...)
 		}
 	} else {
 		// For "any" context, include all patterns
@@ -87,27 +86,27 @@ func (c *BitbucketClient) buildSmartQuery(searchTerm, context string) string {
 func (c *BitbucketClient) buildContextualPatterns(searchTerm string) map[string][]string {
 	return map[string][]string{
 		"assignment": {
-			searchTerm + " =",           // Variable assignment
-			searchTerm + ":",            // Object property, JSON key
-			"= " + searchTerm,           // Right-hand assignment
+			searchTerm + " =", // Variable assignment
+			searchTerm + ":",  // Object property, JSON key
+			"= " + searchTerm, // Right-hand assignment
 		},
 		"declaration": {
-			searchTerm + " =",           // Variable definition
-			searchTerm + ":",            // Object key, parameter definition
-			"function " + searchTerm,    // Function declaration
-			"class " + searchTerm,       // Class declaration
-			"interface " + searchTerm,   // Interface declaration
-			"const " + searchTerm,       // Const declaration
-			"let " + searchTerm,         // Let declaration
-			"var " + searchTerm,         // Var declaration
+			searchTerm + " =",         // Variable definition
+			searchTerm + ":",          // Object key, parameter definition
+			"function " + searchTerm,  // Function declaration
+			"class " + searchTerm,     // Class declaration
+			"interface " + searchTerm, // Interface declaration
+			"const " + searchTerm,     // Const declaration
+			"let " + searchTerm,       // Let declaration
+			"var " + searchTerm,       // Var declaration
 		},
 		"usage": {
-			"." + searchTerm + "(",      // Method call
-			searchTerm + "(",            // Function call
-			"(" + searchTerm + ")",      // Function parameter
+			"." + searchTerm + "(", // Method call
+			searchTerm + "(",       // Function call
+			"(" + searchTerm + ")", // Function parameter
 		},
 		"exact": {
-			searchTerm,                  // Exact match
+			searchTerm, // Exact match
 		},
 	}
 }

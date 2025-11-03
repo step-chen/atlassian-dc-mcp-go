@@ -14,21 +14,7 @@ import (
 
 type Permissions map[string]bool
 
-type JiraConfig struct {
-	URL         string      `mapstructure:"url"`
-	Token       string      `mapstructure:"token"`
-	Permissions Permissions `mapstructure:"permissions"`
-	Timeout     int         `mapstructure:"timeout"`
-}
-
-type ConfluenceConfig struct {
-	URL         string      `mapstructure:"url"`
-	Token       string      `mapstructure:"token"`
-	Permissions Permissions `mapstructure:"permissions"`
-	Timeout     int         `mapstructure:"timeout"`
-}
-
-type BitbucketConfig struct {
+type ClientConfig struct {
 	URL         string      `mapstructure:"url"`
 	Token       string      `mapstructure:"token"`
 	Permissions Permissions `mapstructure:"permissions"`
@@ -52,13 +38,13 @@ type TransportConfig struct {
 }
 
 type Config struct {
-	Port          int              `mapstructure:"port"`
-	Jira          JiraConfig       `mapstructure:"jira"`
-	Confluence    ConfluenceConfig `mapstructure:"confluence"`
-	Bitbucket     BitbucketConfig  `mapstructure:"bitbucket"`
-	Logging       logging.Config   `mapstructure:"logging"`
-	Transport     TransportConfig  `mapstructure:"transport"`
-	ClientTimeout int              `mapstructure:"client_timeout"`
+	Port          int             `mapstructure:"port"`
+	Jira          ClientConfig    `mapstructure:"jira"`
+	Confluence    ClientConfig    `mapstructure:"confluence"`
+	Bitbucket     ClientConfig    `mapstructure:"bitbucket"`
+	Logging       logging.Config  `mapstructure:"logging"`
+	Transport     TransportConfig `mapstructure:"transport"`
+	ClientTimeout int             `mapstructure:"client_timeout"`
 }
 
 // Validate checks that the configuration is valid
@@ -94,11 +80,11 @@ func (c *Config) Validate() error {
 	if c.Jira.Timeout <= 0 {
 		c.Jira.Timeout = c.ClientTimeout
 	}
-	
+
 	if c.Confluence.Timeout <= 0 {
 		c.Confluence.Timeout = c.ClientTimeout
 	}
-	
+
 	if c.Bitbucket.Timeout <= 0 {
 		c.Bitbucket.Timeout = c.ClientTimeout
 	}

@@ -57,7 +57,7 @@ func SetupIntegrationTest(t *testing.T) (*ConfluenceClient, error) {
 	return client, nil
 }
 
-func newConfluenceIntegrationClient() (*config.ConfluenceConfig, *ConfluenceClient, error) {
+func newConfluenceIntegrationClient() (*config.ClientConfig, *ConfluenceClient, error) {
 	confluenceConfig, client, err := testutils.NewIntegrationClient(func(cfg *config.Config) (interface{}, interface{}, error) {
 		if cfg.Confluence.URL == "" || cfg.Confluence.Token == "" {
 			return nil, nil, nil
@@ -75,5 +75,5 @@ func newConfluenceIntegrationClient() (*config.ConfluenceConfig, *ConfluenceClie
 		return nil, nil, nil
 	}
 
-	return confluenceConfig.(*config.ConfluenceConfig), client.(*ConfluenceClient), nil
+	return confluenceConfig.(*config.ClientConfig), client.(*ConfluenceClient), nil
 }

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
-	"atlassian-dc-mcp-go/internal/utils"
 )
 
 // GetAttachment retrieves an attachment from a repository.
@@ -22,17 +22,17 @@ import (
 //   - error: An error if the request fails
 func (c *BitbucketClient) GetAttachment(input GetAttachmentInput) ([]byte, error) {
 	var content []byte
-	if err := c.executeRequest(
+	if err := client.ExecuteRequest(
+		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "attachments", input.AttachmentId},
 		nil,
 		nil,
+		client.AcceptJSON,
 		&content,
-		"application/json",
 	); err != nil {
 		return nil, err
 	}
-
 	return content, nil
 }
 
@@ -48,19 +48,20 @@ func (c *BitbucketClient) GetAttachment(input GetAttachmentInput) ([]byte, error
 //   - types.MapOutput: The attachment metadata retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) GetAttachmentMetadata(input GetAttachmentMetadataInput) (types.MapOutput, error) {
-	var metadata types.MapOutput
-	if err := c.executeRequest(
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "attachments", input.AttachmentId, "metadata"},
 		nil,
 		nil,
-		&metadata,
-		utils.AcceptJSON,
+		client.AcceptJSON,
+		&output,
 	); err != nil {
 		return nil, err
 	}
 
-	return metadata, nil
+	return output, nil
 }
 
 // DeleteAttachment deletes an attachment.
@@ -73,13 +74,14 @@ func (c *BitbucketClient) GetAttachmentMetadata(input GetAttachmentMetadataInput
 // Returns:
 //   - error: An error if the request fails
 func (c *BitbucketClient) DeleteAttachment(input DeleteAttachmentInput) error {
-	if err := c.executeRequest(
+	if err := client.ExecuteRequest(
+		c.BaseClient,
 		http.MethodDelete,
 		[]string{"rest", "attachment", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", fmt.Sprintf("%d", input.PullRequestId), "attachments", fmt.Sprintf("%d", input.AttachmentId)},
 		nil,
 		nil,
+		client.AcceptJSON,
 		nil,
-		utils.AcceptJSON,
 	); err != nil {
 		return err
 	}
@@ -98,20 +100,21 @@ func (c *BitbucketClient) DeleteAttachment(input DeleteAttachmentInput) error {
 //   - types.MapOutput: The created attachment data retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) CreateAttachment(input CreateAttachmentInput) (types.MapOutput, error) {
-	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "filename", input.FileName, "")
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "filename", input.FileName, "")
 
-	var attachment types.MapOutput
-	if err := c.executeRequest(
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
 		http.MethodPost,
 		[]string{"rest", "attachment", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", fmt.Sprintf("%d", input.PullRequestID), "attachments"},
 		queryParams,
 		input.FileAttachment,
-		&attachment,
-		utils.AcceptJSON,
+		client.AcceptJSON,
+		&output,
 	); err != nil {
 		return nil, err
 	}
 
-	return attachment, nil
+	return output, nil
 }

@@ -1,12 +1,11 @@
 package confluence
 
 import (
+	"atlassian-dc-mcp-go/internal/client/testutils"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"atlassian-dc-mcp-go/internal/client/testutils"
 )
 
 func TestSearch(t *testing.T) {

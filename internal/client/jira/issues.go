@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
-	"atlassian-dc-mcp-go/internal/utils"
 )
 
 // GetIssue retrieves a specific issue by its key.
@@ -20,17 +20,25 @@ import (
 //   - types.MapOutput: The issue data
 //   - error: An error if the request fails
 func (c *JiraClient) GetIssue(input GetIssueInput) (types.MapOutput, error) {
-	queryParams := make(url.Values)
+	queryParams := url.Values{}
 	// Pass nil as the invalid value for fields since we want to include fields when the slice is empty
-	utils.SetQueryParam(queryParams, "fields", input.Fields, nil)
+	client.SetQueryParam(queryParams, "fields", input.Fields, nil)
 
-	var issue types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "issue", input.IssueKey}, queryParams, nil, &issue, utils.AcceptJSON)
+	var output types.MapOutput
+	err := client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodGet,
+		[]string{"rest", "api", "2", "issue", input.IssueKey},
+		queryParams,
+		nil,
+		client.AcceptJSON,
+		&output,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return issue, nil
+	return output, nil
 }
 
 // CreateIssue creates a new issue.
@@ -80,18 +88,26 @@ func (c *JiraClient) CreateIssueWithPayload(input CreateIssueWithPayloadInput) (
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	queryParams := make(url.Values)
+	queryParams := url.Values{}
 	if input.UpdateHistory {
 		queryParams.Set("updateHistory", "true")
 	}
 
-	var issue types.MapOutput
-	err = c.executeRequest(http.MethodPost, []string{"rest", "api", "2", "issue"}, queryParams, jsonPayload, &issue, utils.AcceptJSON)
+	var output types.MapOutput
+	err = client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodPost,
+		[]string{"rest", "api", "2", "issue"},
+		queryParams,
+		jsonPayload,
+		client.AcceptJSON,
+		&output,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return issue, nil
+	return output, nil
 }
 
 // CreateSubTask creates a new sub-task for an issue.
@@ -156,7 +172,7 @@ func (c *JiraClient) UpdateIssue(input UpdateIssueInput) (types.MapOutput, error
 //   - error: An error if the request fails
 func (c *JiraClient) UpdateIssueWithOptions(input UpdateIssueWithOptionsInput) (types.MapOutput, error) {
 
-	payload := make(types.MapOutput)
+	payload := types.MapOutput{}
 
 	if input.Updates != nil {
 		payload["fields"] = input.Updates
@@ -169,19 +185,27 @@ func (c *JiraClient) UpdateIssueWithOptions(input UpdateIssueWithOptionsInput) (
 
 	var queryParams url.Values
 	if input.Options != nil {
-		queryParams = make(url.Values)
+		queryParams = url.Values{}
 		for k, v := range input.Options {
 			queryParams.Set(k, v)
 		}
 	}
 
-	var result types.MapOutput
-	err = c.executeRequest(http.MethodPut, []string{"rest", "api", "2", "issue", input.IssueKey}, queryParams, jsonPayload, &result, utils.AcceptJSON)
+	var output types.MapOutput
+	err = client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodPut,
+		[]string{"rest", "api", "2", "issue", input.IssueKey},
+		queryParams,
+		jsonPayload,
+		client.AcceptJSON,
+		&output,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return output, nil
 }
 
 // GetTransitions retrieves transitions available for an issue.
@@ -193,13 +217,21 @@ func (c *JiraClient) UpdateIssueWithOptions(input UpdateIssueWithOptionsInput) (
 //   - types.MapOutput: The transitions data
 //   - error: An error if the request fails
 func (c *JiraClient) GetTransitions(input GetTransitionsInput) (types.MapOutput, error) {
-	var transitions types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "issue", input.IssueKey, "transitions"}, nil, nil, &transitions, utils.AcceptJSON)
+	var output types.MapOutput
+	err := client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodGet,
+		[]string{"rest", "api", "2", "issue", input.IssueKey, "transitions"},
+		nil,
+		nil,
+		client.AcceptJSON,
+		&output,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return transitions, nil
+	return output, nil
 }
 
 // TransitionIssue transitions an issue to a new status.
@@ -210,18 +242,26 @@ func (c *JiraClient) GetTransitions(input GetTransitionsInput) (types.MapOutput,
 // Returns:
 //   - error: An error if the request fails
 func (c *JiraClient) TransitionIssue(input TransitionIssueInput) error {
-	transition := make(types.MapOutput)
-	utils.SetRequestBodyParam(transition, "id", input.TransitionID)
+	transition := types.MapOutput{}
+	client.SetRequestBodyParam(transition, "id", input.TransitionID)
 
-	payload := make(types.MapOutput)
-	utils.SetRequestBodyParam(payload, "transition", transition)
+	payload := types.MapOutput{}
+	client.SetRequestBodyParam(payload, "transition", transition)
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	err = c.executeRequest(http.MethodPost, []string{"rest", "api", "2", "issue", input.IssueKey, "transitions"}, nil, jsonPayload, nil, utils.AcceptJSON)
+	err = client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodPost,
+		[]string{"rest", "api", "2", "issue", input.IssueKey, "transitions"},
+		nil,
+		jsonPayload,
+		client.AcceptJSON,
+		nil,
+	)
 	if err != nil {
 		return err
 	}
@@ -238,13 +278,21 @@ func (c *JiraClient) TransitionIssue(input TransitionIssueInput) error {
 //   - []types.MapOutput: The sub-tasks data
 //   - error: An error if the request fails
 func (c *JiraClient) GetSubtasks(input GetSubtasksInput) ([]types.MapOutput, error) {
-	var subtasks []types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "issue", input.IssueKey, "subtask"}, nil, nil, &subtasks, utils.AcceptJSON)
+	var outputs []types.MapOutput
+	err := client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodGet,
+		[]string{"rest", "api", "2", "issue", input.IssueKey, "subtask"},
+		nil,
+		nil,
+		client.AcceptJSON,
+		&outputs,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return subtasks, nil
+	return outputs, nil
 }
 
 // GetAgileIssue retrieves a specific agile issue by its key or ID.
@@ -257,8 +305,8 @@ func (c *JiraClient) GetSubtasks(input GetSubtasksInput) ([]types.MapOutput, err
 //   - error: An error if the request fails
 func (c *JiraClient) GetAgileIssue(input GetAgileIssueInput) (types.MapOutput, error) {
 
-	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "expand", input.Expand, "")
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "expand", input.Expand, "")
 
 	if len(input.Fields) > 0 {
 		for _, field := range input.Fields {
@@ -266,15 +314,23 @@ func (c *JiraClient) GetAgileIssue(input GetAgileIssueInput) (types.MapOutput, e
 		}
 	}
 
-	utils.SetQueryParam(queryParams, "updateHistory", input.UpdateHistory, false)
+	client.SetQueryParam(queryParams, "updateHistory", input.UpdateHistory, false)
 
-	var issue types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "issue", input.IssueIdOrKey}, queryParams, nil, &issue, utils.AcceptJSON)
+	var output types.MapOutput
+	err := client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodGet,
+		[]string{"rest", "agile", "1.0", "issue", input.IssueIdOrKey},
+		queryParams,
+		nil,
+		client.AcceptJSON,
+		&output,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return issue, nil
+	return output, nil
 }
 
 // GetIssueEstimationForBoard retrieves the estimation for an issue on a board.
@@ -287,16 +343,24 @@ func (c *JiraClient) GetAgileIssue(input GetAgileIssueInput) (types.MapOutput, e
 //   - error: An error if the request fails
 func (c *JiraClient) GetIssueEstimationForBoard(input GetIssueEstimationForBoardInput) (types.MapOutput, error) {
 
-	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "boardId", input.BoardId, int64(0))
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "boardId", input.BoardId, int64(0))
 
-	var estimation types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "agile", "1.0", "issue", input.IssueIdOrKey, "estimation"}, queryParams, nil, &estimation, utils.AcceptJSON)
+	var output types.MapOutput
+	err := client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodGet,
+		[]string{"rest", "agile", "1.0", "issue", input.IssueIdOrKey, "estimation"},
+		queryParams,
+		nil,
+		client.AcceptJSON,
+		&output,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return estimation, nil
+	return output, nil
 }
 
 // SetIssueEstimationForBoard sets the estimation for an issue on a board.
@@ -308,23 +372,30 @@ func (c *JiraClient) GetIssueEstimationForBoard(input GetIssueEstimationForBoard
 //   - types.MapOutput: The estimation data
 //   - error: An error if the request fails
 func (c *JiraClient) SetIssueEstimationForBoard(input SetIssueEstimationForBoardInput) (types.MapOutput, error) {
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "boardId", input.BoardId, int64(0))
 
-	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "boardId", input.BoardId, int64(0))
-
-	payload := make(types.MapOutput)
-	utils.SetRequestBodyParam(payload, "value", input.Value)
+	payload := types.MapOutput{}
+	client.SetRequestBodyParam(payload, "value", input.Value)
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	var estimation types.MapOutput
-	err = c.executeRequest(http.MethodPut, []string{"rest", "agile", "1.0", "issue", input.IssueIdOrKey, "estimation"}, queryParams, jsonPayload, &estimation, utils.AcceptJSON)
+	var output types.MapOutput
+	err = client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodPut,
+		[]string{"rest", "agile", "1.0", "issue", input.IssueIdOrKey, "estimation"},
+		queryParams,
+		jsonPayload,
+		client.AcceptJSON,
+		&output,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return estimation, nil
+	return output, nil
 }

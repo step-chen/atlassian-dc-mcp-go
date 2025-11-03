@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
-	"atlassian-dc-mcp-go/internal/utils"
 )
 
 // GetUser retrieves details of a specific user.
@@ -20,19 +20,20 @@ import (
 //   - types.MapOutput: The user data retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) GetUser(input GetUserInput) (types.MapOutput, error) {
-	var user types.MapOutput
-	if err := c.executeRequest(
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "users", input.UserSlug},
 		nil,
 		nil,
-		&user,
-		utils.AcceptJSON,
+		client.AcceptJSON,
+		&output,
 	); err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return output, nil
 }
 
 // GetUsers retrieves a list of users.
@@ -47,10 +48,10 @@ func (c *BitbucketClient) GetUser(input GetUserInput) (types.MapOutput, error) {
 //   - types.MapOutput: The users data retrieved from the API
 //   - error: An error if the request fails
 func (c *BitbucketClient) GetUsers(input GetUsersInput) (types.MapOutput, error) {
-	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "filter", input.Filter, "")
-	utils.SetQueryParam(queryParams, "permission", input.Permission, "")
-	utils.SetQueryParam(queryParams, "group", input.Group, "")
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "filter", input.Filter, "")
+	client.SetQueryParam(queryParams, "permission", input.Permission, "")
+	client.SetQueryParam(queryParams, "group", input.Group, "")
 
 	// Handle permissionFilters map
 	if input.PermissionFilters != nil {
@@ -61,17 +62,18 @@ func (c *BitbucketClient) GetUsers(input GetUsersInput) (types.MapOutput, error)
 		}
 	}
 
-	var users types.MapOutput
-	if err := c.executeRequest(
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "latest", "users"},
 		queryParams,
 		nil,
-		&users,
-		utils.AcceptJSON,
+		client.AcceptJSON,
+		&output,
 	); err != nil {
 		return nil, err
 	}
 
-	return users, nil
+	return output, nil
 }

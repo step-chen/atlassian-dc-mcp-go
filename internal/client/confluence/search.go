@@ -1,11 +1,12 @@
 package confluence
 
 import (
+	"net/http"
 	"net/url"
 	"strconv"
 
+	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
-	"atlassian-dc-mcp-go/internal/utils"
 )
 
 // Search searches for content based on CQL.
@@ -18,18 +19,26 @@ import (
 //   - error: An error if the request fails
 func (c *ConfluenceClient) Search(input SearchInput) (types.MapOutput, error) {
 	params := url.Values{}
-	utils.SetQueryParam(params, "cql", input.CQL, "")
-	utils.SetQueryParam(params, "cqlcontext", input.CQLContext, "")
-	utils.SetQueryParam(params, "excerpt", input.Excerpt, "")
-	utils.SetQueryParam(params, "start", input.Start, 0)
-	utils.SetQueryParam(params, "limit", input.Limit, 0)
-	utils.SetQueryParam(params, "includeArchivedSpaces", strconv.FormatBool(input.IncludeArchivedSpaces), "")
-	utils.SetQueryParam(params, "expand", input.Expand, []string{})
+	client.SetQueryParam(params, "cql", input.CQL, "")
+	client.SetQueryParam(params, "cqlcontext", input.CQLContext, "")
+	client.SetQueryParam(params, "excerpt", input.Excerpt, "")
+	client.SetQueryParam(params, "start", input.Start, 0)
+	client.SetQueryParam(params, "limit", input.Limit, 0)
+	client.SetQueryParam(params, "includeArchivedSpaces", strconv.FormatBool(input.IncludeArchivedSpaces), "")
+	client.SetQueryParam(params, "expand", input.Expand, []string{})
 
-	var result types.MapOutput
-	if err := c.executeRequest("GET", []string{"rest", "api", "search"}, params, nil, &result, utils.AcceptJSON); err != nil {
+	var output types.MapOutput
+	if err := client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodGet,
+		[]string{"rest", "api", "search"},
+		params,
+		nil,
+		client.AcceptJSON,
+		&output,
+	); err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return output, nil
 }

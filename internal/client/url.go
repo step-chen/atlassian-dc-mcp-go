@@ -1,10 +1,7 @@
-package utils
+package client
 
 import (
-	"atlassian-dc-mcp-go/internal/types"
-	"atlassian-dc-mcp-go/internal/utils/logging"
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,6 +9,9 @@ import (
 	"strconv"
 
 	"go.uber.org/zap"
+
+	"atlassian-dc-mcp-go/internal/types"
+	"atlassian-dc-mcp-go/internal/utils/logging"
 )
 
 type Accept string
@@ -21,7 +21,7 @@ const (
 	AcceptText = Accept("text/plain")
 )
 
-func BuildURL(baseURL string, pathParams []string, queryParams url.Values) (string, error) {
+func BuildURL(baseURL string, pathParams []string, queryParams map[string][]string) (string, error) {
 	u, err := url.Parse(baseURL)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse base URL: %w", err)
@@ -40,7 +40,7 @@ func BuildURL(baseURL string, pathParams []string, queryParams url.Values) (stri
 	return u.String(), nil
 }
 
-func BuildHttpRequest(method, baseURL string, pathParams []string, queryParams url.Values, body []byte, token string, accept Accept) (*http.Request, error) {
+func BuildHttpRequest(method, baseURL string, pathParams []string, queryParams map[string][]string, body []byte, token string, accept Accept) (*http.Request, error) {
 	url, err := BuildURL(baseURL, pathParams, queryParams)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build URL: %w", err)
@@ -66,51 +66,6 @@ func BuildHttpRequest(method, baseURL string, pathParams []string, queryParams u
 	req.Header.Set("Accept", string(accept))
 
 	return req, nil
-}
-
-func HandleHTTPError(resp *http.Response, service string) error {
-	strErr := ""
-	switch resp.StatusCode {
-	case http.StatusBadRequest:
-		strErr = "bad request"
-	case http.StatusUnauthorized:
-		strErr = "unauthorized"
-	case http.StatusForbidden:
-		strErr = "forbidden"
-	case http.StatusNotFound:
-		strErr = "not found"
-	case http.StatusTooManyRequests:
-		strErr = "too many requests"
-	case http.StatusInternalServerError:
-		strErr = "internal server error"
-	case http.StatusBadGateway:
-		strErr = "bad gateway"
-	case http.StatusServiceUnavailable:
-		strErr = "service unavailable"
-	case http.StatusGatewayTimeout:
-		strErr = "gateway timeout"
-	default:
-		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-			return nil
-		} else if resp.StatusCode >= 400 && resp.StatusCode < 500 {
-			strErr = "client error"
-		} else if resp.StatusCode >= 500 {
-			strErr = "server error"
-		} else {
-			strErr = "unknown error"
-		}
-	}
-
-	bodyBytes, _ := io.ReadAll(resp.Body)
-	bodyString := string(bodyBytes)
-
-	logging.GetLogger().Warn("HTTP request failed",
-		zap.String("service", service),
-		zap.Int("status_code", resp.StatusCode),
-		zap.String("error", strErr),
-		zap.String("response_body", bodyString))
-
-	return fmt.Errorf("[%s] %s : %d - %s", service, strErr, resp.StatusCode, bodyString)
 }
 
 func SetRequiredPathQueryParam(params url.Values, path string) {
@@ -242,58 +197,6 @@ func SetRequestBodyParam(params map[string]interface{}, key string, value interf
 			params[key] = v
 		}
 	}
-}
-
-func ExecuteHTTPRequest(client *http.Client, req *http.Request, service string, result interface{}) error {
-	resp, err := client.Do(req)
-	if err != nil {
-		logging.GetLogger().Error("HTTP request failed",
-			zap.String("service", service),
-			zap.String("method", req.Method),
-			zap.String("url", req.URL.String()),
-			zap.Error(err))
-		return fmt.Errorf("[%s] request failed: %w", service, err)
-	}
-	defer resp.Body.Close()
-
-	if err := HandleHTTPError(resp, service); err != nil {
-		return err
-	}
-
-	if result != nil {
-		if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
-			logging.GetLogger().Error("Failed to decode HTTP response",
-				zap.String("service", service),
-				zap.String("method", req.Method),
-				zap.String("url", req.URL.String()),
-				zap.Error(err))
-			return fmt.Errorf("[%s] failed to decode response: %w", service, err)
-		}
-	}
-
-	logging.GetLogger().Debug("HTTP request successful",
-		zap.String("service", service),
-		zap.String("method", req.Method),
-		zap.String("url", req.URL.String()),
-		zap.Int("status_code", resp.StatusCode))
-
-	return nil
-}
-
-func HandleHTTPResponse(resp *http.Response, service string, result interface{}) error {
-	defer resp.Body.Close()
-
-	if err := HandleHTTPError(resp, service); err != nil {
-		return err
-	}
-
-	if result != nil {
-		if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
-			return fmt.Errorf("[%s] failed to decode response: %w", service, err)
-		}
-	}
-
-	return nil
 }
 
 // ReadBody reads the response body and returns it as a string

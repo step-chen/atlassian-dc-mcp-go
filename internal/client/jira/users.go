@@ -1,14 +1,11 @@
 package jira
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 
-	"github.com/hashicorp/go-retryablehttp"
-
+	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
-	"atlassian-dc-mcp-go/internal/utils"
 )
 
 // GetUserByName retrieves a user by their username.
@@ -20,17 +17,24 @@ import (
 //   - types.MapOutput: The user data
 //   - error: An error if the request fails
 func (c *JiraClient) GetUserByName(input GetUserByNameInput) (types.MapOutput, error) {
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "username", input.Username, "")
 
-	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "username", input.Username, "")
-
-	var user types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "user"}, queryParams, nil, &user, utils.AcceptJSON)
+	var output types.MapOutput
+	err := client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodGet,
+		[]string{"rest", "api", "2", "user"},
+		queryParams,
+		nil,
+		client.AcceptJSON,
+		&output,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return output, nil
 }
 
 // GetUserByKey retrieves a user by their key.
@@ -42,17 +46,24 @@ func (c *JiraClient) GetUserByName(input GetUserByNameInput) (types.MapOutput, e
 //   - types.MapOutput: The user data
 //   - error: An error if the request fails
 func (c *JiraClient) GetUserByKey(input GetUserByKeyInput) (types.MapOutput, error) {
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "key", input.Key, "")
 
-	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "key", input.Key, "")
-
-	var user types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "user"}, queryParams, nil, &user, utils.AcceptJSON)
+	var output types.MapOutput
+	err := client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodGet,
+		[]string{"rest", "api", "2", "user"},
+		queryParams,
+		nil,
+		client.AcceptJSON,
+		&output,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return output, nil
 }
 
 // SearchUsers searches for users based on a query.
@@ -64,19 +75,26 @@ func (c *JiraClient) GetUserByKey(input GetUserByKeyInput) (types.MapOutput, err
 //   - []types.MapOutput: The users data
 //   - error: An error if the request fails
 func (c *JiraClient) SearchUsers(input SearchUsersInput) ([]types.MapOutput, error) {
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "username", input.Query, "")
+	client.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
+	client.SetQueryParam(queryParams, "maxResults", input.MaxResults, 0)
 
-	queryParams := make(url.Values)
-	utils.SetQueryParam(queryParams, "username", input.Query, "")
-	utils.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
-	utils.SetQueryParam(queryParams, "maxResults", input.MaxResults, 0)
-
-	var users []types.MapOutput
-	err := c.executeRequest(http.MethodGet, []string{"rest", "api", "2", "user", "search"}, queryParams, nil, &users, utils.AcceptJSON)
+	var outputs []types.MapOutput
+	err := client.ExecuteRequest(
+		c.BaseClient,
+		http.MethodGet,
+		[]string{"rest", "api", "2", "user", "search"},
+		queryParams,
+		nil,
+		client.AcceptJSON,
+		&outputs,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return users, nil
+	return outputs, nil
 }
 
 // GetCurrentUser retrieves the current user.
@@ -88,35 +106,19 @@ func (c *JiraClient) SearchUsers(input SearchUsersInput) ([]types.MapOutput, err
 //   - types.MapOutput: The current user data
 //   - error: An error if the request fails
 func (c *JiraClient) GetCurrentUser() (types.MapOutput, error) {
-
-	req, err := utils.BuildHttpRequest(
+	var output types.MapOutput
+	err := client.ExecuteRequest(
+		c.BaseClient,
 		http.MethodGet,
-		c.Config.URL,
 		[]string{"rest", "api", "2", "myself"},
 		nil,
 		nil,
-		c.Config.Token,
-		utils.AcceptJSON,
+		client.AcceptJSON,
+		&output,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to build request: %w", err)
-	}
-
-	// Convert the request to a retryable request
-	retryableReq, err := retryablehttp.FromRequest(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert request: %w", err)
-	}
-
-	resp, err := c.HTTPClient.Do(retryableReq)
-	if err != nil {
-		return nil, fmt.Errorf("failed to send request: %w", err)
-	}
-
-	var user types.MapOutput
-	if err := utils.HandleHTTPResponse(resp, "jira", &user); err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return output, nil
 }
