@@ -18,21 +18,21 @@ import (
 //   - types.MapOutput: The search results
 //   - error: An error if the request fails
 func (c *ConfluenceClient) Search(input SearchInput) (types.MapOutput, error) {
-	params := url.Values{}
-	client.SetQueryParam(params, "cql", input.CQL, "")
-	client.SetQueryParam(params, "cqlcontext", input.CQLContext, "")
-	client.SetQueryParam(params, "excerpt", input.Excerpt, "")
-	client.SetQueryParam(params, "start", input.Start, 0)
-	client.SetQueryParam(params, "limit", input.Limit, 0)
-	client.SetQueryParam(params, "includeArchivedSpaces", strconv.FormatBool(input.IncludeArchivedSpaces), "")
-	client.SetQueryParam(params, "expand", input.Expand, []string{})
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "cql", input.CQL, "")
+	client.SetQueryParam(queryParams, "cqlcontext", input.CQLContext, "")
+	client.SetQueryParam(queryParams, "excerpt", input.Excerpt, "")
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	client.SetQueryParam(queryParams, "includeArchivedSpaces", strconv.FormatBool(input.IncludeArchivedSpaces), "")
+	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "search"},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,

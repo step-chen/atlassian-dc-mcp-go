@@ -68,11 +68,11 @@ func BuildHttpRequest(method, baseURL string, pathParams []string, queryParams m
 	return req, nil
 }
 
-func SetRequiredPathQueryParam(params url.Values, path string) {
+func SetRequiredPathParam(pathParams url.Values, path string) {
 	if path == "" {
-		params.Add("path", "/")
+		pathParams.Add("path", "/")
 	} else {
-		params.Add("path", path)
+		pathParams.Add("path", path)
 	}
 }
 
@@ -84,7 +84,7 @@ func SetRequiredPathQueryParam(params url.Values, path string) {
 // - string: set only if not empty
 // - bool: always set
 // - pointers: set only if not nil and the dereferenced value is valid
-func SetQueryParam(params url.Values, key string, value any, invalid any) {
+func SetQueryParam(queryParams url.Values, key string, value any, invalid any) {
 	// Handle slice comparisons specially since slices are not comparable
 	if slice, ok := value.([]string); ok {
 		// Check if slice is empty
@@ -96,7 +96,7 @@ func SetQueryParam(params url.Values, key string, value any, invalid any) {
 				return
 			}
 		}
-		params[key] = slice
+		queryParams[key] = slice
 		return
 	}
 
@@ -104,17 +104,17 @@ func SetQueryParam(params url.Values, key string, value any, invalid any) {
 	switch v := value.(type) {
 	case *string:
 		if v != nil && *v != "" && *v != invalid {
-			params.Set(key, *v)
+			queryParams.Set(key, *v)
 		}
 		return
 	case *int:
 		if v != nil && *v > 0 {
-			params.Set(key, strconv.Itoa(*v))
+			queryParams.Set(key, strconv.Itoa(*v))
 		}
 		return
 	case *bool:
 		if v != nil {
-			params.Set(key, strconv.FormatBool(*v))
+			queryParams.Set(key, strconv.FormatBool(*v))
 		}
 		return
 	default:
@@ -124,17 +124,17 @@ func SetQueryParam(params url.Values, key string, value any, invalid any) {
 			switch val := value.(type) {
 			case string:
 				if val != "" {
-					params.Set(key, val)
+					queryParams.Set(key, val)
 				}
 			case int:
 				if val > 0 {
-					params.Set(key, strconv.Itoa(val))
+					queryParams.Set(key, strconv.Itoa(val))
 				}
 			case bool:
-				params.Set(key, strconv.FormatBool(val))
+				queryParams.Set(key, strconv.FormatBool(val))
 			default:
 				if valStr := fmt.Sprintf("%v", val); valStr != "" {
-					params.Set(key, valStr)
+					queryParams.Set(key, valStr)
 				}
 			}
 		}
@@ -149,52 +149,52 @@ func SetQueryParam(params url.Values, key string, value any, invalid any) {
 // For boolean types, the parameter is always set.
 // For pointer types, the parameter is set only if the pointer is not nil.
 // For MapOutput and []MapOutput types, the parameter is set only if not nil/empty.
-func SetRequestBodyParam(params map[string]interface{}, key string, value interface{}) {
+func SetRequestBodyParam(bodyParams map[string]interface{}, key string, value interface{}) {
 	switch v := value.(type) {
 	case string:
 		if v != "" {
-			params[key] = v
+			bodyParams[key] = v
 		}
 	case []string:
 		if len(v) > 0 {
-			params[key] = v
+			bodyParams[key] = v
 		}
 	case int, int8, int16, int32, int64:
 		if v != 0 {
-			params[key] = v
+			bodyParams[key] = v
 		}
 	case float32, float64:
 		if v != 0.0 {
-			params[key] = v
+			bodyParams[key] = v
 		}
 	case bool:
-		params[key] = v
+		bodyParams[key] = v
 	case *string:
 		if v != nil && *v != "" {
-			params[key] = *v
+			bodyParams[key] = *v
 		}
 	case *int:
 		if v != nil && *v != 0 {
-			params[key] = *v
+			bodyParams[key] = *v
 		}
 	case *bool:
 		if v != nil {
-			params[key] = *v
+			bodyParams[key] = *v
 		}
 	case types.MapOutput:
 		// For MapOutput, set only if not nil
 		if v != nil {
-			params[key] = v
+			bodyParams[key] = v
 		}
 	case []types.MapOutput:
 		// For []MapOutput, set only if not empty
 		if len(v) > 0 {
-			params[key] = v
+			bodyParams[key] = v
 		}
 	default:
 		// For other types, only set if not nil
 		if v != nil {
-			params[key] = v
+			bodyParams[key] = v
 		}
 	}
 }

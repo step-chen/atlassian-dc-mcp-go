@@ -854,7 +854,7 @@ func (c *BitbucketClient) UpdatePullRequestParticipantStatus(input UpdatePullReq
 func (c *BitbucketClient) GetPullRequestComments(input GetPullRequestCommentsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 
-	client.SetRequiredPathQueryParam(queryParams, input.Path)
+	client.SetRequiredPathParam(queryParams, input.Path)
 	client.SetQueryParam(queryParams, "fromHash", input.FromHash, "")
 	client.SetQueryParam(queryParams, "anchorState", input.AnchorState, "")
 	client.SetQueryParam(queryParams, "toHash", input.ToHash, "")

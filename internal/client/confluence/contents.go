@@ -20,23 +20,23 @@ import (
 //   - types.MapOutput: The content data
 //   - error: An error if the request fails
 func (c *ConfluenceClient) GetContent(input GetContentInput) (types.MapOutput, error) {
-	params := url.Values{}
+	queryParams := url.Values{}
 
-	client.SetQueryParam(params, "type", input.TypeParam, "")
-	client.SetQueryParam(params, "spaceKey", input.SpaceKey, "")
-	client.SetQueryParam(params, "title", input.Title, "")
-	client.SetQueryParam(params, "status", input.Status, []string{})
-	client.SetQueryParam(params, "postingDay", input.PostingDay, "")
-	client.SetQueryParam(params, "expand", input.Expand, []string{})
-	client.SetQueryParam(params, "start", input.Start, 0)
-	client.SetQueryParam(params, "limit", input.Limit, 0)
+	client.SetQueryParam(queryParams, "type", input.TypeParam, "")
+	client.SetQueryParam(queryParams, "spaceKey", input.SpaceKey, "")
+	client.SetQueryParam(queryParams, "title", input.Title, "")
+	client.SetQueryParam(queryParams, "status", input.Status, []string{})
+	client.SetQueryParam(queryParams, "postingDay", input.PostingDay, "")
+	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "content"},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,
@@ -56,15 +56,15 @@ func (c *ConfluenceClient) GetContent(input GetContentInput) (types.MapOutput, e
 //   - types.MapOutput: The content data
 //   - error: An error if the request fails
 func (c *ConfluenceClient) GetContentByID(input GetContentByIDInput) (types.MapOutput, error) {
-	params := url.Values{}
-	client.SetQueryParam(params, "expand", input.Expand, []string{})
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "content", input.ContentID},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,
@@ -84,19 +84,19 @@ func (c *ConfluenceClient) GetContentByID(input GetContentByIDInput) (types.MapO
 //   - types.MapOutput: The search results
 //   - error: An error if the request fails
 func (c *ConfluenceClient) SearchContent(input SearchContentInput) (types.MapOutput, error) {
-	params := url.Values{}
-	client.SetQueryParam(params, "cql", input.CQL, "")
-	client.SetQueryParam(params, "cqlcontext", input.CQLContext, "")
-	client.SetQueryParam(params, "start", input.Start, 0)
-	client.SetQueryParam(params, "limit", input.Limit, 0)
-	client.SetQueryParam(params, "expand", input.Expand, []string{})
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "cql", input.CQL, "")
+	client.SetQueryParam(queryParams, "cqlcontext", input.CQLContext, "")
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "content", "search"},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,
@@ -207,15 +207,15 @@ func (c *ConfluenceClient) DeleteContent(input DeleteContentInput) error {
 //   - types.MapOutput: The content history data
 //   - error: An error if the request fails
 func (c *ConfluenceClient) GetContentHistory(input GetContentHistoryInput) (types.MapOutput, error) {
-	params := url.Values{}
-	client.SetQueryParam(params, "expand", input.Expand, []string{})
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "content", input.ContentID, "history"},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,
@@ -279,19 +279,19 @@ func (c *ConfluenceClient) AddComment(input AddCommentInput) (types.MapOutput, e
 //   - types.MapOutput: The attachments data
 //   - error: An error if the request fails
 func (c *ConfluenceClient) GetAttachments(input GetAttachmentsInput) (types.MapOutput, error) {
-	params := url.Values{}
-	client.SetQueryParam(params, "expand", input.Expand, []string{})
-	client.SetQueryParam(params, "start", input.Start, 0)
-	client.SetQueryParam(params, "limit", input.Limit, 0)
-	client.SetQueryParam(params, "filename", input.Filename, "")
-	client.SetQueryParam(params, "mediaType", input.MediaType, "")
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	client.SetQueryParam(queryParams, "filename", input.Filename, "")
+	client.SetQueryParam(queryParams, "mediaType", input.MediaType, "")
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "content", input.ContentID, "child", "attachment"},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,
@@ -336,16 +336,16 @@ func (c *ConfluenceClient) GetExtractedText(input GetExtractedTextInput) (types.
 //   - types.MapOutput: The labels data
 //   - error: An error if the request fails
 func (c *ConfluenceClient) GetContentLabels(input GetContentLabelsInput) (types.MapOutput, error) {
-	params := url.Values{}
-	client.SetQueryParam(params, "start", input.Start, 0)
-	client.SetQueryParam(params, "limit", input.Limit, 0)
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "content", input.ContentID, "label"},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,
@@ -365,23 +365,23 @@ func (c *ConfluenceClient) GetContentLabels(input GetContentLabelsInput) (types.
 //   - types.MapOutput: The scanned content data
 //   - error: An error if the request fails
 func (c *ConfluenceClient) ScanContentBySpaceKey(input ScanContentBySpaceKeyInput) (types.MapOutput, error) {
-	params := url.Values{}
+	queryParams := url.Values{}
 
-	client.SetQueryParam(params, "type", input.TypeParam, "")
-	client.SetQueryParam(params, "spaceKey", input.SpaceKey, "")
-	client.SetQueryParam(params, "status", input.Status, []string{})
-	client.SetQueryParam(params, "postingDay", input.PostingDay, "")
-	client.SetQueryParam(params, "expand", input.Expand, []string{})
-	client.SetQueryParam(params, "cursor", input.Cursor, "")
-	client.SetQueryParam(params, "start", input.Start, 0)
-	client.SetQueryParam(params, "limit", input.Limit, 0)
+	client.SetQueryParam(queryParams, "type", input.TypeParam, "")
+	client.SetQueryParam(queryParams, "spaceKey", input.SpaceKey, "")
+	client.SetQueryParam(queryParams, "status", input.Status, []string{})
+	client.SetQueryParam(queryParams, "postingDay", input.PostingDay, "")
+	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
+	client.SetQueryParam(queryParams, "cursor", input.Cursor, "")
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "content", "scan"},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,

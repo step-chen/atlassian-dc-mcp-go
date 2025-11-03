@@ -74,9 +74,9 @@ func NewRetryableHTTPClient(config *HTTPClientConfig) *retryablehttp.Client {
 
 // ExecuteRequest executes an HTTP request with the provided parameters.
 // It builds the request and executes it with retry logic.
-func ExecuteRequest(client *BaseClient, method string, pathSegments []string, queryParams map[string][]string, body []byte, accept Accept, result any) error {
+func ExecuteRequest(client *BaseClient, method string, pathParams []string, queryParams map[string][]string, body []byte, accept Accept, result any) error {
 	// Build the HTTP request
-	req, err := BuildHttpRequest(method, client.Config.URL, pathSegments, queryParams, body, client.Config.Token, accept)
+	req, err := BuildHttpRequest(method, client.Config.URL, pathParams, queryParams, body, client.Config.Token, accept)
 	if err != nil {
 		return fmt.Errorf("failed to build request: %w", err)
 	}
@@ -92,9 +92,9 @@ func ExecuteRequest(client *BaseClient, method string, pathSegments []string, qu
 
 // ExecuteStream executes an HTTP request and returns a stream of the response body.
 // It builds the request and executes it with retry logic and timeout.
-func ExecuteStream(client *BaseClient, method string, pathSegments []string, queryParams map[string][]string, body []byte, accept Accept, timeout time.Duration) (io.ReadCloser, error) {
+func ExecuteStream(client *BaseClient, method string, pathParams []string, queryParams map[string][]string, body []byte, accept Accept, timeout time.Duration) (io.ReadCloser, error) {
 	// Build the HTTP request
-	req, err := BuildHttpRequest(method, client.Config.URL, pathSegments, queryParams, body, client.Config.Token, accept)
+	req, err := BuildHttpRequest(method, client.Config.URL, pathParams, queryParams, body, client.Config.Token, accept)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build request: %w", err)
 	}

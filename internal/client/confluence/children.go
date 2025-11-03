@@ -16,16 +16,16 @@ import (
 //   - types.MapOutput: The content children data
 //   - error: An error if the request fails
 func (c *ConfluenceClient) GetContentChildren(input GetContentChildrenInput) (types.MapOutput, error) {
-	params := url.Values{}
-	client.SetQueryParam(params, "expand", input.Expand, []string{})
-	client.SetQueryParam(params, "parentVersion", input.ParentVersion, "")
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
+	client.SetQueryParam(queryParams, "parentVersion", input.ParentVersion, "")
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "content", input.ContentID, "child"},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,
@@ -45,18 +45,18 @@ func (c *ConfluenceClient) GetContentChildren(input GetContentChildrenInput) (ty
 //   - types.MapOutput: The content children data
 //   - error: An error if the request fails
 func (c *ConfluenceClient) GetContentChildrenByType(input GetContentChildrenByTypeInput) (types.MapOutput, error) {
-	params := url.Values{}
-	client.SetQueryParam(params, "expand", input.Expand, []string{})
-	client.SetQueryParam(params, "start", input.Start, 0)
-	client.SetQueryParam(params, "limit", input.Limit, 0)
-	client.SetQueryParam(params, "orderBy", input.OrderBy, "")
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	client.SetQueryParam(queryParams, "orderBy", input.OrderBy, "")
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "content", input.ContentID, "child", input.ChildType},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,
@@ -76,18 +76,18 @@ func (c *ConfluenceClient) GetContentChildrenByType(input GetContentChildrenByTy
 //   - types.MapOutput: The content comments data
 //   - error: An error if the request fails
 func (c *ConfluenceClient) GetContentComments(input GetContentCommentsInput) (types.MapOutput, error) {
-	params := url.Values{}
-	client.SetQueryParam(params, "expand", input.Expand, []string{})
-	client.SetQueryParam(params, "parentVersion", input.ParentVersion, "")
-	client.SetQueryParam(params, "start", input.Start, 0)
-	client.SetQueryParam(params, "limit", input.Limit, 0)
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
+	client.SetQueryParam(queryParams, "parentVersion", input.ParentVersion, "")
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "content", input.ContentID, "child", "comment"},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,

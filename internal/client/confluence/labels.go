@@ -18,16 +18,16 @@ import (
 //   - error: An error if the request fails
 func (c *ConfluenceClient) GetRelatedLabels(input GetRelatedLabelsInput) (types.MapOutput, error) {
 
-	params := url.Values{}
-	client.SetQueryParam(params, "start", input.Start, 0)
-	client.SetQueryParam(params, "limit", input.Limit, 0)
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "label", input.LabelName, "related"},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,
@@ -48,20 +48,20 @@ func (c *ConfluenceClient) GetRelatedLabels(input GetRelatedLabelsInput) (types.
 //   - error: An error if the request fails
 func (c *ConfluenceClient) GetLabels(input GetLabelsInput) (types.MapOutput, error) {
 
-	params := url.Values{}
-	client.SetQueryParam(params, "labelName", input.LabelName, "")
-	client.SetQueryParam(params, "owner", input.Owner, "")
-	client.SetQueryParam(params, "namespace", input.Namespace, "")
-	client.SetQueryParam(params, "spaceKey", input.SpaceKey, "")
-	client.SetQueryParam(params, "start", input.Start, 0)
-	client.SetQueryParam(params, "limit", input.Limit, 0)
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "labelName", input.LabelName, "")
+	client.SetQueryParam(queryParams, "owner", input.Owner, "")
+	client.SetQueryParam(queryParams, "namespace", input.Namespace, "")
+	client.SetQueryParam(queryParams, "spaceKey", input.SpaceKey, "")
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "label"},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,

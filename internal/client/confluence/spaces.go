@@ -22,15 +22,15 @@ func (c *ConfluenceClient) GetSpace(input GetSpaceInput) (types.MapOutput, error
 		return nil, fmt.Errorf("spaceKey cannot be empty")
 	}
 
-	params := url.Values{}
-	client.SetQueryParam(params, "expand", input.Expand, []string{})
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "space", input.SpaceKey},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,
@@ -54,17 +54,17 @@ func (c *ConfluenceClient) GetContentsInSpace(input GetContentsInSpaceInput) (ty
 		return nil, fmt.Errorf("spaceKey cannot be empty")
 	}
 
-	params := url.Values{}
-	client.SetQueryParam(params, "start", input.Start, 0)
-	client.SetQueryParam(params, "limit", input.Limit, 0)
-	client.SetQueryParam(params, "expand", input.Expand, []string{})
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "space", input.SpaceKey, "content"},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,
@@ -92,17 +92,17 @@ func (c *ConfluenceClient) GetContentsByType(input GetContentsByTypeInput) (type
 		return nil, fmt.Errorf("contentType cannot be empty")
 	}
 
-	params := url.Values{}
-	client.SetQueryParam(params, "start", input.Start, 0)
-	client.SetQueryParam(params, "limit", input.Limit, 0)
-	client.SetQueryParam(params, "expand", input.Expand, []string{})
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "space", input.SpaceKey, "content", input.ContentType},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,
@@ -126,28 +126,28 @@ func (c *ConfluenceClient) GetSpacesByKey(input GetSpacesByKeyInput) (types.MapO
 		return nil, fmt.Errorf("at least one space identifier parameter must be provided")
 	}
 
-	params := url.Values{}
-	client.SetQueryParam(params, "start", input.Start, 0)
-	client.SetQueryParam(params, "limit", input.Limit, 0)
-	client.SetQueryParam(params, "expand", input.Expand, []string{})
-	client.SetQueryParam(params, "spaceKeys", input.SpaceKeys, "")
-	client.SetQueryParam(params, "spaceIds", strings.Join(input.SpaceIds, ","), "")
-	client.SetQueryParam(params, "spaceId", input.SpaceId, []string{})
-	client.SetQueryParam(params, "spaceKeySingle", input.SpaceKeySingle, "")
-	client.SetQueryParam(params, "type", input.Type, "")
-	client.SetQueryParam(params, "status", input.Status, "")
-	client.SetQueryParam(params, "label", input.Label, []string{})
-	client.SetQueryParam(params, "contentLabel", input.ContentLabel, []string{})
-	client.SetQueryParam(params, "favourite", input.Favourite, (*bool)(nil))
-	client.SetQueryParam(params, "hasRetentionPolicy", input.HasRetentionPolicy, (*bool)(nil))
-	client.SetQueryParam(params, "spaceKey", input.Keys, []string{})
+	queryParams := url.Values{}
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
+	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
+	client.SetQueryParam(queryParams, "spaceKeys", input.SpaceKeys, "")
+	client.SetQueryParam(queryParams, "spaceIds", strings.Join(input.SpaceIds, ","), "")
+	client.SetQueryParam(queryParams, "spaceId", input.SpaceId, []string{})
+	client.SetQueryParam(queryParams, "spaceKeySingle", input.SpaceKeySingle, "")
+	client.SetQueryParam(queryParams, "type", input.Type, "")
+	client.SetQueryParam(queryParams, "status", input.Status, "")
+	client.SetQueryParam(queryParams, "label", input.Label, []string{})
+	client.SetQueryParam(queryParams, "contentLabel", input.ContentLabel, []string{})
+	client.SetQueryParam(queryParams, "favourite", input.Favourite, (*bool)(nil))
+	client.SetQueryParam(queryParams, "hasRetentionPolicy", input.HasRetentionPolicy, (*bool)(nil))
+	client.SetQueryParam(queryParams, "spaceKey", input.Keys, []string{})
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
 		[]string{"rest", "api", "space"},
-		params,
+		queryParams,
 		nil,
 		client.AcceptJSON,
 		&output,
