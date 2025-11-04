@@ -2,8 +2,6 @@
 package confluence
 
 import (
-	"time"
-
 	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/config"
 )
@@ -15,16 +13,7 @@ type ConfluenceClient struct {
 
 // NewConfluenceClient creates a new Confluence client with the provided configuration.
 func NewConfluenceClient(config *config.ClientConfig) *ConfluenceClient {
-	clientConfig := client.DefaultHTTPClientConfig()
-	if config.Timeout > 0 {
-		clientConfig.Timeout = time.Duration(config.Timeout) * time.Second
-	}
-
 	return &ConfluenceClient{
-		BaseClient: &client.BaseClient{
-			Config:     config,
-			HTTPClient: client.NewRetryableHTTPClient(clientConfig),
-			Name:       "confluence",
-		},
+		BaseClient: client.NewBaseClient(config, "confluence"),
 	}
 }

@@ -2,8 +2,6 @@
 package jira
 
 import (
-	"time"
-
 	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/config"
 )
@@ -15,16 +13,7 @@ type JiraClient struct {
 
 // NewJiraClient creates a new Jira client with the provided configuration.
 func NewJiraClient(config *config.ClientConfig) *JiraClient {
-	clientConfig := client.DefaultHTTPClientConfig()
-	if config.Timeout > 0 {
-		clientConfig.Timeout = time.Duration(config.Timeout) * time.Second
-	}
-
 	return &JiraClient{
-		BaseClient: &client.BaseClient{
-			Config:     config,
-			HTTPClient: client.NewRetryableHTTPClient(clientConfig),
-			Name:       "jira",
-		},
+		BaseClient: client.NewBaseClient(config, "jira"),
 	}
 }
