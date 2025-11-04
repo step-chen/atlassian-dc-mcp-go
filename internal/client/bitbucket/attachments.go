@@ -1,7 +1,6 @@
 package bitbucket
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -25,7 +24,7 @@ func (c *BitbucketClient) GetAttachment(input GetAttachmentInput) ([]byte, error
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "attachments", input.AttachmentId},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "attachments", input.AttachmentId},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -33,6 +32,7 @@ func (c *BitbucketClient) GetAttachment(input GetAttachmentInput) ([]byte, error
 	); err != nil {
 		return nil, err
 	}
+
 	return content, nil
 }
 
@@ -52,7 +52,7 @@ func (c *BitbucketClient) GetAttachmentMetadata(input GetAttachmentMetadataInput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "attachments", input.AttachmentId, "metadata"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "attachments", input.AttachmentId, "metadata"},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -77,7 +77,7 @@ func (c *BitbucketClient) DeleteAttachment(input DeleteAttachmentInput) error {
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodDelete,
-		[]string{"rest", "attachment", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", fmt.Sprintf("%d", input.PullRequestId), "attachments", fmt.Sprintf("%d", input.AttachmentId)},
+		[]any{"rest", "attachment", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestId, "attachments", input.AttachmentId},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -107,7 +107,7 @@ func (c *BitbucketClient) CreateAttachment(input CreateAttachmentInput) (types.M
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPost,
-		[]string{"rest", "attachment", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", fmt.Sprintf("%d", input.PullRequestID), "attachments"},
+		[]any{"rest", "attachment", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "attachments"},
 		queryParams,
 		input.FileAttachment,
 		client.AcceptJSON,

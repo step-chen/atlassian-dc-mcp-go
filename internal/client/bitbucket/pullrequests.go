@@ -32,7 +32,7 @@ func (c *BitbucketClient) GetPullRequest(input GetPullRequestInput) (types.MapOu
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID)},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -67,7 +67,7 @@ func (c *BitbucketClient) GetPullRequestActivities(input GetPullRequestActivitie
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "activities"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "activities"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -97,17 +97,17 @@ func (c *BitbucketClient) GetPullRequestChanges(input GetPullRequestChangesInput
 	}
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "changeScope", string(input.ChangeScope), "")
-	client.SetQueryParam(queryParams, "limit", strconv.Itoa(input.Limit), 0)
+	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	client.SetQueryParam(queryParams, "sinceId", input.SinceId, "")
-	client.SetQueryParam(queryParams, "start", strconv.Itoa(input.Start), 0)
+	client.SetQueryParam(queryParams, "start", input.Start, 0)
 	client.SetQueryParam(queryParams, "untilId", input.UntilId, "")
-	client.SetQueryParam(queryParams, "withComments", strconv.FormatBool(input.WithComments), false)
+	client.SetQueryParam(queryParams, "withComments", input.WithComments, false)
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "changes"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "changes"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -150,7 +150,7 @@ func (c *BitbucketClient) AddPullRequestComment(input AddPullRequestCommentInput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPost,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(int(input.PullRequestID)), "comments"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "comments"},
 		nil,
 		jsonPayload,
 		client.AcceptJSON,
@@ -526,7 +526,7 @@ func (c *BitbucketClient) MergePullRequest(input MergePullRequestInput) (types.M
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPost,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "merge"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "merge"},
 		nil,
 		jsonPayload,
 		client.AcceptJSON,
@@ -557,11 +557,8 @@ type DeclinePullRequestOptions struct {
 func (c *BitbucketClient) GetPullRequestDiff(input GetPullRequestDiffInput) (io.ReadCloser, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "srcPath", input.SrcPath, "")
-	if input.ContextLines != nil {
-		queryParams.Set("contextLines", strconv.Itoa(*input.ContextLines))
-	} else {
-		// Set default value of 3 for ContextLines
-		queryParams.Set("contextLines", "3")
+	if !client.SetQueryParam(queryParams, "contextLines", input.ContextLines, nil) {
+		client.SetQueryParam(queryParams, "contextLines", 3, nil)
 	}
 	client.SetQueryParam(queryParams, "sinceId", input.SinceId, "")
 	client.SetQueryParam(queryParams, "untilId", input.UntilId, "")
@@ -578,7 +575,7 @@ func (c *BitbucketClient) GetPullRequestDiff(input GetPullRequestDiffInput) (io.
 	return client.ExecuteStream(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "diff", path},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "diff", path},
 		queryParams,
 		nil,
 		client.AcceptText,
@@ -604,9 +601,7 @@ func (c *BitbucketClient) DeclinePullRequest(input DeclinePullRequestInput) (typ
 	}
 
 	queryParams := url.Values{}
-	if input.Version != 0 {
-		queryParams.Set("version", strconv.Itoa(input.Version))
-	}
+	client.SetQueryParam(queryParams, "version", input.Version, 0)
 
 	jsonPayload, err := json.Marshal(options)
 	if err != nil {
@@ -617,7 +612,7 @@ func (c *BitbucketClient) DeclinePullRequest(input DeclinePullRequestInput) (typ
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPost,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "decline"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "decline"},
 		queryParams,
 		jsonPayload,
 		client.AcceptJSON,
@@ -640,9 +635,9 @@ func (c *BitbucketClient) GetPullRequests(input GetPullRequestsInput) (types.Map
 	queryParams := url.Values{}
 
 	client.SetQueryParam(queryParams, "state", input.State, "")
-	client.SetQueryParam(queryParams, "withAttributes", strconv.FormatBool(input.WithAttributes), "")
+	client.SetQueryParam(queryParams, "withAttributes", input.WithAttributes, "")
 	client.SetQueryParam(queryParams, "at", input.At, "")
-	client.SetQueryParam(queryParams, "withProperties", strconv.FormatBool(input.WithProperties), "")
+	client.SetQueryParam(queryParams, "withProperties", input.WithProperties, "")
 	client.SetQueryParam(queryParams, "draft", input.Draft, "")
 	client.SetQueryParam(queryParams, "filterText", input.FilterText, "")
 	client.SetQueryParam(queryParams, "order", input.Order, "")
@@ -654,7 +649,7 @@ func (c *BitbucketClient) GetPullRequests(input GetPullRequestsInput) (types.Map
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -686,7 +681,7 @@ func (c *BitbucketClient) GetPullRequestSuggestions(input GetPullRequestSuggesti
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "dashboard", "pull-request-suggestions"},
+		[]any{"rest", "api", "latest", "dashboard", "pull-request-suggestions"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -714,7 +709,7 @@ func (c *BitbucketClient) GetPullRequestJiraIssues(input GetPullRequestJiraIssue
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "jira", "1.0", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "issues"},
+		[]any{"rest", "jira", "1.0", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "issues"},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -752,7 +747,7 @@ func (c *BitbucketClient) GetPullRequestsForUser(input GetPullRequestsForUserInp
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "dashboard", "pull-requests"},
+		[]any{"rest", "api", "latest", "dashboard", "pull-requests"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -780,7 +775,7 @@ func (c *BitbucketClient) GetPullRequestComment(input GetPullRequestCommentInput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "comments", input.CommentID},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "comments", input.CommentID},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -828,7 +823,7 @@ func (c *BitbucketClient) UpdatePullRequestParticipantStatus(input UpdatePullReq
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPut,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "participants", input.UserSlug},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "participants", input.UserSlug},
 		nil,
 		jsonPayload,
 		client.AcceptJSON,
@@ -869,7 +864,7 @@ func (c *BitbucketClient) GetPullRequestComments(input GetPullRequestCommentsInp
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "comments"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "comments"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -895,18 +890,15 @@ func (c *BitbucketClient) GetPullRequestComments(input GetPullRequestCommentsInp
 //   - error: An error if the request fails
 func (c *BitbucketClient) GetPullRequestDiffStreamRaw(input GetPullRequestDiffStreamInput) (io.ReadCloser, error) {
 	queryParams := url.Values{}
-	if input.ContextLines != nil {
-		queryParams.Set("contextLines", strconv.Itoa(*input.ContextLines))
-	} else {
-		// Set default value of 3 for ContextLines
-		queryParams.Set("contextLines", "3")
+	if !client.SetQueryParam(queryParams, "contextLines", input.ContextLines, nil) {
+		client.SetQueryParam(queryParams, "contextLines", 3, nil)
 	}
 	client.SetQueryParam(queryParams, "whitespace", input.Whitespace, "")
 
 	return client.ExecuteStream(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID) + ".diff"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID) + ".diff"},
 		queryParams,
 		nil,
 		client.AcceptText,
@@ -930,7 +922,7 @@ func (c *BitbucketClient) TestPullRequestCanMerge(input TestPullRequestCanMergeI
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "merge"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "merge"},
 		nil,
 		nil,
 		client.AcceptJSON,

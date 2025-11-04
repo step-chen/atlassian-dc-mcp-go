@@ -30,7 +30,7 @@ func (c *BitbucketClient) GetProjects(input GetProjectsInput) (types.MapOutput, 
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects"},
+		[]any{"rest", "api", "latest", "projects"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -58,7 +58,7 @@ func (c *BitbucketClient) GetProject(input GetProjectInput) (types.MapOutput, er
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -86,7 +86,7 @@ func (c *BitbucketClient) GetProjectPrimaryEnhancedEntityLink(input GetProjectPr
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "jira", "latest", "projects", input.ProjectKey, "primary-enhanced-entitylink"},
+		[]any{"rest", "jira", "latest", "projects", input.ProjectKey, "primary-enhanced-entitylink"},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -119,7 +119,7 @@ func (c *BitbucketClient) GetProjectTasks(input GetProjectTasksInput) (types.Map
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "default-tasks", "latest", "projects", input.ProjectKey, "tasks"},
+		[]any{"rest", "default-tasks", "latest", "projects", input.ProjectKey, "tasks"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -152,7 +152,7 @@ func (c *BitbucketClient) GetRepositoryTasks(input GetRepositoryTasksInput) (typ
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "default-tasks", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "tasks"},
+		[]any{"rest", "default-tasks", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "tasks"},
 		queryParams,
 		nil,
 		client.AcceptJSON,

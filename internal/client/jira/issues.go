@@ -28,7 +28,7 @@ func (c *JiraClient) GetIssue(input GetIssueInput) (types.MapOutput, error) {
 	err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "2", "issue", input.IssueKey},
+		[]any{"rest", "api", "2", "issue", input.IssueKey},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -97,7 +97,7 @@ func (c *JiraClient) CreateIssueWithPayload(input CreateIssueWithPayloadInput) (
 	err = client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPost,
-		[]string{"rest", "api", "2", "issue"},
+		[]any{"rest", "api", "2", "issue"},
 		queryParams,
 		jsonPayload,
 		client.AcceptJSON,
@@ -195,7 +195,7 @@ func (c *JiraClient) UpdateIssueWithOptions(input UpdateIssueWithOptionsInput) (
 	err = client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPut,
-		[]string{"rest", "api", "2", "issue", input.IssueKey},
+		[]any{"rest", "api", "2", "issue", input.IssueKey},
 		queryParams,
 		jsonPayload,
 		client.AcceptJSON,
@@ -221,7 +221,7 @@ func (c *JiraClient) GetTransitions(input GetTransitionsInput) (types.MapOutput,
 	err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "2", "issue", input.IssueKey, "transitions"},
+		[]any{"rest", "api", "2", "issue", input.IssueKey, "transitions"},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -256,7 +256,7 @@ func (c *JiraClient) TransitionIssue(input TransitionIssueInput) error {
 	err = client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPost,
-		[]string{"rest", "api", "2", "issue", input.IssueKey, "transitions"},
+		[]any{"rest", "api", "2", "issue", input.IssueKey, "transitions"},
 		nil,
 		jsonPayload,
 		client.AcceptJSON,
@@ -282,7 +282,7 @@ func (c *JiraClient) GetSubtasks(input GetSubtasksInput) ([]types.MapOutput, err
 	err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "2", "issue", input.IssueKey, "subtask"},
+		[]any{"rest", "api", "2", "issue", input.IssueKey, "subtask"},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -320,7 +320,7 @@ func (c *JiraClient) GetAgileIssue(input GetAgileIssueInput) (types.MapOutput, e
 	err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "agile", "1.0", "issue", input.IssueIdOrKey},
+		[]any{"rest", "agile", "1.0", "issue", input.IssueIdOrKey},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -350,7 +350,7 @@ func (c *JiraClient) GetIssueEstimationForBoard(input GetIssueEstimationForBoard
 	err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "agile", "1.0", "issue", input.IssueIdOrKey, "estimation"},
+		[]any{"rest", "agile", "1.0", "issue", input.IssueIdOrKey, "estimation"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -387,7 +387,7 @@ func (c *JiraClient) SetIssueEstimationForBoard(input SetIssueEstimationForBoard
 	err = client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPut,
-		[]string{"rest", "agile", "1.0", "issue", input.IssueIdOrKey, "estimation"},
+		[]any{"rest", "agile", "1.0", "issue", input.IssueIdOrKey, "estimation"},
 		queryParams,
 		jsonPayload,
 		client.AcceptJSON,

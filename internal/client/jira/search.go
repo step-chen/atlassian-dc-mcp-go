@@ -54,7 +54,7 @@ func (c *JiraClient) SearchIssues(input SearchIssuesInput) (types.MapOutput, err
 	err = client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPost,
-		[]string{"rest", "api", "2", "search"},
+		[]any{"rest", "api", "2", "search"},
 		nil,
 		jsonPayload,
 		client.AcceptJSON,

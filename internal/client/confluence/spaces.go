@@ -29,7 +29,7 @@ func (c *ConfluenceClient) GetSpace(input GetSpaceInput) (types.MapOutput, error
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "space", input.SpaceKey},
+		[]any{"rest", "api", "space", input.SpaceKey},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -63,7 +63,7 @@ func (c *ConfluenceClient) GetContentsInSpace(input GetContentsInSpaceInput) (ty
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "space", input.SpaceKey, "content"},
+		[]any{"rest", "api", "space", input.SpaceKey, "content"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -101,7 +101,7 @@ func (c *ConfluenceClient) GetContentsByType(input GetContentsByTypeInput) (type
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "space", input.SpaceKey, "content", input.ContentType},
+		[]any{"rest", "api", "space", input.SpaceKey, "content", input.ContentType},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -146,7 +146,7 @@ func (c *ConfluenceClient) GetSpacesByKey(input GetSpacesByKeyInput) (types.MapO
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "space"},
+		[]any{"rest", "api", "space"},
 		queryParams,
 		nil,
 		client.AcceptJSON,

@@ -19,7 +19,7 @@ func (c *ConfluenceClient) GetCurrentUser() (types.MapOutput, error) {
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "user", "current"},
+		[]any{"rest", "api", "user", "current"},
 		nil,
 		nil,
 		client.AcceptJSON,

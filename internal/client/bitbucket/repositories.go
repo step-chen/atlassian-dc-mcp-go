@@ -22,7 +22,7 @@ func (c *BitbucketClient) GetRepository(input GetRepositoryInput) (types.MapOutp
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -57,7 +57,7 @@ func (c *BitbucketClient) GetRepositories(input GetRepositoriesInput) (types.Map
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "repos"},
+		[]any{"rest", "api", "latest", "repos"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -89,7 +89,7 @@ func (c *BitbucketClient) GetProjectRepositories(input GetProjectRepositoriesInp
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -117,7 +117,7 @@ func (c *BitbucketClient) GetRepositoryLabels(input GetRepositoryLabelsInput) ([
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "labels"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "labels"},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -151,7 +151,7 @@ func (c *BitbucketClient) GetFileContent(input GetFileContentInput) ([]byte, err
 	respBody, err := client.ExecuteStream(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "raw", input.Path},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "raw", input.Path},
 		queryParams,
 		nil,
 		client.AcceptText,
@@ -187,16 +187,16 @@ func (c *BitbucketClient) GetFiles(input GetFilesInput) (types.MapOutput, error)
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
 
-	pathParams := []string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "files"}
+	pathSegments := []any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "files"}
 	if input.Path != "" {
-		pathParams = append(pathParams, input.Path)
+		pathSegments = append(pathSegments, input.Path)
 	}
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		pathParams,
+		pathSegments,
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -230,7 +230,7 @@ func (c *BitbucketClient) GetChanges(input GetChangesInput) (types.MapOutput, er
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "changes"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "changes"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -265,7 +265,7 @@ func (c *BitbucketClient) CompareChanges(input CompareChangesInput) (types.MapOu
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "compare", "changes"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "compare", "changes"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -297,7 +297,7 @@ func (c *BitbucketClient) GetForks(input GetForksInput) (types.MapOutput, error)
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "forks"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "forks"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -332,7 +332,7 @@ func (c *BitbucketClient) GetReadme(input GetReadmeInput) (types.MapOutput, erro
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "readme"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "readme"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -364,7 +364,7 @@ func (c *BitbucketClient) GetRelatedRepositories(input GetRelatedRepositoriesInp
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "related"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "related"},
 		queryParams,
 		nil,
 		client.AcceptJSON,

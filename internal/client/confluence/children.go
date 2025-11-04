@@ -24,7 +24,7 @@ func (c *ConfluenceClient) GetContentChildren(input GetContentChildrenInput) (ty
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "content", input.ContentID, "child"},
+		[]any{"rest", "api", "content", input.ContentID, "child"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -55,7 +55,7 @@ func (c *ConfluenceClient) GetContentChildrenByType(input GetContentChildrenByTy
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "content", input.ContentID, "child", input.ChildType},
+		[]any{"rest", "api", "content", input.ContentID, "child", input.ChildType},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -86,7 +86,7 @@ func (c *ConfluenceClient) GetContentComments(input GetContentCommentsInput) (ty
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "content", input.ContentID, "child", "comment"},
+		[]any{"rest", "api", "content", input.ContentID, "child", "comment"},
 		queryParams,
 		nil,
 		client.AcceptJSON,

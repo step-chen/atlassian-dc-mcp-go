@@ -24,7 +24,7 @@ func (c *JiraClient) GetUserByName(input GetUserByNameInput) (types.MapOutput, e
 	err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "2", "user"},
+		[]any{"rest", "api", "2", "user"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -53,7 +53,7 @@ func (c *JiraClient) GetUserByKey(input GetUserByKeyInput) (types.MapOutput, err
 	err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "2", "user"},
+		[]any{"rest", "api", "2", "user"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -84,7 +84,7 @@ func (c *JiraClient) SearchUsers(input SearchUsersInput) ([]types.MapOutput, err
 	err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "2", "user", "search"},
+		[]any{"rest", "api", "2", "user", "search"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -110,7 +110,7 @@ func (c *JiraClient) GetCurrentUser() (types.MapOutput, error) {
 	err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "2", "myself"},
+		[]any{"rest", "api", "2", "myself"},
 		nil,
 		nil,
 		client.AcceptJSON,

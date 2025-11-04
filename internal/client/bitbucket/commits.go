@@ -3,7 +3,6 @@ package bitbucket
 import (
 	"net/http"
 	"net/url"
-	"strconv"
 
 	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
@@ -32,7 +31,7 @@ func (c *BitbucketClient) GetCommits(input GetCommitsInput) (types.MapOutput, er
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -69,7 +68,7 @@ func (c *BitbucketClient) GetPullRequestCommits(input GetPullRequestCommitsInput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID), "commits"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "commits"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -100,7 +99,7 @@ func (c *BitbucketClient) GetCommit(input GetCommitInput) (types.MapOutput, erro
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -134,7 +133,7 @@ func (c *BitbucketClient) GetCommitChanges(input GetCommitChangesInput) (types.M
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID, "changes"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID, "changes"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -169,7 +168,7 @@ func (c *BitbucketClient) GetCommitDiffStatsSummary(input GetCommitDiffStatsSumm
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID, "diff-stats-summary", input.Path},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID, "diff-stats-summary", input.Path},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -202,22 +201,20 @@ func (c *BitbucketClient) GetDiffBetweenCommits(input GetDiffBetweenCommitsInput
 	client.SetQueryParam(queryParams, "whitespace", input.Whitespace, "")
 	client.SetQueryParam(queryParams, "fromRepo", input.FromRepo, "")
 
-	var pathSegments = []string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "compare", "diff" + input.Path}
-
-	var diff string
+	var output string
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		pathSegments,
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "compare", "diff" + input.Path},
 		queryParams,
 		nil,
 		client.AcceptJSON,
-		&diff,
+		&output,
 	); err != nil {
 		return "", err
 	}
 
-	return diff, nil
+	return output, nil
 }
 
 // GetDiffBetweenRevisions retrieves the diff between revisions.
@@ -242,20 +239,20 @@ func (c *BitbucketClient) GetDiffBetweenRevisions(input GetDiffBetweenRevisionsI
 	client.SetQueryParam(queryParams, "autoSrcPath", input.AutoSrcPath, "")
 	client.SetQueryParam(queryParams, "withComments", input.WithComments, "")
 
-	var diff string
+	var output string
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID, "diff", input.Path},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID, "diff", input.Path},
 		queryParams,
 		nil,
 		client.AcceptJSON,
-		&diff,
+		&output,
 	); err != nil {
 		return "", err
 	}
 
-	return diff, nil
+	return output, nil
 }
 
 // GetCommitComment retrieves a specific comment on a commit.
@@ -274,7 +271,7 @@ func (c *BitbucketClient) GetCommitComment(input GetCommitCommentInput) (types.M
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID, "comments", strconv.Itoa(input.CommentID)},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID, "comments", input.CommentID},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -308,7 +305,7 @@ func (c *BitbucketClient) GetCommitComments(input GetCommitCommentsInput) (types
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID, "comments"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID, "comments"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -341,7 +338,7 @@ func (c *BitbucketClient) GetJiraIssueCommits(input GetJiraIssueCommitsInput) (t
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "jira", "latest", "issues", input.IssueKey, "commits"},
+		[]any{"rest", "jira", "latest", "issues", input.IssueKey, "commits"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -373,18 +370,18 @@ func (c *BitbucketClient) GetDiffBetweenRevisionsForPath(input GetDiffBetweenRev
 	client.SetQueryParam(queryParams, "srcPath", input.SrcPath, "")
 	client.SetQueryParam(queryParams, "whitespace", input.Whitespace, "")
 
-	var diff string
+	var output string
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "diff", input.Path},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "diff", input.Path},
 		queryParams,
 		nil,
 		client.AcceptJSON,
-		&diff,
+		&output,
 	); err != nil {
 		return "", err
 	}
 
-	return diff, nil
+	return output, nil
 }

@@ -18,8 +18,7 @@ import (
 //   - types.MapOutput: The worklogs data
 //   - error: An error if the request fails
 func (c *JiraClient) GetWorklogs(input GetWorklogsInput) (types.MapOutput, error) {
-	pathSegments := []string{"rest", "api", "2", "issue", input.IssueKey, "worklog"}
-
+	pathSegments := []any{"rest", "api", "2", "issue", input.IssueKey, "worklog"}
 	if input.WorklogId != "" {
 		pathSegments = append(pathSegments, input.WorklogId)
 	}
@@ -50,7 +49,7 @@ func (c *JiraClient) GetWorklogs(input GetWorklogsInput) (types.MapOutput, error
 //   - types.MapOutput: The created worklog data
 //   - error: An error if the request fails
 func (c *JiraClient) AddWorklog(input AddWorklogInput) (types.MapOutput, error) {
-	pathSegments := []string{"rest", "api", "2", "issue", input.IssueKey, "worklog"}
+	pathSegments := []any{"rest", "api", "2", "issue", input.IssueKey, "worklog"}
 
 	// Prepare query parameters
 	queryParams := url.Values{}

@@ -18,7 +18,7 @@ func (c *JiraClient) GetPriorities() ([]types.MapOutput, error) {
 	err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "2", "priority"},
+		[]any{"rest", "api", "2", "priority"},
 		nil,
 		nil,
 		client.AcceptJSON,

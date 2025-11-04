@@ -37,7 +37,7 @@ func (c *BitbucketClient) GetBranches(input GetBranchesInput) (types.MapOutput, 
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "branches"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "branches"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -65,7 +65,7 @@ func (c *BitbucketClient) GetDefaultBranch(input GetDefaultBranchInput) (types.M
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "default-branch"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "default-branch"},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -97,7 +97,7 @@ func (c *BitbucketClient) GetBranch(input GetBranchInput) (types.MapOutput, erro
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "branch-utils", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "branches", "info", input.CommitId},
+		[]any{"rest", "branch-utils", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "branches", "info", input.CommitId},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -136,7 +136,7 @@ func (c *BitbucketClient) CreateBranch(input CreateBranchInput) (types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPost,
-		[]string{"rest", "branch-utils", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "branches"},
+		[]any{"rest", "branch-utils", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "branches"},
 		nil,
 		jsonPayload,
 		client.AcceptJSON,

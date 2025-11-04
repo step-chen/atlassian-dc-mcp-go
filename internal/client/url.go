@@ -14,6 +14,20 @@ import (
 	"atlassian-dc-mcp-go/internal/utils/logging"
 )
 
+// convertAnyToStringSlice converts a slice of any to a slice of strings.
+// It preserves the order of elements and converts each element to its string representation.
+func convertAnyToStringSlice(slice []any) []string {
+	if slice == nil {
+		return nil
+	}
+
+	result := make([]string, len(slice))
+	for i, v := range slice {
+		result[i] = fmt.Sprintf("%v", v)
+	}
+	return result
+}
+
 type Accept string
 
 const (
@@ -21,13 +35,14 @@ const (
 	AcceptText = Accept("text/plain")
 )
 
-func BuildURL(baseURL string, pathParams []string, queryParams map[string][]string) (string, error) {
+func buildURL(baseURL string, pathSegments []any, queryParams map[string][]string) (string, error) {
+	stringPathParams := convertAnyToStringSlice(pathSegments)
 	u, err := url.Parse(baseURL)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse base URL: %w", err)
 	}
 
-	u = u.JoinPath(pathParams...)
+	u = u.JoinPath(stringPathParams...)
 
 	q := u.Query()
 	for key, values := range queryParams {
@@ -40,8 +55,8 @@ func BuildURL(baseURL string, pathParams []string, queryParams map[string][]stri
 	return u.String(), nil
 }
 
-func BuildHttpRequest(method, baseURL string, pathParams []string, queryParams map[string][]string, body []byte, token string, accept Accept) (*http.Request, error) {
-	url, err := BuildURL(baseURL, pathParams, queryParams)
+func buildHttpRequest(method, baseURL string, pathSegments []any, queryParams map[string][]string, body []byte, token string, accept Accept) (*http.Request, error) {
+	url, err := buildURL(baseURL, pathSegments, queryParams)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build URL: %w", err)
 	}
@@ -68,11 +83,11 @@ func BuildHttpRequest(method, baseURL string, pathParams []string, queryParams m
 	return req, nil
 }
 
-func SetRequiredPathParam(pathParams url.Values, path string) {
+func SetRequiredPathParam(queryParams url.Values, path string) {
 	if path == "" {
-		pathParams.Add("path", "/")
+		queryParams.Add("path", "/")
 	} else {
-		pathParams.Add("path", path)
+		queryParams.Add("path", path)
 	}
 }
 
@@ -84,20 +99,20 @@ func SetRequiredPathParam(pathParams url.Values, path string) {
 // - string: set only if not empty
 // - bool: always set
 // - pointers: set only if not nil and the dereferenced value is valid
-func SetQueryParam(queryParams url.Values, key string, value any, invalid any) {
+func SetQueryParam(queryParams url.Values, key string, value any, invalid any) bool {
 	// Handle slice comparisons specially since slices are not comparable
 	if slice, ok := value.([]string); ok {
 		// Check if slice is empty
 		if len(slice) == 0 {
 			// Also check if the invalid value is an empty slice
 			if invalidSlice, ok := invalid.([]string); ok && len(invalidSlice) == 0 {
-				return
+				return false
 			} else if invalid == nil {
-				return
+				return false
 			}
 		}
 		queryParams[key] = slice
-		return
+		return true
 	}
 
 	// Handle pointer types
@@ -105,40 +120,44 @@ func SetQueryParam(queryParams url.Values, key string, value any, invalid any) {
 	case *string:
 		if v != nil && *v != "" && *v != invalid {
 			queryParams.Set(key, *v)
+			return true
 		}
-		return
 	case *int:
 		if v != nil && *v > 0 {
 			queryParams.Set(key, strconv.Itoa(*v))
+			return true
 		}
-		return
 	case *bool:
 		if v != nil {
 			queryParams.Set(key, strconv.FormatBool(*v))
+			return true
 		}
-		return
+	case string:
+		if v != "" && v != invalid {
+			queryParams.Set(key, v)
+			return true
+		}
+	case int:
+		if v > 0 && v != invalid {
+			queryParams.Set(key, strconv.Itoa(v))
+			return true
+		}
+	case bool:
+		// For bool values, we ignore the invalid check since it's unclear what
+		// an "invalid" bool value would be, so we always set it
+		queryParams.Set(key, strconv.FormatBool(v))
+		return true
 	default:
 		// For all other types, compare with invalid value
 		if value != invalid {
 			// Special handling for basic types
-			switch val := value.(type) {
-			case string:
-				if val != "" {
-					queryParams.Set(key, val)
-				}
-			case int:
-				if val > 0 {
-					queryParams.Set(key, strconv.Itoa(val))
-				}
-			case bool:
-				queryParams.Set(key, strconv.FormatBool(val))
-			default:
-				if valStr := fmt.Sprintf("%v", val); valStr != "" {
-					queryParams.Set(key, valStr)
-				}
+			if valStr := fmt.Sprintf("%v", value); valStr != "" && valStr != fmt.Sprintf("%v", invalid) {
+				queryParams.Set(key, valStr)
+				return true
 			}
 		}
 	}
+	return false
 }
 
 // SetRequestBodyParam sets a request body parameter based on its value.
@@ -182,17 +201,14 @@ func SetRequestBodyParam(bodyParams map[string]interface{}, key string, value in
 			bodyParams[key] = *v
 		}
 	case types.MapOutput:
-		// For MapOutput, set only if not nil
 		if v != nil {
 			bodyParams[key] = v
 		}
 	case []types.MapOutput:
-		// For []MapOutput, set only if not empty
 		if len(v) > 0 {
 			bodyParams[key] = v
 		}
 	default:
-		// For other types, only set if not nil
 		if v != nil {
 			bodyParams[key] = v
 		}

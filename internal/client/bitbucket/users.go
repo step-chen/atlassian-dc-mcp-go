@@ -24,7 +24,7 @@ func (c *BitbucketClient) GetUser(input GetUserInput) (types.MapOutput, error) {
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "users", input.UserSlug},
+		[]any{"rest", "api", "latest", "users", input.UserSlug},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -66,7 +66,7 @@ func (c *BitbucketClient) GetUsers(input GetUsersInput) (types.MapOutput, error)
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "users"},
+		[]any{"rest", "api", "latest", "users"},
 		queryParams,
 		nil,
 		client.AcceptJSON,

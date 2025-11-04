@@ -16,7 +16,7 @@ func (c *JiraClient) GetIssueTypes() ([]types.MapOutput, error) {
 	err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "2", "issuetype"},
+		[]any{"rest", "api", "2", "issuetype"},
 		nil,
 		nil,
 		client.AcceptJSON,

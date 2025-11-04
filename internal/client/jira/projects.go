@@ -21,7 +21,7 @@ func (c *JiraClient) GetProject(input GetProjectInput) (types.MapOutput, error) 
 	err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "2", "project", input.ProjectKey},
+		[]any{"rest", "api", "2", "project", input.ProjectKey},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -53,7 +53,7 @@ func (c *JiraClient) GetAllProjects(input GetAllProjectsInput) ([]types.MapOutpu
 	err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "2", "project"},
+		[]any{"rest", "api", "2", "project"},
 		queryParams,
 		nil,
 		client.AcceptJSON,

@@ -26,7 +26,7 @@ func (c *ConfluenceClient) GetRelatedLabels(input GetRelatedLabelsInput) (types.
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "label", input.LabelName, "related"},
+		[]any{"rest", "api", "label", input.LabelName, "related"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -60,7 +60,7 @@ func (c *ConfluenceClient) GetLabels(input GetLabelsInput) (types.MapOutput, err
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "label"},
+		[]any{"rest", "api", "label"},
 		queryParams,
 		nil,
 		client.AcceptJSON,

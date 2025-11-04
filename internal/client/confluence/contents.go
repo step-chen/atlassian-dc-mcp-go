@@ -35,7 +35,7 @@ func (c *ConfluenceClient) GetContent(input GetContentInput) (types.MapOutput, e
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "content"},
+		[]any{"rest", "api", "content"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -63,7 +63,7 @@ func (c *ConfluenceClient) GetContentByID(input GetContentByIDInput) (types.MapO
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "content", input.ContentID},
+		[]any{"rest", "api", "content", input.ContentID},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -95,7 +95,7 @@ func (c *ConfluenceClient) SearchContent(input SearchContentInput) (types.MapOut
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "content", "search"},
+		[]any{"rest", "api", "content", "search"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -133,7 +133,7 @@ func (c *ConfluenceClient) CreateContent(input CreateContentInput) (types.MapOut
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPost,
-		[]string{"rest", "api", "content"},
+		[]any{"rest", "api", "content"},
 		nil,
 		jsonPayload,
 		client.AcceptJSON,
@@ -163,7 +163,7 @@ func (c *ConfluenceClient) UpdateContent(input UpdateContentInput) (types.MapOut
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPut,
-		[]string{"rest", "api", "content", input.ContentID},
+		[]any{"rest", "api", "content", input.ContentID},
 		nil,
 		jsonPayload,
 		client.AcceptJSON,
@@ -186,7 +186,7 @@ func (c *ConfluenceClient) DeleteContent(input DeleteContentInput) error {
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodDelete,
-		[]string{"rest", "api", "content", input.ContentID},
+		[]any{"rest", "api", "content", input.ContentID},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -214,7 +214,7 @@ func (c *ConfluenceClient) GetContentHistory(input GetContentHistoryInput) (type
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "content", input.ContentID, "history"},
+		[]any{"rest", "api", "content", input.ContentID, "history"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -258,7 +258,7 @@ func (c *ConfluenceClient) AddComment(input AddCommentInput) (types.MapOutput, e
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPost,
-		[]string{"rest", "api", "content"},
+		[]any{"rest", "api", "content"},
 		nil,
 		jsonPayload,
 		client.AcceptJSON,
@@ -290,7 +290,7 @@ func (c *ConfluenceClient) GetAttachments(input GetAttachmentsInput) (types.MapO
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "content", input.ContentID, "child", "attachment"},
+		[]any{"rest", "api", "content", input.ContentID, "child", "attachment"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -315,7 +315,7 @@ func (c *ConfluenceClient) GetExtractedText(input GetExtractedTextInput) (types.
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "content", input.ContentID, "child", "attachment", input.AttachmentID, "extractedText"},
+		[]any{"rest", "api", "content", input.ContentID, "child", "attachment", input.AttachmentID, "extractedText"},
 		nil,
 		nil,
 		client.AcceptJSON,
@@ -344,7 +344,7 @@ func (c *ConfluenceClient) GetContentLabels(input GetContentLabelsInput) (types.
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "content", input.ContentID, "label"},
+		[]any{"rest", "api", "content", input.ContentID, "label"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -380,7 +380,7 @@ func (c *ConfluenceClient) ScanContentBySpaceKey(input ScanContentBySpaceKeyInpu
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "content", "scan"},
+		[]any{"rest", "api", "content", "scan"},
 		queryParams,
 		nil,
 		client.AcceptJSON,

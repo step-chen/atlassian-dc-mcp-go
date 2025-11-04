@@ -30,7 +30,7 @@ func (c *BitbucketClient) GetTags(input GetTagsInput) (types.MapOutput, error) {
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "tags"},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "tags"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -58,7 +58,7 @@ func (c *BitbucketClient) GetTag(input GetTagInput) (types.MapOutput, error) {
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "tags", input.Name},
+		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "tags", input.Name},
 		nil,
 		nil,
 		client.AcceptJSON,

@@ -29,7 +29,7 @@ func (c *JiraClient) GetComments(input GetCommentsInput) (types.MapOutput, error
 	err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "2", "issue", input.IssueKey, "comment"},
+		[]any{"rest", "api", "2", "issue", input.IssueKey, "comment"},
 		queryParams,
 		nil,
 		client.AcceptJSON,
@@ -63,7 +63,7 @@ func (c *JiraClient) AddComment(input AddCommentInput) (types.MapOutput, error) 
 	err = client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPost,
-		[]string{"rest", "api", "2", "issue", input.IssueKey, "comment"},
+		[]any{"rest", "api", "2", "issue", input.IssueKey, "comment"},
 		nil,
 		jsonPayload,
 		client.AcceptJSON,

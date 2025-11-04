@@ -3,7 +3,6 @@ package confluence
 import (
 	"net/http"
 	"net/url"
-	"strconv"
 
 	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
@@ -24,14 +23,14 @@ func (c *ConfluenceClient) Search(input SearchInput) (types.MapOutput, error) {
 	client.SetQueryParam(queryParams, "excerpt", input.Excerpt, "")
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
-	client.SetQueryParam(queryParams, "includeArchivedSpaces", strconv.FormatBool(input.IncludeArchivedSpaces), "")
+	client.SetQueryParam(queryParams, "includeArchivedSpaces", input.IncludeArchivedSpaces, "")
 	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodGet,
-		[]string{"rest", "api", "search"},
+		[]any{"rest", "api", "search"},
 		queryParams,
 		nil,
 		client.AcceptJSON,

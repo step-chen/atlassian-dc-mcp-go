@@ -47,7 +47,7 @@ func (c *BitbucketClient) SearchCode(input SearchCodeInput) (types.MapOutput, er
 	if err := client.ExecuteRequest(
 		c.BaseClient,
 		http.MethodPost,
-		[]string{"rest", "search", "latest", "search"},
+		[]any{"rest", "search", "latest", "search"},
 		nil,
 		jsonPayload,
 		client.AcceptJSON,
