@@ -100,23 +100,13 @@ func SetRequiredPathParam(queryParams url.Values, path string) {
 // - bool: always set
 // - pointers: set only if not nil and the dereferenced value is valid
 func SetQueryParam(queryParams url.Values, key string, value any, invalid any) bool {
-	// Handle slice comparisons specially since slices are not comparable
-	if slice, ok := value.([]string); ok {
-		// Check if slice is empty
-		if len(slice) == 0 {
-			// Also check if the invalid value is an empty slice
-			if invalidSlice, ok := invalid.([]string); ok && len(invalidSlice) == 0 {
-				return false
-			} else if invalid == nil {
-				return false
-			}
-		}
-		queryParams[key] = slice
-		return true
-	}
-
-	// Handle pointer types
 	switch v := value.(type) {
+	case []string:
+		if len(v) == 0 {
+			return false
+		}
+		queryParams[key] = v
+		return true
 	case *string:
 		if v != nil && *v != "" && *v != invalid {
 			queryParams.Set(key, *v)
@@ -143,14 +133,10 @@ func SetQueryParam(queryParams url.Values, key string, value any, invalid any) b
 			return true
 		}
 	case bool:
-		// For bool values, we ignore the invalid check since it's unclear what
-		// an "invalid" bool value would be, so we always set it
 		queryParams.Set(key, strconv.FormatBool(v))
 		return true
 	default:
-		// For all other types, compare with invalid value
 		if value != invalid {
-			// Special handling for basic types
 			if valStr := fmt.Sprintf("%v", value); valStr != "" && valStr != fmt.Sprintf("%v", invalid) {
 				queryParams.Set(key, valStr)
 				return true
