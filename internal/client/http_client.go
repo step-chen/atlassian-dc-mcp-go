@@ -81,10 +81,29 @@ func ExecuteRequest(client *BaseClient, method string, pathSegments []any, query
 		return fmt.Errorf("failed to build request: %w", err)
 	}
 
-	// Execute the request with retry mechanism
-	err = executeHTTPRequest(client.HTTPClient, req, client.Name, result)
+	// Convert http.Request to retryablehttp.Request
+	retryReq, err := retryablehttp.FromRequest(req)
 	if err != nil {
-		return fmt.Errorf("request failed: %w", err)
+		return fmt.Errorf("[%s] failed to convert request: %w", client.Name, err)
+	}
+
+	// Execute the request with retry mechanism
+	resp, err := client.HTTPClient.Do(retryReq)
+	if err != nil {
+		return fmt.Errorf("[%s] request failed: %w", client.Name, err)
+	}
+	defer resp.Body.Close()
+
+	// Check for HTTP errors
+	if err := HandleHTTPError(resp, client.Name); err != nil {
+		return err
+	}
+
+	// Decode response if needed
+	if result != nil {
+		if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+			return fmt.Errorf("[%s] failed to decode response: %w", client.Name, err)
+		}
 	}
 
 	return nil
@@ -99,42 +118,6 @@ func ExecuteStream(client *BaseClient, method string, pathSegments []any, queryP
 		return nil, fmt.Errorf("failed to build request: %w", err)
 	}
 
-	// Execute the stream request using the common utility function
-	return executeStreamRequest(client.HTTPClient, req, client.Name, timeout)
-}
-
-// ExecuteHTTPRequest executes an HTTP request with retry logic using hashicorp/go-retryablehttp
-func executeHTTPRequest(client *retryablehttp.Client, req *http.Request, service string, result interface{}) error {
-	// Convert http.Request to retryablehttp.Request
-	retryReq, err := retryablehttp.FromRequest(req)
-	if err != nil {
-		return fmt.Errorf("[%s] failed to convert request: %w", service, err)
-	}
-
-	// Execute the request with retry mechanism
-	resp, err := client.Do(retryReq)
-	if err != nil {
-		return fmt.Errorf("[%s] request failed: %w", service, err)
-	}
-	defer resp.Body.Close()
-
-	// Check for HTTP errors
-	if err := HandleHTTPError(resp, service); err != nil {
-		return err
-	}
-
-	// Decode response if needed
-	if result != nil {
-		if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
-			return fmt.Errorf("[%s] failed to decode response: %w", service, err)
-		}
-	}
-
-	return nil
-}
-
-// ExecuteStreamRequest executes an HTTP request with retry logic and returns a stream of the response body.
-func executeStreamRequest(client *retryablehttp.Client, req *http.Request, service string, timeout time.Duration) (io.ReadCloser, error) {
 	// Create a context with timeout
 	ctx := context.Background()
 	if timeout > 0 {
@@ -147,19 +130,19 @@ func executeStreamRequest(client *retryablehttp.Client, req *http.Request, servi
 	// Convert the request to a retryable request
 	retryableReq, err := retryablehttp.FromRequest(req)
 	if err != nil {
-		return nil, fmt.Errorf("[%s] failed to convert request: %w", service, err)
+		return nil, fmt.Errorf("[%s] failed to convert request: %w", client.Name, err)
 	}
 
 	// Execute the request
-	resp, err := client.Do(retryableReq)
+	resp, err := client.HTTPClient.Do(retryableReq)
 	if err != nil {
-		return nil, fmt.Errorf("[%s] request failed: %w", service, err)
+		return nil, fmt.Errorf("[%s] request failed: %w", client.Name, err)
 	}
 
 	// Check for non-2xx status codes
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		resp.Body.Close()
-		return nil, fmt.Errorf("[%s] request failed with status %d", service, resp.StatusCode)
+		return nil, fmt.Errorf("[%s] request failed with status %d", client.Name, resp.StatusCode)
 	}
 
 	return resp.Body, nil
