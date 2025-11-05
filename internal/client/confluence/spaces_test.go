@@ -2,6 +2,7 @@ package confluence
 
 import (
 	"atlassian-dc-mcp-go/internal/client/testutils"
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,7 +43,7 @@ func TestGetSpace(t *testing.T) {
 			input := GetSpaceInput{
 				SpaceKey: tt.spaceKey,
 			}
-			result, err := client.GetSpace(input)
+			result, err := client.GetSpace(context.Background(), input)
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -60,7 +61,7 @@ func TestGetSpace(t *testing.T) {
 			SpaceKey: testConfig.Spaces.Key,
 			Expand:   []string{"description", "homepage"},
 		}
-		result, err := client.GetSpace(input)
+		result, err := client.GetSpace(context.Background(), input)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, result)

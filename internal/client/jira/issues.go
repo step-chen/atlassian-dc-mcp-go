@@ -2,6 +2,7 @@
 package jira
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -19,13 +20,14 @@ import (
 // Returns:
 //   - types.MapOutput: The issue data
 //   - error: An error if the request fails
-func (c *JiraClient) GetIssue(input GetIssueInput) (types.MapOutput, error) {
+func (c *JiraClient) GetIssue(ctx context.Context, input GetIssueInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	// Pass nil as the invalid value for fields since we want to include fields when the slice is empty
 	client.SetQueryParam(queryParams, "fields", input.Fields, nil)
 
 	var output types.MapOutput
 	err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "2", "issue", input.IssueKey},
@@ -49,7 +51,7 @@ func (c *JiraClient) GetIssue(input GetIssueInput) (types.MapOutput, error) {
 // Returns:
 //   - types.MapOutput: The created issue data
 //   - error: An error if the request fails
-func (c *JiraClient) CreateIssue(input CreateIssueInput) (types.MapOutput, error) {
+func (c *JiraClient) CreateIssue(ctx context.Context, input CreateIssueInput) (types.MapOutput, error) {
 	payload := types.MapOutput{
 		"fields": types.MapOutput{
 			"project": map[string]string{
@@ -71,7 +73,7 @@ func (c *JiraClient) CreateIssue(input CreateIssueInput) (types.MapOutput, error
 		UpdateHistory: false,
 	}
 
-	return c.CreateIssueWithPayload(createPayloadInput)
+	return c.CreateIssueWithPayload(ctx, createPayloadInput)
 }
 
 // CreateIssueWithPayload creates a new issue with a custom payload.
@@ -82,7 +84,7 @@ func (c *JiraClient) CreateIssue(input CreateIssueInput) (types.MapOutput, error
 // Returns:
 //   - types.MapOutput: The created issue data
 //   - error: An error if the request fails
-func (c *JiraClient) CreateIssueWithPayload(input CreateIssueWithPayloadInput) (types.MapOutput, error) {
+func (c *JiraClient) CreateIssueWithPayload(ctx context.Context, input CreateIssueWithPayloadInput) (types.MapOutput, error) {
 	jsonPayload, err := json.Marshal(input.Payload)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
@@ -95,6 +97,7 @@ func (c *JiraClient) CreateIssueWithPayload(input CreateIssueWithPayloadInput) (
 
 	var output types.MapOutput
 	err = client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPost,
 		[]any{"rest", "api", "2", "issue"},
@@ -118,7 +121,7 @@ func (c *JiraClient) CreateIssueWithPayload(input CreateIssueWithPayloadInput) (
 // Returns:
 //   - types.MapOutput: The created sub-task data
 //   - error: An error if the request fails
-func (c *JiraClient) CreateSubTask(input CreateSubTaskInput) (types.MapOutput, error) {
+func (c *JiraClient) CreateSubTask(ctx context.Context, input CreateSubTaskInput) (types.MapOutput, error) {
 	payload := types.MapOutput{
 		"fields": types.MapOutput{
 			"project": map[string]string{
@@ -143,7 +146,7 @@ func (c *JiraClient) CreateSubTask(input CreateSubTaskInput) (types.MapOutput, e
 		UpdateHistory: false,
 	}
 
-	return c.CreateIssueWithPayload(createPayloadInput)
+	return c.CreateIssueWithPayload(ctx, createPayloadInput)
 }
 
 // UpdateIssue updates an existing issue.
@@ -154,8 +157,8 @@ func (c *JiraClient) CreateSubTask(input CreateSubTaskInput) (types.MapOutput, e
 // Returns:
 //   - types.MapOutput: The updated issue data
 //   - error: An error if the request fails
-func (c *JiraClient) UpdateIssue(input UpdateIssueInput) (types.MapOutput, error) {
-	return c.UpdateIssueWithOptions(UpdateIssueWithOptionsInput{
+func (c *JiraClient) UpdateIssue(ctx context.Context, input UpdateIssueInput) (types.MapOutput, error) {
+	return c.UpdateIssueWithOptions(ctx, UpdateIssueWithOptionsInput{
 		IssueKey: input.IssueKey,
 		Updates:  input.Updates,
 		Options:  nil,
@@ -170,7 +173,7 @@ func (c *JiraClient) UpdateIssue(input UpdateIssueInput) (types.MapOutput, error
 // Returns:
 //   - types.MapOutput: The updated issue data
 //   - error: An error if the request fails
-func (c *JiraClient) UpdateIssueWithOptions(input UpdateIssueWithOptionsInput) (types.MapOutput, error) {
+func (c *JiraClient) UpdateIssueWithOptions(ctx context.Context, input UpdateIssueWithOptionsInput) (types.MapOutput, error) {
 
 	payload := types.MapOutput{}
 
@@ -193,6 +196,7 @@ func (c *JiraClient) UpdateIssueWithOptions(input UpdateIssueWithOptionsInput) (
 
 	var output types.MapOutput
 	err = client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPut,
 		[]any{"rest", "api", "2", "issue", input.IssueKey},
@@ -216,9 +220,10 @@ func (c *JiraClient) UpdateIssueWithOptions(input UpdateIssueWithOptionsInput) (
 // Returns:
 //   - types.MapOutput: The transitions data
 //   - error: An error if the request fails
-func (c *JiraClient) GetTransitions(input GetTransitionsInput) (types.MapOutput, error) {
+func (c *JiraClient) GetTransitions(ctx context.Context, input GetTransitionsInput) (types.MapOutput, error) {
 	var output types.MapOutput
 	err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "2", "issue", input.IssueKey, "transitions"},
@@ -241,7 +246,7 @@ func (c *JiraClient) GetTransitions(input GetTransitionsInput) (types.MapOutput,
 //
 // Returns:
 //   - error: An error if the request fails
-func (c *JiraClient) TransitionIssue(input TransitionIssueInput) error {
+func (c *JiraClient) TransitionIssue(ctx context.Context, input TransitionIssueInput) error {
 	transition := types.MapOutput{}
 	client.SetRequestBodyParam(transition, "id", input.TransitionID)
 
@@ -254,6 +259,7 @@ func (c *JiraClient) TransitionIssue(input TransitionIssueInput) error {
 	}
 
 	err = client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPost,
 		[]any{"rest", "api", "2", "issue", input.IssueKey, "transitions"},
@@ -277,9 +283,10 @@ func (c *JiraClient) TransitionIssue(input TransitionIssueInput) error {
 // Returns:
 //   - []types.MapOutput: The sub-tasks data
 //   - error: An error if the request fails
-func (c *JiraClient) GetSubtasks(input GetSubtasksInput) ([]types.MapOutput, error) {
+func (c *JiraClient) GetSubtasks(ctx context.Context, input GetSubtasksInput) ([]types.MapOutput, error) {
 	var outputs []types.MapOutput
 	err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "2", "issue", input.IssueKey, "subtask"},
@@ -303,7 +310,7 @@ func (c *JiraClient) GetSubtasks(input GetSubtasksInput) ([]types.MapOutput, err
 // Returns:
 //   - types.MapOutput: The agile issue data
 //   - error: An error if the request fails
-func (c *JiraClient) GetAgileIssue(input GetAgileIssueInput) (types.MapOutput, error) {
+func (c *JiraClient) GetAgileIssue(ctx context.Context, input GetAgileIssueInput) (types.MapOutput, error) {
 
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "expand", input.Expand, "")
@@ -318,6 +325,7 @@ func (c *JiraClient) GetAgileIssue(input GetAgileIssueInput) (types.MapOutput, e
 
 	var output types.MapOutput
 	err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "agile", "1.0", "issue", input.IssueIdOrKey},
@@ -341,13 +349,14 @@ func (c *JiraClient) GetAgileIssue(input GetAgileIssueInput) (types.MapOutput, e
 // Returns:
 //   - types.MapOutput: The estimation data
 //   - error: An error if the request fails
-func (c *JiraClient) GetIssueEstimationForBoard(input GetIssueEstimationForBoardInput) (types.MapOutput, error) {
+func (c *JiraClient) GetIssueEstimationForBoard(ctx context.Context, input GetIssueEstimationForBoardInput) (types.MapOutput, error) {
 
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "boardId", input.BoardId, int64(0))
 
 	var output types.MapOutput
 	err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "agile", "1.0", "issue", input.IssueIdOrKey, "estimation"},
@@ -371,7 +380,7 @@ func (c *JiraClient) GetIssueEstimationForBoard(input GetIssueEstimationForBoard
 // Returns:
 //   - types.MapOutput: The estimation data
 //   - error: An error if the request fails
-func (c *JiraClient) SetIssueEstimationForBoard(input SetIssueEstimationForBoardInput) (types.MapOutput, error) {
+func (c *JiraClient) SetIssueEstimationForBoard(ctx context.Context, input SetIssueEstimationForBoardInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "boardId", input.BoardId, int64(0))
 
@@ -385,6 +394,7 @@ func (c *JiraClient) SetIssueEstimationForBoard(input SetIssueEstimationForBoard
 
 	var output types.MapOutput
 	err = client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPut,
 		[]any{"rest", "agile", "1.0", "issue", input.IssueIdOrKey, "estimation"},

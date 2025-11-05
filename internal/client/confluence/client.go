@@ -12,8 +12,13 @@ type ConfluenceClient struct {
 }
 
 // NewConfluenceClient creates a new Confluence client with the provided configuration.
-func NewConfluenceClient(config *config.ClientConfig) *ConfluenceClient {
-	return &ConfluenceClient{
-		BaseClient: client.NewBaseClient(config, "confluence"),
+func NewConfluenceClient(config *config.ClientConfig) (*ConfluenceClient, error) {
+	baseClient, err := client.NewBaseClient(config, "confluence", client.ConfluenceTokenKey)
+	if err != nil {
+		return nil, err
 	}
+
+	return &ConfluenceClient{
+		BaseClient: baseClient,
+	}, nil
 }

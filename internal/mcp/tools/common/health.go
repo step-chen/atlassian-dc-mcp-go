@@ -52,11 +52,12 @@ type HealthCheckOutput struct {
 }
 
 // checkJiraHealth checks the health of the Jira service
-func checkJiraHealth(client *jira.JiraClient) types.MapOutput {
+func checkJiraHealth(ctx context.Context, client *jira.JiraClient) types.MapOutput {
 	result := make(types.MapOutput)
 
 	if client != nil {
-		_, err := client.GetCurrentUser()
+		// The client will automatically use the auth token from the context
+		_, err := client.GetCurrentUser(ctx)
 		if err != nil {
 			result["status"] = "error"
 			result["message"] = err.Error()
@@ -71,11 +72,12 @@ func checkJiraHealth(client *jira.JiraClient) types.MapOutput {
 }
 
 // checkConfluenceHealth checks the health of the Confluence service
-func checkConfluenceHealth(client *confluence.ConfluenceClient) types.MapOutput {
+func checkConfluenceHealth(ctx context.Context, client *confluence.ConfluenceClient) types.MapOutput {
 	result := make(types.MapOutput)
 
 	if client != nil {
-		_, err := client.GetCurrentUser()
+		// The client will automatically use the auth token from the context
+		_, err := client.GetCurrentUser(ctx)
 		if err != nil {
 			result["status"] = "error"
 			result["message"] = err.Error()
@@ -90,11 +92,12 @@ func checkConfluenceHealth(client *confluence.ConfluenceClient) types.MapOutput 
 }
 
 // checkBitbucketHealth checks the health of the Bitbucket service
-func checkBitbucketHealth(client *bitbucket.BitbucketClient) types.MapOutput {
+func checkBitbucketHealth(ctx context.Context, client *bitbucket.BitbucketClient) types.MapOutput {
 	result := make(types.MapOutput)
 
 	if client != nil {
-		_, err := client.GetUsers(bitbucket.GetUsersInput{})
+		// The client will automatically use the auth token from the context
+		_, err := client.GetUsers(ctx, bitbucket.GetUsersInput{})
 		if err != nil {
 			result["status"] = "error"
 			result["message"] = err.Error()
@@ -109,7 +112,7 @@ func checkBitbucketHealth(client *bitbucket.BitbucketClient) types.MapOutput {
 }
 
 // performHealthCheck executes health checks for all services and returns the status
-func performHealthCheck(jiraClient *jira.JiraClient, confluenceClient *confluence.ConfluenceClient, bitbucketClient *bitbucket.BitbucketClient) HealthCheckOutput {
+func performHealthCheck(ctx context.Context, jiraClient *jira.JiraClient, confluenceClient *confluence.ConfluenceClient, bitbucketClient *bitbucket.BitbucketClient) HealthCheckOutput {
 	var wg sync.WaitGroup
 
 	status := HealthCheckOutput{
@@ -122,7 +125,7 @@ func performHealthCheck(jiraClient *jira.JiraClient, confluenceClient *confluenc
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		jiraStatus := checkJiraHealth(jiraClient)
+		jiraStatus := checkJiraHealth(ctx, jiraClient)
 		status.Jira = ServiceStatus{
 			Status:  jiraStatus["status"].(string),
 			Message: jiraStatus["message"].(string),
@@ -133,7 +136,7 @@ func performHealthCheck(jiraClient *jira.JiraClient, confluenceClient *confluenc
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		confluenceStatus := checkConfluenceHealth(confluenceClient)
+		confluenceStatus := checkConfluenceHealth(ctx, confluenceClient)
 		status.Confluence = ServiceStatus{
 			Status:  confluenceStatus["status"].(string),
 			Message: confluenceStatus["message"].(string),
@@ -144,7 +147,7 @@ func performHealthCheck(jiraClient *jira.JiraClient, confluenceClient *confluenc
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		bitbucketStatus := checkBitbucketHealth(bitbucketClient)
+		bitbucketStatus := checkBitbucketHealth(ctx, bitbucketClient)
 		status.Bitbucket = ServiceStatus{
 			Status:  bitbucketStatus["status"].(string),
 			Message: bitbucketStatus["message"].(string),
@@ -158,7 +161,7 @@ func performHealthCheck(jiraClient *jira.JiraClient, confluenceClient *confluenc
 
 // healthCheckHandler handles the health check tool call using the new generic API.
 func (h *Handler) healthCheckHandler(ctx context.Context, req *mcp.CallToolRequest, input HealthCheckInput) (*mcp.CallToolResult, HealthCheckOutput, error) {
-	status := performHealthCheck(
+	status := performHealthCheck(ctx,
 		h.appServer.GetJiraClient(),
 		h.appServer.GetConfluenceClient(),
 		h.appServer.GetBitbucketClient(),

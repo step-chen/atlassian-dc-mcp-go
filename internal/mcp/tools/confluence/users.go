@@ -13,7 +13,7 @@ import (
 
 // getCurrentUserHandler handles getting the current Confluence user
 func (h *Handler) getCurrentUserHandler(ctx context.Context, req *mcp.CallToolRequest, input types.EmptyInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	user, err := h.client.GetCurrentUser()
+	user, err := h.client.GetCurrentUser(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get current user failed: %w", err)
 	}

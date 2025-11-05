@@ -2,6 +2,7 @@ package confluence
 
 import (
 	"atlassian-dc-mcp-go/internal/client/testutils"
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,12 +43,11 @@ func TestGetPage(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// 使用新的结构体参数方式
 			input := GetContentByIDInput{
 				ContentID: tt.pageID,
 				Expand:    tt.expand,
 			}
-			result, err := client.GetContentByID(input)
+			result, err := client.GetContentByID(context.Background(), input)
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -98,7 +98,7 @@ func TestGetComments(t *testing.T) {
 				ContentID: tt.pageID,
 				ChildType: "comment",
 			}
-			result, err := client.GetContentChildrenByType(input)
+			result, err := client.GetContentChildrenByType(context.Background(), input)
 
 			if tt.expectError {
 				assert.Error(t, err)

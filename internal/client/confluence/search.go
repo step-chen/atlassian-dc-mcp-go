@@ -1,6 +1,7 @@
 package confluence
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 
@@ -16,7 +17,7 @@ import (
 // Returns:
 //   - types.MapOutput: The search results
 //   - error: An error if the request fails
-func (c *ConfluenceClient) Search(input SearchInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) Search(ctx context.Context, input SearchInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "cql", input.CQL, "")
 	client.SetQueryParam(queryParams, "cqlcontext", input.CQLContext, "")
@@ -28,6 +29,7 @@ func (c *ConfluenceClient) Search(input SearchInput) (types.MapOutput, error) {
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "search"},

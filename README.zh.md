@@ -1,22 +1,22 @@
-# Atlassian Data Center MCP (Model Context Protocol)
+# Atlassian Data Center MCP（模型上下文协议）
 
 作者：Stephen Chen
 
-本项目提供了一个基于 Go 语言的 Model Context Protocol (MCP) 服务，用于管理和交互 Atlassian Data Center 产品，包括 Jira、Confluence 和 Bitbucket。它允许您通过统一接口以编程方式管理这些产品，并支持可配置的身份验证和权限。
+本项目提供了一个基于 Go 语言的模型上下文协议（MCP）服务，用于管理和操作 Atlassian Data Center 产品，包括 Jira、Confluence 和 Bitbucket。它允许您通过统一的接口以编程方式管理这些产品，并支持可配置的身份验证和权限控制。
 
 ## 功能特性
 
-- **多产品支持**：Jira、Confluence 和 Bitbucket 的统一接口
-- **Model Context Protocol**：通过 Model Context Protocol 暴露所有操作的工具
-- **配置管理**：通过文件、环境变量和热重载实现灵活配置
-- **身份验证**：每个服务的直接 API 令牌身份验证
-- **权限控制**：每个服务的细粒度读/写权限
-- **健康监控**：所有服务的内置健康检查
-- **Docker 支持**：可直接用于容器化部署
+- **多产品支持**：为 Jira、Confluence 和 Bitbucket 提供统一接口
+- **模型上下文协议**：通过模型上下文协议暴露所有操作工具
+- **配置管理**：支持通过文件、环境变量和热重载进行灵活配置
+- **身份验证**：为每个服务提供直接 API 令牌身份验证
+- **权限控制**：为每个服务提供细粒度的读/写权限控制
+- **健康监控**：内置所有服务的健康检查
+- **Docker 支持**：支持容器化部署
 
 ## 运行应用程序
 
-您可以通过多种方式运行应用程序：直接使用 Go、先构建二进制文件或使用 Docker。
+您可以通过多种方式运行应用程序：直接使用 Go 运行、先构建二进制文件再运行，或使用 Docker。
 
 有关运行应用程序的详细说明：
 - [使用 Docker 运行](README.docker.zh.md) - 使用 Docker 和 Docker Compose 运行服务的说明
@@ -26,8 +26,8 @@
 
 ### 直接执行
 
-```bash
-# 运行服务器
+``bash
+# 运行服务端
 go run cmd/server/main.go
 
 # 使用自定义配置文件路径运行
@@ -36,23 +36,23 @@ go run cmd/server/main.go -c /path/to/your/config.yaml
 
 ### 构建和运行二进制文件
 
-项目使用 Makefile 简化构建过程。所有二进制文件都放置在 `dist` 目录中。
+项目使用 Makefile 简化构建过程。所有二进制文件都放在 `dist` 目录中。
 
 ```bash
 # 显示所有可用命令
 make help
 
-# 为当前操作系统构建服务器二进制文件
+# 为当前操作系统构建服务端二进制文件
 make build
 
-# 构建静态链接的发布二进制文件
+# 构建静态链接的发布版二进制文件
 make release
 ```
 
 构建项目后，您可以直接从 `dist` 目录运行二进制文件：
 
 ```bash
-# 运行服务器
+# 运行服务端
 ./dist/atlassian-dc-mcp-server
 
 # 使用自定义配置文件路径运行
@@ -69,7 +69,27 @@ make release
 cp config.yaml.example config.yaml
 ```
 
-配置文件已包含所有可用设置的示例并有详细文档。有关详细配置选项，请参阅 [config.yaml.example](config.yaml.example) 文件。
+配置文件中包含了所有可用设置的示例和说明。有关详细配置选项，请参阅 [config.yaml.example](config.yaml.example) 文件。
+
+### 认证模式
+
+服务支持两种认证模式：
+
+1. **配置模式（默认）**：API令牌从配置文件中读取
+2. **Header模式**：API令牌通过HTTP头部传递
+
+要启用header模式，请使用 `-auth-mode=header` 标志启动服务器：
+
+```bash
+./dist/atlassian-dc-mcp-server -auth-mode=header
+```
+
+在header模式下，服务期望以下HTTP头部：
+- `Jira-Token`：Jira的API令牌
+- `Confluence-Token`：Confluence的API令牌
+- `Bitbucket-Token`：Bitbucket的API令牌
+
+当您希望避免在配置文件中存储敏感令牌时，这种模式特别有用，例如在服务部署在反向代理后面且由反向代理处理认证的环境中。
 
 ## 工具文档
 
@@ -79,7 +99,7 @@ cp config.yaml.example config.yaml
 - 获取当前用户信息
 - 获取问题
 - 创建问题
-- 以及更多
+- 更多...
 
 ### Confluence 工具
 
@@ -87,7 +107,7 @@ cp config.yaml.example config.yaml
 - 获取当前用户信息
 - 获取内容
 - 搜索内容
-- 以及更多
+- 更多...
 
 ### Bitbucket 工具
 
@@ -95,7 +115,7 @@ cp config.yaml.example config.yaml
 - 获取当前用户信息
 - 获取仓库
 - 获取提交
-- 以及更多
+- 更多...
 
 ## Lingma 规则
 
@@ -153,4 +173,4 @@ make build-macos
 - [Confluence REST API](https://developer.atlassian.com/server/confluence/rest/v1010/intro/#about)
 - [Jira REST API](https://developer.atlassian.com/server/jira/platform/rest/v11000/intro/#gettingstarted)
 - [Bitbucket REST API](https://developer.atlassian.com/server/bitbucket/rest/v1000/intro/#about)
-- [Model Context Protocol Go SDK](https://github.com/modelcontextprotocol/go-sdk)
+- [模型上下文协议 Go SDK](https://github.com/modelcontextprotocol/go-sdk)

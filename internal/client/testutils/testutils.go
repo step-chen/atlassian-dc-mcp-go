@@ -47,7 +47,7 @@ func LoadTestConfig(config interface{}, configFileName string) error {
 }
 
 func NewIntegrationClient(clientCreator func(*config.Config) (interface{}, interface{}, error)) (interface{}, interface{}, error) {
-	cfg, err := config.LoadConfig("")
+	cfg, err := config.LoadConfig("", "")
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to load config: %w", err)
 	}

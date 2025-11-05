@@ -3,6 +3,7 @@ package confluence
 import (
 	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
+	"context"
 	"net/http"
 	"net/url"
 )
@@ -15,13 +16,14 @@ import (
 // Returns:
 //   - types.MapOutput: The content children data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentChildren(input GetContentChildrenInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) GetContentChildren(ctx context.Context, input GetContentChildrenInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 	client.SetQueryParam(queryParams, "parentVersion", input.ParentVersion, "")
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "content", input.ContentID, "child"},
@@ -44,7 +46,7 @@ func (c *ConfluenceClient) GetContentChildren(input GetContentChildrenInput) (ty
 // Returns:
 //   - types.MapOutput: The content children data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentChildrenByType(input GetContentChildrenByTypeInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) GetContentChildrenByType(ctx context.Context, input GetContentChildrenByTypeInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
@@ -53,6 +55,7 @@ func (c *ConfluenceClient) GetContentChildrenByType(input GetContentChildrenByTy
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "content", input.ContentID, "child", input.ChildType},
@@ -75,7 +78,7 @@ func (c *ConfluenceClient) GetContentChildrenByType(input GetContentChildrenByTy
 // Returns:
 //   - types.MapOutput: The content comments data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentComments(input GetContentCommentsInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) GetContentComments(ctx context.Context, input GetContentCommentsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 	client.SetQueryParam(queryParams, "parentVersion", input.ParentVersion, "")
@@ -84,6 +87,7 @@ func (c *ConfluenceClient) GetContentComments(input GetContentCommentsInput) (ty
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "content", input.ContentID, "child", "comment"},

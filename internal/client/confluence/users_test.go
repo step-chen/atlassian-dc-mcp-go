@@ -2,6 +2,7 @@ package confluence
 
 import (
 	"atlassian-dc-mcp-go/internal/client/testutils"
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -34,7 +35,7 @@ func TestGetUserByUsername(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			user, err := client.GetCurrentUser()
+			user, err := client.GetCurrentUser(context.Background())
 
 			if tt.expectError {
 				assert.Error(t, err)

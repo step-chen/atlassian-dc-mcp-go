@@ -2,6 +2,7 @@ package jira
 
 import (
 	"atlassian-dc-mcp-go/internal/client/testutils"
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,7 +29,7 @@ func TestGetPriorities(t *testing.T) {
 
 			require.NotNil(t, client, "Jira client should not be nil")
 
-			priorities, err := client.GetPriorities()
+			priorities, err := client.GetPriorities(context.Background())
 
 			if err == nil {
 				assert.NotNil(t, priorities)

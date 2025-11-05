@@ -13,7 +13,7 @@ import (
 
 // getIssueTypesHandler handles getting Jira issue types
 func (h *Handler) getIssueTypesHandler(ctx context.Context, req *mcp.CallToolRequest, input types.EmptyInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	issueTypes, err := h.client.GetIssueTypes()
+	issueTypes, err := h.client.GetIssueTypes(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get issue types failed: %w", err)
 	}

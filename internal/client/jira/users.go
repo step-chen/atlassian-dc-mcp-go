@@ -1,6 +1,7 @@
 package jira
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 
@@ -16,12 +17,13 @@ import (
 // Returns:
 //   - types.MapOutput: The user data
 //   - error: An error if the request fails
-func (c *JiraClient) GetUserByName(input GetUserByNameInput) (types.MapOutput, error) {
+func (c *JiraClient) GetUserByName(ctx context.Context, input GetUserByNameInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "username", input.Username, "")
 
 	var output types.MapOutput
 	err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "2", "user"},
@@ -45,12 +47,13 @@ func (c *JiraClient) GetUserByName(input GetUserByNameInput) (types.MapOutput, e
 // Returns:
 //   - types.MapOutput: The user data
 //   - error: An error if the request fails
-func (c *JiraClient) GetUserByKey(input GetUserByKeyInput) (types.MapOutput, error) {
+func (c *JiraClient) GetUserByKey(ctx context.Context, input GetUserByKeyInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "key", input.Key, "")
 
 	var output types.MapOutput
 	err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "2", "user"},
@@ -74,7 +77,7 @@ func (c *JiraClient) GetUserByKey(input GetUserByKeyInput) (types.MapOutput, err
 // Returns:
 //   - []types.MapOutput: The users data
 //   - error: An error if the request fails
-func (c *JiraClient) SearchUsers(input SearchUsersInput) ([]types.MapOutput, error) {
+func (c *JiraClient) SearchUsers(ctx context.Context, input SearchUsersInput) ([]types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "username", input.Query, "")
 	client.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
@@ -82,6 +85,7 @@ func (c *JiraClient) SearchUsers(input SearchUsersInput) ([]types.MapOutput, err
 
 	var outputs []types.MapOutput
 	err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "2", "user", "search"},
@@ -105,9 +109,10 @@ func (c *JiraClient) SearchUsers(input SearchUsersInput) ([]types.MapOutput, err
 // Returns:
 //   - types.MapOutput: The current user data
 //   - error: An error if the request fails
-func (c *JiraClient) GetCurrentUser() (types.MapOutput, error) {
+func (c *JiraClient) GetCurrentUser(ctx context.Context) (types.MapOutput, error) {
 	var output types.MapOutput
 	err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "2", "myself"},

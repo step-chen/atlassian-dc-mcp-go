@@ -1,6 +1,7 @@
 package jira
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -47,7 +48,7 @@ func TestGetIssueWorklogs(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetWorklogs(GetWorklogsInput{
+			result, err := client.GetWorklogs(context.Background(), GetWorklogsInput{
 				IssueKey: tt.issueKey,
 			})
 
@@ -90,7 +91,7 @@ func TestGetWorklog(t *testing.T) {
 
 	require.NotNil(t, client, "Jira client should not be nil")
 
-	worklogsResult, err := client.GetWorklogs(GetWorklogsInput{
+	worklogsResult, err := client.GetWorklogs(context.Background(), GetWorklogsInput{
 		IssueKey: testConfig.Worklogs.IssueKey,
 	})
 	if err != nil {
@@ -141,7 +142,7 @@ func TestGetWorklog(t *testing.T) {
 				return
 			}
 
-			result, err := client.GetWorklogs(GetWorklogsInput{
+			result, err := client.GetWorklogs(context.Background(), GetWorklogsInput{
 				IssueKey:  tt.issueKey,
 				WorklogId: tt.worklogID,
 			})

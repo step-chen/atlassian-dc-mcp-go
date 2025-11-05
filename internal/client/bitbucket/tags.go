@@ -1,6 +1,7 @@
 package bitbucket
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 
@@ -19,7 +20,7 @@ import (
 // Returns:
 //   - types.MapOutput: The tags data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetTags(input GetTagsInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetTags(ctx context.Context, input GetTagsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "filterText", input.FilterText, "")
 	client.SetQueryParam(queryParams, "orderBy", input.OrderBy, "")
@@ -28,6 +29,7 @@ func (c *BitbucketClient) GetTags(input GetTagsInput) (types.MapOutput, error) {
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "tags"},
@@ -53,9 +55,10 @@ func (c *BitbucketClient) GetTags(input GetTagsInput) (types.MapOutput, error) {
 // Returns:
 //   - types.MapOutput: The tag data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetTag(input GetTagInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetTag(ctx context.Context, input GetTagInput) (types.MapOutput, error) {
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "tags", input.Name},

@@ -18,7 +18,7 @@ type GetAttachmentOutput struct {
 
 // getAttachmentHandler handles getting an attachment
 func (h *Handler) getAttachmentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetAttachmentInput) (*mcp.CallToolResult, GetAttachmentOutput, error) {
-	attachment, err := h.client.GetAttachment(input)
+	attachment, err := h.client.GetAttachment(ctx, input)
 	if err != nil {
 		return nil, GetAttachmentOutput{}, fmt.Errorf("get attachment failed: %w", err)
 	}
@@ -28,7 +28,7 @@ func (h *Handler) getAttachmentHandler(ctx context.Context, req *mcp.CallToolReq
 
 // getAttachmentMetadataHandler handles getting attachment metadata
 func (h *Handler) getAttachmentMetadataHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetAttachmentMetadataInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	metadata, err := h.client.GetAttachmentMetadata(input)
+	metadata, err := h.client.GetAttachmentMetadata(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get attachment metadata failed: %w", err)
 	}
@@ -38,7 +38,7 @@ func (h *Handler) getAttachmentMetadataHandler(ctx context.Context, req *mcp.Cal
 
 // createAttachmentHandler handles creating an attachment
 func (h *Handler) createAttachmentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.CreateAttachmentInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	attachment, err := h.client.CreateAttachment(input)
+	attachment, err := h.client.CreateAttachment(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("create attachment failed: %w", err)
 	}
@@ -48,7 +48,7 @@ func (h *Handler) createAttachmentHandler(ctx context.Context, req *mcp.CallTool
 
 // deleteAttachmentHandler handles deleting an attachment
 func (h *Handler) deleteAttachmentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.DeleteAttachmentInput) (*mcp.CallToolResult, interface{}, error) {
-	err := h.client.DeleteAttachment(input)
+	err := h.client.DeleteAttachment(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("delete attachment failed: %w", err)
 	}

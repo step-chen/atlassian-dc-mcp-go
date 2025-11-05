@@ -47,8 +47,14 @@ type Config struct {
 	ClientTimeout int             `mapstructure:"client_timeout"`
 }
 
+const (
+	BitbucketField  = "Bitbucket.Token"
+	ConfluenceField = "Confluence.Token"
+	JiraField       = "Jira.Token"
+)
+
 // Validate checks that the configuration is valid
-func (c *Config) Validate() error {
+func (c *Config) Validate(authMode string) error {
 	// Validate port
 	if c.Port <= 0 || c.Port > 65535 {
 		return fmt.Errorf("invalid port: %d, must be between 1 and 65535", c.Port)
@@ -89,20 +95,16 @@ func (c *Config) Validate() error {
 		c.Bitbucket.Timeout = c.ClientTimeout
 	}
 
-	if c.Jira.URL != "" {
-		if c.Jira.Token == "" {
+	if authMode != "header" {
+		if c.Jira.URL != "" && c.Jira.Token == "" {
 			return fmt.Errorf("jira token must be set when jira url is configured")
 		}
-	}
 
-	if c.Confluence.URL != "" {
-		if c.Confluence.Token == "" {
+		if c.Confluence.URL != "" && c.Confluence.Token == "" {
 			return fmt.Errorf("confluence token must be set when confluence url is configured")
 		}
-	}
 
-	if c.Bitbucket.URL != "" {
-		if c.Bitbucket.Token == "" {
+		if c.Bitbucket.URL != "" && c.Bitbucket.Token == "" {
 			return fmt.Errorf("bitbucket token must be set when bitbucket url is configured")
 		}
 	}
@@ -118,7 +120,7 @@ func (c *Config) Validate() error {
 //
 // Returns a pointer to the loaded Config and nil error if successful,
 // or nil and an error if configuration loading fails.
-func LoadConfig(configPath string) (*Config, error) {
+func LoadConfig(configPath string, authMode string) (*Config, error) {
 	viper.SetConfigType("yaml")
 
 	// If a config path is provided, use it directly
@@ -171,7 +173,7 @@ func LoadConfig(configPath string) (*Config, error) {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
-	if err := config.Validate(); err != nil {
+	if err := config.Validate(authMode); err != nil {
 		return nil, fmt.Errorf("config validation failed: %w", err)
 	}
 
@@ -179,7 +181,7 @@ func LoadConfig(configPath string) (*Config, error) {
 }
 
 // WatchConfigOnChange sets up a callback for when the config file changes
-func WatchConfigOnChange(run func()) {
+func WatchConfigOnChange(run func(), authMode string) {
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		fmt.Println("Config file changed:", e.Name)
 
@@ -189,7 +191,7 @@ func WatchConfigOnChange(run func()) {
 			return
 		}
 
-		if err := newConfig.Validate(); err != nil {
+		if err := newConfig.Validate(authMode); err != nil {
 			fmt.Printf("Error validating updated config: %v\n", err)
 			return
 		}

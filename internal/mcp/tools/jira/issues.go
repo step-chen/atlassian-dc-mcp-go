@@ -14,7 +14,7 @@ import (
 
 // getIssueHandler retrieves a Jira issue by its key with default fields.
 func (h *Handler) getIssueHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetIssueInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	issue, err := h.client.GetIssue(input)
+	issue, err := h.client.GetIssue(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get issue failed: %w", err)
 	}
@@ -24,7 +24,7 @@ func (h *Handler) getIssueHandler(ctx context.Context, req *mcp.CallToolRequest,
 
 // createIssueHandler creates a new Jira issue.
 func (h *Handler) createIssueHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.CreateIssueInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	issue, err := h.client.CreateIssue(input)
+	issue, err := h.client.CreateIssue(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("create issue failed: %w", err)
 	}
@@ -34,7 +34,7 @@ func (h *Handler) createIssueHandler(ctx context.Context, req *mcp.CallToolReque
 
 // createIssueWithPayloadHandler creates a new Jira issue with a custom payload.
 func (h *Handler) createIssueWithPayloadHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.CreateIssueWithPayloadInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	issue, err := h.client.CreateIssueWithPayload(input)
+	issue, err := h.client.CreateIssueWithPayload(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("create issue with payload failed: %w", err)
 	}
@@ -44,7 +44,7 @@ func (h *Handler) createIssueWithPayloadHandler(ctx context.Context, req *mcp.Ca
 
 // updateIssueHandler updates an existing Jira issue.
 func (h *Handler) updateIssueHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.UpdateIssueInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	issue, err := h.client.UpdateIssue(input)
+	issue, err := h.client.UpdateIssue(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("update issue failed: %w", err)
 	}
@@ -54,7 +54,7 @@ func (h *Handler) updateIssueHandler(ctx context.Context, req *mcp.CallToolReque
 
 // updateIssueWithOptionsHandler updates an existing Jira issue with additional options.
 func (h *Handler) updateIssueWithOptionsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.UpdateIssueWithOptionsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	issue, err := h.client.UpdateIssueWithOptions(input)
+	issue, err := h.client.UpdateIssueWithOptions(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("update issue with options failed: %w", err)
 	}
@@ -64,7 +64,7 @@ func (h *Handler) updateIssueWithOptionsHandler(ctx context.Context, req *mcp.Ca
 
 // getAgileIssueHandler retrieves an agile Jira issue by its key.
 func (h *Handler) getAgileIssueHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetAgileIssueInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	issue, err := h.client.GetAgileIssue(input)
+	issue, err := h.client.GetAgileIssue(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get agile issue failed: %w", err)
 	}
@@ -74,7 +74,7 @@ func (h *Handler) getAgileIssueHandler(ctx context.Context, req *mcp.CallToolReq
 
 // getIssueEstimationForBoardHandler gets issue estimation for a board.
 func (h *Handler) getIssueEstimationForBoardHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetIssueEstimationForBoardInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	estimation, err := h.client.GetIssueEstimationForBoard(input)
+	estimation, err := h.client.GetIssueEstimationForBoard(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get issue estimation for board failed: %w", err)
 	}
@@ -84,7 +84,7 @@ func (h *Handler) getIssueEstimationForBoardHandler(ctx context.Context, req *mc
 
 // setIssueEstimationForBoardHandler sets issue estimation for a board.
 func (h *Handler) setIssueEstimationForBoardHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.SetIssueEstimationForBoardInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	estimation, err := h.client.SetIssueEstimationForBoard(input)
+	estimation, err := h.client.SetIssueEstimationForBoard(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("set issue estimation for board failed: %w", err)
 	}
@@ -94,7 +94,7 @@ func (h *Handler) setIssueEstimationForBoardHandler(ctx context.Context, req *mc
 
 // searchIssuesHandler searches for Jira issues using a JQL query.
 func (h *Handler) searchIssuesHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.SearchIssuesInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	issues, err := h.client.SearchIssues(input)
+	issues, err := h.client.SearchIssues(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("search issues failed: %w", err)
 	}
@@ -110,7 +110,7 @@ func AddIssueTools(server *mcp.Server, client *jira.JiraClient, permissions map[
 	utils.RegisterTool[jira.GetIssueInput, types.MapOutput](server, "jira_get_issue", "Get a specific Jira issue by key or ID", handler.getIssueHandler)
 	utils.RegisterTool[jira.GetAgileIssueInput, types.MapOutput](server, "jira_get_agile_issue", "Get an agile Jira issue by key or ID", handler.getAgileIssueHandler)
 	utils.RegisterTool[jira.GetIssueEstimationForBoardInput, types.MapOutput](server, "jira_get_issue_estimation_for_board", "Get issue estimation for a board", handler.getIssueEstimationForBoardHandler)
-	
+
 	if permissions["jira_set_issue_estimation_for_board"] {
 		utils.RegisterTool[jira.SetIssueEstimationForBoardInput, types.MapOutput](server, "jira_set_issue_estimation_for_board", "Set issue estimation for a board", handler.setIssueEstimationForBoardHandler)
 	}

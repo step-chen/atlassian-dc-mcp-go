@@ -3,6 +3,7 @@ package confluence
 import (
 	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -17,7 +18,7 @@ import (
 // Returns:
 //   - types.MapOutput: The space data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetSpace(input GetSpaceInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) GetSpace(ctx context.Context, input GetSpaceInput) (types.MapOutput, error) {
 	if input.SpaceKey == "" {
 		return nil, fmt.Errorf("spaceKey cannot be empty")
 	}
@@ -27,6 +28,7 @@ func (c *ConfluenceClient) GetSpace(input GetSpaceInput) (types.MapOutput, error
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "space", input.SpaceKey},
@@ -49,7 +51,7 @@ func (c *ConfluenceClient) GetSpace(input GetSpaceInput) (types.MapOutput, error
 // Returns:
 //   - types.MapOutput: The contents data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentsInSpace(input GetContentsInSpaceInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) GetContentsInSpace(ctx context.Context, input GetContentsInSpaceInput) (types.MapOutput, error) {
 	if input.SpaceKey == "" {
 		return nil, fmt.Errorf("spaceKey cannot be empty")
 	}
@@ -61,6 +63,7 @@ func (c *ConfluenceClient) GetContentsInSpace(input GetContentsInSpaceInput) (ty
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "space", input.SpaceKey, "content"},
@@ -83,7 +86,7 @@ func (c *ConfluenceClient) GetContentsInSpace(input GetContentsInSpaceInput) (ty
 // Returns:
 //   - types.MapOutput: The contents data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentsByType(input GetContentsByTypeInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) GetContentsByType(ctx context.Context, input GetContentsByTypeInput) (types.MapOutput, error) {
 	if input.SpaceKey == "" {
 		return nil, fmt.Errorf("spaceKey cannot be empty")
 	}
@@ -99,6 +102,7 @@ func (c *ConfluenceClient) GetContentsByType(input GetContentsByTypeInput) (type
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "space", input.SpaceKey, "content", input.ContentType},
@@ -121,7 +125,7 @@ func (c *ConfluenceClient) GetContentsByType(input GetContentsByTypeInput) (type
 // Returns:
 //   - types.MapOutput: The spaces data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetSpacesByKey(input GetSpacesByKeyInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) GetSpacesByKey(ctx context.Context, input GetSpacesByKeyInput) (types.MapOutput, error) {
 	if len(input.Keys) == 0 && len(input.SpaceIds) == 0 && input.SpaceKeys == "" && len(input.SpaceId) == 0 && input.SpaceKeySingle == "" {
 		return nil, fmt.Errorf("at least one space identifier parameter must be provided")
 	}
@@ -144,6 +148,7 @@ func (c *ConfluenceClient) GetSpacesByKey(input GetSpacesByKeyInput) (types.MapO
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "space"},

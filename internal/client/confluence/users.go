@@ -3,6 +3,7 @@ package confluence
 import (
 	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
+	"context"
 	"net/http"
 )
 
@@ -14,9 +15,10 @@ import (
 // Returns:
 //   - types.MapOutput: The current user data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetCurrentUser() (types.MapOutput, error) {
+func (c *ConfluenceClient) GetCurrentUser(ctx context.Context) (types.MapOutput, error) {
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "user", "current"},

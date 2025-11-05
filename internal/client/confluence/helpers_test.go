@@ -63,7 +63,10 @@ func newConfluenceIntegrationClient() (*config.ClientConfig, *ConfluenceClient, 
 			return nil, nil, nil
 		}
 
-		client := NewConfluenceClient(&cfg.Confluence)
+		client, err := NewConfluenceClient(&cfg.Confluence)
+		if err != nil {
+			return nil, nil, err
+		}
 		return &cfg.Confluence, client, nil
 	})
 

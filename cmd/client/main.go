@@ -20,6 +20,7 @@ func main() {
 	flag.StringVar(configPath, "config", "", "Path to config file (optional)")
 	help := flag.Bool("h", false, "Show help message")
 	flag.BoolVar(help, "help", false, "Show help message")
+	authMode := flag.String("auth-mode", "config", "Authentication mode. One of: config, header")
 	flag.Parse()
 
 	if *help {
@@ -41,7 +42,7 @@ func main() {
 	}()
 
 	// Load configuration
-	cfg, err := config.LoadConfig(*configPath)
+	cfg, err := config.LoadConfig(*configPath, *authMode)
 	if err != nil {
 		logger.Fatal("Failed to load configuration", zap.Error(err))
 	}

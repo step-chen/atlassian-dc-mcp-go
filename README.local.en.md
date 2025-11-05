@@ -21,11 +21,18 @@ First, you need to create a local configuration file.
    - `url`: Your Atlassian product instance address
    - `token`: The corresponding API Token
 
+Note: You can leave the token fields empty if you plan to use header-based authentication.
+
 ### 3. Run the Service
 
 After downloading and extracting the binary, you can run the service directly:
 ```
 ./atlassian-dc-mcp-server -c /path/to/your/config.yaml
+```
+
+To enable header-based authentication mode, use the `-auth-mode=header` flag:
+```
+./atlassian-dc-mcp-server -c /path/to/your/config.yaml -auth-mode=header
 ```
 
 ### 4. Verify Service Running
@@ -65,6 +72,11 @@ Or, if you have enabled HTTP mode:
   }
 }
 ```
+
+When using header-based authentication, your client will need to pass the appropriate headers:
+- `Jira-Token`: API token for Jira
+- `Confluence-Token`: API token for Confluence
+- `Bitbucket-Token`: API token for Bitbucket
 
 ### 6. Stop the Service
 
@@ -108,7 +120,7 @@ In Ubuntu systems, you can use systemd user services to configure the service to
 
    [Service]
    Type=simple
-   ExecStart=/path/to/your/mcp/atlassian-dc-mcp-server -c /path/to/your/mcp/config.yaml
+   ExecStart=/path/to/your/mcp/atlassian-dc-mcp-server -c /path/to/your/mcp/config.yaml -auth-mode=header
    Restart=always
    RestartSec=10
    Environment=HOME=/home/your-username

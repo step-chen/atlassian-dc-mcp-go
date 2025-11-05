@@ -13,7 +13,7 @@ import (
 
 // getPrioritiesHandler handles getting Jira priorities
 func (h *Handler) getPrioritiesHandler(ctx context.Context, req *mcp.CallToolRequest, input types.EmptyInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	priorities, err := h.client.GetPriorities()
+	priorities, err := h.client.GetPriorities(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get priorities failed: %w", err)
 	}

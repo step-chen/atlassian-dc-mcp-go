@@ -1,6 +1,7 @@
 package jira
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -57,7 +58,7 @@ func TestListBoards(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetBoards(GetBoardsInput{
+			result, err := client.GetBoards(context.Background(), GetBoardsInput{
 				PaginationInput: PaginationInput{
 					StartAt:    tt.startAt,
 					MaxResults: tt.maxResults,
@@ -180,7 +181,7 @@ func TestGetBoardBacklog(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetBoardBacklog(GetBoardBacklogInput{
+			result, err := client.GetBoardBacklog(context.Background(), GetBoardBacklogInput{
 				BoardId: tt.boardID,
 				PaginationInput: PaginationInput{
 					StartAt:    tt.startAt,
@@ -248,7 +249,7 @@ func TestGetBoard(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetBoard(GetBoardInput{
+			result, err := client.GetBoard(context.Background(), GetBoardInput{
 				Id: tt.boardID,
 			})
 
@@ -320,7 +321,7 @@ func TestGetBoardEpics(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetBoardEpics(GetBoardEpicsInput{
+			result, err := client.GetBoardEpics(context.Background(), GetBoardEpicsInput{
 				BoardId: tt.boardID,
 				PaginationInput: PaginationInput{
 					StartAt:    tt.startAt,
@@ -443,7 +444,7 @@ func TestGetSprintIssues(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetSprintIssues(GetSprintIssuesInput{
+			result, err := client.GetSprintIssues(context.Background(), GetSprintIssuesInput{
 				SprintId: tt.sprintID,
 				PaginationInput: PaginationInput{
 					StartAt:    tt.startAt,
@@ -511,7 +512,7 @@ func TestGetSprint(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetSprint(GetSprintInput{
+			result, err := client.GetSprint(context.Background(), GetSprintInput{
 				SprintId: tt.sprintID,
 			})
 

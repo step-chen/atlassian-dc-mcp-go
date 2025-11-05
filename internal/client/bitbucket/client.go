@@ -12,8 +12,13 @@ type BitbucketClient struct {
 }
 
 // NewBitbucketClient creates a new Bitbucket client with the provided configuration.
-func NewBitbucketClient(config *config.ClientConfig) *BitbucketClient {
-	return &BitbucketClient{
-		BaseClient: client.NewBaseClient(config, "bitbucket"),
+func NewBitbucketClient(config *config.ClientConfig) (*BitbucketClient, error) {
+	baseClient, err := client.NewBaseClient(config, "bitbucket", client.BitbucketTokenKey)
+	if err != nil {
+		return nil, err
 	}
+
+	return &BitbucketClient{
+		BaseClient: baseClient,
+	}, nil
 }

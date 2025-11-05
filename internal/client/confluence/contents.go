@@ -2,6 +2,7 @@
 package confluence
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -19,7 +20,7 @@ import (
 // Returns:
 //   - types.MapOutput: The content data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContent(input GetContentInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) GetContent(ctx context.Context, input GetContentInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 
 	client.SetQueryParam(queryParams, "type", input.TypeParam, "")
@@ -33,6 +34,7 @@ func (c *ConfluenceClient) GetContent(input GetContentInput) (types.MapOutput, e
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "content"},
@@ -55,12 +57,13 @@ func (c *ConfluenceClient) GetContent(input GetContentInput) (types.MapOutput, e
 // Returns:
 //   - types.MapOutput: The content data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentByID(input GetContentByIDInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) GetContentByID(ctx context.Context, input GetContentByIDInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "content", input.ContentID},
@@ -83,7 +86,7 @@ func (c *ConfluenceClient) GetContentByID(input GetContentByIDInput) (types.MapO
 // Returns:
 //   - types.MapOutput: The search results
 //   - error: An error if the request fails
-func (c *ConfluenceClient) SearchContent(input SearchContentInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) SearchContent(ctx context.Context, input SearchContentInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "cql", input.CQL, "")
 	client.SetQueryParam(queryParams, "cqlcontext", input.CQLContext, "")
@@ -93,6 +96,7 @@ func (c *ConfluenceClient) SearchContent(input SearchContentInput) (types.MapOut
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "content", "search"},
@@ -115,7 +119,7 @@ func (c *ConfluenceClient) SearchContent(input SearchContentInput) (types.MapOut
 // Returns:
 //   - types.MapOutput: The created content data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) CreateContent(input CreateContentInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) CreateContent(ctx context.Context, input CreateContentInput) (types.MapOutput, error) {
 	payload := types.MapOutput{}
 	client.SetRequestBodyParam(payload, "type", input.Type)
 	client.SetRequestBodyParam(payload, "title", input.Title)
@@ -131,6 +135,7 @@ func (c *ConfluenceClient) CreateContent(input CreateContentInput) (types.MapOut
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPost,
 		[]any{"rest", "api", "content"},
@@ -153,7 +158,7 @@ func (c *ConfluenceClient) CreateContent(input CreateContentInput) (types.MapOut
 // Returns:
 //   - types.MapOutput: The updated content data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) UpdateContent(input UpdateContentInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) UpdateContent(ctx context.Context, input UpdateContentInput) (types.MapOutput, error) {
 	jsonPayload, err := json.Marshal(input.ContentData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
@@ -161,6 +166,7 @@ func (c *ConfluenceClient) UpdateContent(input UpdateContentInput) (types.MapOut
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPut,
 		[]any{"rest", "api", "content", input.ContentID},
@@ -182,8 +188,9 @@ func (c *ConfluenceClient) UpdateContent(input UpdateContentInput) (types.MapOut
 //
 // Returns:
 //   - error: An error if the request fails
-func (c *ConfluenceClient) DeleteContent(input DeleteContentInput) error {
+func (c *ConfluenceClient) DeleteContent(ctx context.Context, input DeleteContentInput) error {
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodDelete,
 		[]any{"rest", "api", "content", input.ContentID},
@@ -206,12 +213,13 @@ func (c *ConfluenceClient) DeleteContent(input DeleteContentInput) error {
 // Returns:
 //   - types.MapOutput: The content history data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentHistory(input GetContentHistoryInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) GetContentHistory(ctx context.Context, input GetContentHistoryInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "content", input.ContentID, "history"},
@@ -234,7 +242,7 @@ func (c *ConfluenceClient) GetContentHistory(input GetContentHistoryInput) (type
 // Returns:
 //   - types.MapOutput: The added comment data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) AddComment(input AddCommentInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) AddComment(ctx context.Context, input AddCommentInput) (types.MapOutput, error) {
 	payload := types.MapOutput{
 		"type": "comment",
 		"container": map[string]string{
@@ -256,6 +264,7 @@ func (c *ConfluenceClient) AddComment(input AddCommentInput) (types.MapOutput, e
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPost,
 		[]any{"rest", "api", "content"},
@@ -278,7 +287,7 @@ func (c *ConfluenceClient) AddComment(input AddCommentInput) (types.MapOutput, e
 // Returns:
 //   - types.MapOutput: The attachments data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetAttachments(input GetAttachmentsInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) GetAttachments(ctx context.Context, input GetAttachmentsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
@@ -288,6 +297,7 @@ func (c *ConfluenceClient) GetAttachments(input GetAttachmentsInput) (types.MapO
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "content", input.ContentID, "child", "attachment"},
@@ -310,9 +320,10 @@ func (c *ConfluenceClient) GetAttachments(input GetAttachmentsInput) (types.MapO
 // Returns:
 //   - types.MapOutput: The extracted text data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetExtractedText(input GetExtractedTextInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) GetExtractedText(ctx context.Context, input GetExtractedTextInput) (types.MapOutput, error) {
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "content", input.ContentID, "child", "attachment", input.AttachmentID, "extractedText"},
@@ -335,13 +346,14 @@ func (c *ConfluenceClient) GetExtractedText(input GetExtractedTextInput) (types.
 // Returns:
 //   - types.MapOutput: The labels data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentLabels(input GetContentLabelsInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) GetContentLabels(ctx context.Context, input GetContentLabelsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "content", input.ContentID, "label"},
@@ -364,7 +376,7 @@ func (c *ConfluenceClient) GetContentLabels(input GetContentLabelsInput) (types.
 // Returns:
 //   - types.MapOutput: The scanned content data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) ScanContentBySpaceKey(input ScanContentBySpaceKeyInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) ScanContentBySpaceKey(ctx context.Context, input ScanContentBySpaceKeyInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 
 	client.SetQueryParam(queryParams, "type", input.TypeParam, "")
@@ -378,6 +390,7 @@ func (c *ConfluenceClient) ScanContentBySpaceKey(input ScanContentBySpaceKeyInpu
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "content", "scan"},

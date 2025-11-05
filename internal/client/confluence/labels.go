@@ -1,6 +1,7 @@
 package confluence
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 
@@ -16,7 +17,7 @@ import (
 // Returns:
 //   - types.MapOutput: The related labels data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetRelatedLabels(input GetRelatedLabelsInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) GetRelatedLabels(ctx context.Context, input GetRelatedLabelsInput) (types.MapOutput, error) {
 
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
@@ -24,6 +25,7 @@ func (c *ConfluenceClient) GetRelatedLabels(input GetRelatedLabelsInput) (types.
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "label", input.LabelName, "related"},
@@ -46,7 +48,7 @@ func (c *ConfluenceClient) GetRelatedLabels(input GetRelatedLabelsInput) (types.
 // Returns:
 //   - types.MapOutput: The labels data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetLabels(input GetLabelsInput) (types.MapOutput, error) {
+func (c *ConfluenceClient) GetLabels(ctx context.Context, input GetLabelsInput) (types.MapOutput, error) {
 
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "labelName", input.LabelName, "")
@@ -58,6 +60,7 @@ func (c *ConfluenceClient) GetLabels(input GetLabelsInput) (types.MapOutput, err
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "label"},

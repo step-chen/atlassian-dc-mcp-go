@@ -1,6 +1,7 @@
 package bitbucket
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -26,10 +27,11 @@ import (
 // Returns:
 //   - types.MapOutput: The pull request data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequest(input GetPullRequestInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetPullRequest(ctx context.Context, input GetPullRequestInput) (types.MapOutput, error) {
 	var output types.MapOutput
 
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID},
@@ -55,7 +57,7 @@ func (c *BitbucketClient) GetPullRequest(input GetPullRequestInput) (types.MapOu
 // Returns:
 //   - types.MapOutput: The activities data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestActivities(input GetPullRequestActivitiesInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetPullRequestActivities(ctx context.Context, input GetPullRequestActivitiesInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 
 	client.SetQueryParam(queryParams, "fromType", input.FromType, "")
@@ -65,6 +67,7 @@ func (c *BitbucketClient) GetPullRequestActivities(input GetPullRequestActivitie
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "activities"},
@@ -90,7 +93,7 @@ func (c *BitbucketClient) GetPullRequestActivities(input GetPullRequestActivitie
 // Returns:
 //   - map[string]interface{}: The changes data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestChanges(input GetPullRequestChangesInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetPullRequestChanges(ctx context.Context, input GetPullRequestChangesInput) (types.MapOutput, error) {
 	limit := input.Limit
 	if limit <= 0 {
 		limit = 25
@@ -105,6 +108,7 @@ func (c *BitbucketClient) GetPullRequestChanges(input GetPullRequestChangesInput
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "changes"},
@@ -131,12 +135,12 @@ func (c *BitbucketClient) GetPullRequestChanges(input GetPullRequestChangesInput
 // Returns:
 //   - types.MapOutput: The comment data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) AddPullRequestComment(input AddPullRequestCommentInput) (types.MapOutput, error) {
+func (c *BitbucketClient) AddPullRequestComment(ctx context.Context, input AddPullRequestCommentInput) (types.MapOutput, error) {
 	if input.CommentText == "" && input.Suggestion == nil {
 		return nil, fmt.Errorf("either commentText or suggestion must be provided")
 	}
 
-	payload, err := c.buildCommentPayload(input)
+	payload, err := c.buildCommentPayload(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -148,6 +152,7 @@ func (c *BitbucketClient) AddPullRequestComment(input AddPullRequestCommentInput
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPost,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "comments"},
@@ -163,7 +168,7 @@ func (c *BitbucketClient) AddPullRequestComment(input AddPullRequestCommentInput
 }
 
 // buildCommentPayload builds the payload for adding a comment to a pull request.
-func (c *BitbucketClient) buildCommentPayload(input AddPullRequestCommentInput) (*CommentPayload, error) {
+func (c *BitbucketClient) buildCommentPayload(ctx context.Context, input AddPullRequestCommentInput) (*CommentPayload, error) {
 	var lineNumber *int
 	var lineType string
 
@@ -174,7 +179,7 @@ func (c *BitbucketClient) buildCommentPayload(input AddPullRequestCommentInput) 
 	}
 
 	if input.CodeSnippet != nil {
-		resolvedInfo, err := c.resolveLineNumber(input)
+		resolvedInfo, err := c.resolveLineNumber(ctx, input)
 		if err != nil {
 			return nil, fmt.Errorf("failed to resolve line from code snippet: %w", err)
 		}
@@ -260,7 +265,7 @@ func (c *BitbucketClient) buildCommentPayload(input AddPullRequestCommentInput) 
 }
 
 // resolveLineNumber resolves a line number from a code snippet in a pull request diff.
-func (c *BitbucketClient) resolveLineNumber(input AddPullRequestCommentInput) (ResolvedLineInfo, error) {
+func (c *BitbucketClient) resolveLineNumber(ctx context.Context, input AddPullRequestCommentInput) (ResolvedLineInfo, error) {
 	var searchContext *SearchContext
 	if input.SearchContext != nil {
 		if err := json.Unmarshal([]byte(*input.SearchContext), &searchContext); err != nil {
@@ -280,7 +285,7 @@ func (c *BitbucketClient) resolveLineNumber(input AddPullRequestCommentInput) (R
 		SearchContext: searchContext,
 	}
 
-	return c.resolveLineFromCode(resolveInput)
+	return c.resolveLineFromCode(ctx, resolveInput)
 }
 
 // resolveLineFromCode resolves a line number from a code snippet in a pull request diff.
@@ -288,8 +293,8 @@ func (c *BitbucketClient) resolveLineNumber(input AddPullRequestCommentInput) (R
 // 1. Fetch and parse the diff for the pull request.
 // 2. Find all potential matches for the given code snippet within the diff.
 // 3. Calculate the confidence of each match and select the best one based on the chosen strategy.
-func (c *BitbucketClient) resolveLineFromCode(input ResolveLineFromCodeInput) (ResolvedLineInfo, error) {
-	fileDiffs, err := c.getAndParseDiff(input)
+func (c *BitbucketClient) resolveLineFromCode(ctx context.Context, input ResolveLineFromCodeInput) (ResolvedLineInfo, error) {
+	fileDiffs, err := c.getAndParseDiff(ctx, input)
 	if err != nil {
 		return ResolvedLineInfo{}, err
 	}
@@ -301,7 +306,7 @@ func (c *BitbucketClient) resolveLineFromCode(input ResolveLineFromCodeInput) (R
 
 // getAndParseDiff fetches the pull request diff and parses it into a structured format.
 // It efficiently fetches only the required file's diff if a file path is provided.
-func (c *BitbucketClient) getAndParseDiff(input ResolveLineFromCodeInput) ([]*diff.FileDiff, error) {
+func (c *BitbucketClient) getAndParseDiff(ctx context.Context, input ResolveLineFromCodeInput) ([]*diff.FileDiff, error) {
 	var diffStream io.ReadCloser
 	var err error
 
@@ -313,13 +318,13 @@ func (c *BitbucketClient) getAndParseDiff(input ResolveLineFromCodeInput) ([]*di
 			Path:          input.FilePath,
 			ContextLines:  &contextLines, // Use a large number to ensure we get the whole file's diff
 		}
-		diffStream, err = c.GetPullRequestDiff(diffInput)
+		diffStream, err = c.GetPullRequestDiff(ctx, diffInput)
 	} else {
 		diffInput := GetPullRequestDiffStreamInput{
 			CommonInput:   input.CommonInput,
 			PullRequestID: input.PullRequestID,
 		}
-		diffStream, err = c.GetPullRequestDiffStreamRaw(diffInput)
+		diffStream, err = c.GetPullRequestDiffStreamRaw(ctx, diffInput)
 	}
 
 	if err != nil {
@@ -503,7 +508,7 @@ type MergePullRequestOptions struct {
 // Returns:
 //   - types.MapOutput: The merge result data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) MergePullRequest(input MergePullRequestInput) (types.MapOutput, error) {
+func (c *BitbucketClient) MergePullRequest(ctx context.Context, input MergePullRequestInput) (types.MapOutput, error) {
 	// Create options struct from input fields that are merge options
 	options := MergePullRequestOptions{
 		AutoMerge:   input.AutoMerge,
@@ -524,6 +529,7 @@ func (c *BitbucketClient) MergePullRequest(input MergePullRequestInput) (types.M
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPost,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "merge"},
@@ -554,7 +560,7 @@ type DeclinePullRequestOptions struct {
 // Returns:
 //   - io.ReadCloser: A reader to stream the diff content
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestDiff(input GetPullRequestDiffInput) (io.ReadCloser, error) {
+func (c *BitbucketClient) GetPullRequestDiff(ctx context.Context, input GetPullRequestDiffInput) (io.ReadCloser, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "srcPath", input.SrcPath, "")
 	if !client.SetQueryParam(queryParams, "contextLines", input.ContextLines, nil) {
@@ -573,6 +579,7 @@ func (c *BitbucketClient) GetPullRequestDiff(input GetPullRequestDiffInput) (io.
 		path = *input.Path
 	}
 	return client.ExecuteStream(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "diff", path},
@@ -594,7 +601,7 @@ func (c *BitbucketClient) GetPullRequestDiff(input GetPullRequestDiffInput) (io.
 // Returns:
 //   - types.MapOutput: The decline result data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) DeclinePullRequest(input DeclinePullRequestInput) (types.MapOutput, error) {
+func (c *BitbucketClient) DeclinePullRequest(ctx context.Context, input DeclinePullRequestInput) (types.MapOutput, error) {
 	// Create options struct from input fields that are decline options
 	options := DeclinePullRequestOptions{
 		Comment: input.Comment,
@@ -610,6 +617,7 @@ func (c *BitbucketClient) DeclinePullRequest(input DeclinePullRequestInput) (typ
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPost,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "decline"},
@@ -631,7 +639,7 @@ func (c *BitbucketClient) DeclinePullRequest(input DeclinePullRequestInput) (typ
 // Returns:
 //   - types.MapOutput: The pull requests data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequests(input GetPullRequestsInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetPullRequests(ctx context.Context, input GetPullRequestsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 
 	client.SetQueryParam(queryParams, "state", input.State, "")
@@ -647,6 +655,7 @@ func (c *BitbucketClient) GetPullRequests(input GetPullRequestsInput) (types.Map
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests"},
@@ -672,13 +681,14 @@ func (c *BitbucketClient) GetPullRequests(input GetPullRequestsInput) (types.Map
 // Returns:
 //   - types.MapOutput: The suggestions data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestSuggestions(input GetPullRequestSuggestionsInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetPullRequestSuggestions(ctx context.Context, input GetPullRequestSuggestionsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "changesSince", input.ChangesSince, "")
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "dashboard", "pull-request-suggestions"},
@@ -704,9 +714,10 @@ func (c *BitbucketClient) GetPullRequestSuggestions(input GetPullRequestSuggesti
 // Returns:
 //   - []RestJiraIssue: The Jira issues data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestJiraIssues(input GetPullRequestJiraIssuesInput) ([]RestJiraIssue, error) {
+func (c *BitbucketClient) GetPullRequestJiraIssues(ctx context.Context, input GetPullRequestJiraIssuesInput) ([]RestJiraIssue, error) {
 	var issues []RestJiraIssue
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "jira", "1.0", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "issues"},
@@ -732,7 +743,7 @@ func (c *BitbucketClient) GetPullRequestJiraIssues(input GetPullRequestJiraIssue
 // Returns:
 //   - types.MapOutput: The pull requests data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestsForUser(input GetPullRequestsForUserInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetPullRequestsForUser(ctx context.Context, input GetPullRequestsForUserInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "closedSince", input.ClosedSince, "")
 	client.SetQueryParam(queryParams, "role", input.Role, "")
@@ -745,6 +756,7 @@ func (c *BitbucketClient) GetPullRequestsForUser(input GetPullRequestsForUserInp
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "dashboard", "pull-requests"},
@@ -770,9 +782,10 @@ func (c *BitbucketClient) GetPullRequestsForUser(input GetPullRequestsForUserInp
 // Returns:
 //   - types.MapOutput: The comment data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestComment(input GetPullRequestCommentInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetPullRequestComment(ctx context.Context, input GetPullRequestCommentInput) (types.MapOutput, error) {
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "comments", input.CommentID},
@@ -799,7 +812,7 @@ func (c *BitbucketClient) GetPullRequestComment(input GetPullRequestCommentInput
 // Returns:
 //   - types.MapOutput: The participant data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) UpdatePullRequestParticipantStatus(input UpdatePullRequestStatusInput) (types.MapOutput, error) {
+func (c *BitbucketClient) UpdatePullRequestParticipantStatus(ctx context.Context, input UpdatePullRequestStatusInput) (types.MapOutput, error) {
 	switch input.Status {
 	case "UNAPPROVED", "NEEDS_WORK", "APPROVED":
 	default:
@@ -821,6 +834,7 @@ func (c *BitbucketClient) UpdatePullRequestParticipantStatus(input UpdatePullReq
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPut,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "participants", input.UserSlug},
@@ -846,7 +860,7 @@ func (c *BitbucketClient) UpdatePullRequestParticipantStatus(input UpdatePullReq
 // Returns:
 //   - types.MapOutput: The comments data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestComments(input GetPullRequestCommentsInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetPullRequestComments(ctx context.Context, input GetPullRequestCommentsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 
 	client.SetRequiredPathParam(queryParams, input.Path)
@@ -862,6 +876,7 @@ func (c *BitbucketClient) GetPullRequestComments(input GetPullRequestCommentsInp
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "comments"},
@@ -888,7 +903,7 @@ func (c *BitbucketClient) GetPullRequestComments(input GetPullRequestCommentsInp
 // Returns:
 //   - io.ReadCloser: A reader that can be used to stream the diff content
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestDiffStreamRaw(input GetPullRequestDiffStreamInput) (io.ReadCloser, error) {
+func (c *BitbucketClient) GetPullRequestDiffStreamRaw(ctx context.Context, input GetPullRequestDiffStreamInput) (io.ReadCloser, error) {
 	queryParams := url.Values{}
 	if !client.SetQueryParam(queryParams, "contextLines", input.ContextLines, nil) {
 		client.SetQueryParam(queryParams, "contextLines", 3, nil)
@@ -896,6 +911,7 @@ func (c *BitbucketClient) GetPullRequestDiffStreamRaw(input GetPullRequestDiffSt
 	client.SetQueryParam(queryParams, "whitespace", input.Whitespace, "")
 
 	return client.ExecuteStream(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", strconv.Itoa(input.PullRequestID) + ".diff"},
@@ -917,9 +933,10 @@ func (c *BitbucketClient) GetPullRequestDiffStreamRaw(input GetPullRequestDiffSt
 // Returns:
 //   - types.MapOutput: The merge status data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) TestPullRequestCanMerge(input TestPullRequestCanMergeInput) (types.MapOutput, error) {
+func (c *BitbucketClient) TestPullRequestCanMerge(ctx context.Context, input TestPullRequestCanMergeInput) (types.MapOutput, error) {
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "merge"},

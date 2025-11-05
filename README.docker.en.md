@@ -21,6 +21,8 @@ First, you need to create a local configuration file.
    - `url`: Your Atlassian product instance address
    - `token`: The corresponding API Token
 
+Note: When using Docker, you can leave the token fields empty if you plan to use header-based authentication.
+
 ### 2. Modify `docker-compose.yml`
 
 To allow the Docker container to read your local configuration, you need to modify the `docker-compose.yml` file to map the `config.yaml` file into the container.
@@ -36,6 +38,21 @@ services:
       - "8090:8090"
     volumes:
       - ./config.yaml:/app/config.yaml # <-- Add or modify this line
+    # ... (other configurations remain unchanged)
+```
+
+To enable header-based authentication mode, you'll need to add a command parameter:
+
+```yaml
+services:
+  mcp-server:
+    # ... (other configurations remain unchanged)
+    image: ghcr.io/step-chen/atlassian-dc-mcp-go:latest
+    command: ["-auth-mode=header"]
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./config.yaml:/app/config.yaml
     # ... (other configurations remain unchanged)
 ```
 
@@ -66,6 +83,11 @@ Finally, in the configuration of your AI assistant or related client, add or mod
 ```
 
 `http://localhost:8090` is the mapped port configured in `docker-compose.yml`, and `/sse` is the SSE endpoint for the MCP service.
+
+When using header-based authentication, your client will need to pass the appropriate headers:
+- `Jira-Token`: API token for Jira
+- `Confluence-Token`: API token for Confluence
+- `Bitbucket-Token`: API token for Bitbucket
 
 ## Stop the Service
 

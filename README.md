@@ -71,6 +71,26 @@ cp config.yaml.example config.yaml
 
 The configuration file is self-documented with examples for all available settings. Please refer to the [config.yaml.example](config.yaml.example) file for detailed configuration options.
 
+### Authentication Modes
+
+The service supports two authentication modes:
+
+1. **Config Mode (default)**: API tokens are read from the configuration file
+2. **Header Mode**: API tokens are passed via HTTP headers
+
+To enable header mode, start the server with the `-auth-mode=header` flag:
+
+```bash
+./dist/atlassian-dc-mcp-server -auth-mode=header
+```
+
+In header mode, the service expects the following HTTP headers:
+- `Jira-Token`: API token for Jira
+- `Confluence-Token`: API token for Confluence
+- `Bitbucket-Token`: API token for Bitbucket
+
+This mode is particularly useful when deploying the service in environments where you want to avoid storing sensitive tokens in configuration files, such as when using the service behind a reverse proxy that handles authentication.
+
 ## Tools Documentation
 
 ### Jira Tools

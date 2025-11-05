@@ -13,7 +13,7 @@ import (
 
 // getRepositoryHandler handles getting a repository
 func (h *Handler) getRepositoryHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetRepositoryInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	repo, err := h.client.GetRepository(input)
+	repo, err := h.client.GetRepository(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get repository failed: %w", err)
 	}
@@ -23,7 +23,7 @@ func (h *Handler) getRepositoryHandler(ctx context.Context, req *mcp.CallToolReq
 
 // getRepositoriesHandler handles getting repositories
 func (h *Handler) getRepositoriesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetRepositoriesInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	repos, err := h.client.GetRepositories(input)
+	repos, err := h.client.GetRepositories(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get repositories failed: %w", err)
 	}
@@ -33,7 +33,7 @@ func (h *Handler) getRepositoriesHandler(ctx context.Context, req *mcp.CallToolR
 
 // getProjectRepositoriesHandler handles getting project repositories
 func (h *Handler) getProjectRepositoriesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetProjectRepositoriesInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	repos, err := h.client.GetProjectRepositories(input)
+	repos, err := h.client.GetProjectRepositories(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get project repositories failed: %w", err)
 	}
@@ -43,7 +43,7 @@ func (h *Handler) getProjectRepositoriesHandler(ctx context.Context, req *mcp.Ca
 
 // getRepositoryLabelsHandler handles getting repository labels
 func (h *Handler) getRepositoryLabelsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetRepositoryLabelsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	labels, err := h.client.GetRepositoryLabels(input)
+	labels, err := h.client.GetRepositoryLabels(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get repository labels failed: %w", err)
 	}
@@ -54,7 +54,7 @@ func (h *Handler) getRepositoryLabelsHandler(ctx context.Context, req *mcp.CallT
 
 // getFileContentHandler handles getting file content
 func (h *Handler) getFileContentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetFileContentInput) (*mcp.CallToolResult, ContentOutput, error) {
-	content, err := h.client.GetFileContent(input)
+	content, err := h.client.GetFileContent(ctx, input)
 	if err != nil {
 		return nil, ContentOutput{}, fmt.Errorf("get file content failed: %w", err)
 	}
@@ -64,7 +64,7 @@ func (h *Handler) getFileContentHandler(ctx context.Context, req *mcp.CallToolRe
 
 // getReadmeHandler handles getting readme
 func (h *Handler) getReadmeHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetReadmeInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	readme, err := h.client.GetReadme(input)
+	readme, err := h.client.GetReadme(ctx, input)
 	if err != nil {
 		return nil, types.MapOutput{}, fmt.Errorf("get readme failed: %w", err)
 	}
@@ -74,7 +74,7 @@ func (h *Handler) getReadmeHandler(ctx context.Context, req *mcp.CallToolRequest
 
 // getFilesHandler handles getting files
 func (h *Handler) getFilesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetFilesInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	files, err := h.client.GetFiles(input)
+	files, err := h.client.GetFiles(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get files failed: %w", err)
 	}
@@ -84,7 +84,7 @@ func (h *Handler) getFilesHandler(ctx context.Context, req *mcp.CallToolRequest,
 
 // getChangesHandler handles getting changes
 func (h *Handler) getChangesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetChangesInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	changes, err := h.client.GetChanges(input)
+	changes, err := h.client.GetChanges(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get changes failed: %w", err)
 	}
@@ -94,7 +94,7 @@ func (h *Handler) getChangesHandler(ctx context.Context, req *mcp.CallToolReques
 
 // compareChangesHandler handles comparing changes
 func (h *Handler) compareChangesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.CompareChangesInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	changes, err := h.client.CompareChanges(input)
+	changes, err := h.client.CompareChanges(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("compare changes failed: %w", err)
 	}
@@ -104,7 +104,7 @@ func (h *Handler) compareChangesHandler(ctx context.Context, req *mcp.CallToolRe
 
 // getForksHandler handles getting forks
 func (h *Handler) getForksHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetForksInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	forks, err := h.client.GetForks(input)
+	forks, err := h.client.GetForks(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get forks failed: %w", err)
 	}
@@ -114,7 +114,7 @@ func (h *Handler) getForksHandler(ctx context.Context, req *mcp.CallToolRequest,
 
 // getRelatedRepositoriesHandler handles getting related repositories
 func (h *Handler) getRelatedRepositoriesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetRelatedRepositoriesInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	repos, err := h.client.GetRelatedRepositories(input)
+	repos, err := h.client.GetRelatedRepositories(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get related repositories failed: %w", err)
 	}

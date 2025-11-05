@@ -1,6 +1,7 @@
 package bitbucket
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,9 +18,10 @@ import (
 // Returns:
 //   - types.MapOutput: The repository data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetRepository(input GetRepositoryInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetRepository(ctx context.Context, input GetRepositoryInput) (types.MapOutput, error) {
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug},
@@ -41,7 +43,7 @@ func (c *BitbucketClient) GetRepository(input GetRepositoryInput) (types.MapOutp
 // Returns:
 //   - types.MapOutput: The repositories data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetRepositories(input GetRepositoriesInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetRepositories(ctx context.Context, input GetRepositoriesInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "projectName", input.ProjectName, "")
 	client.SetQueryParam(queryParams, "projectKey", input.ProjectKey, "")
@@ -55,6 +57,7 @@ func (c *BitbucketClient) GetRepositories(input GetRepositoriesInput) (types.Map
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "repos"},
@@ -80,13 +83,14 @@ func (c *BitbucketClient) GetRepositories(input GetRepositoriesInput) (types.Map
 // Returns:
 //   - types.MapOutput: The repositories data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetProjectRepositories(input GetProjectRepositoriesInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetProjectRepositories(ctx context.Context, input GetProjectRepositoriesInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos"},
@@ -112,9 +116,10 @@ func (c *BitbucketClient) GetProjectRepositories(input GetProjectRepositoriesInp
 // Returns:
 //   - []string: The labels retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetRepositoryLabels(input GetRepositoryLabelsInput) ([]string, error) {
+func (c *BitbucketClient) GetRepositoryLabels(ctx context.Context, input GetRepositoryLabelsInput) ([]string, error) {
 	var labels []string
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "labels"},
@@ -140,7 +145,7 @@ func (c *BitbucketClient) GetRepositoryLabels(input GetRepositoryLabelsInput) ([
 // Returns:
 //   - []byte: The file content retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetFileContent(input GetFileContentInput) ([]byte, error) {
+func (c *BitbucketClient) GetFileContent(ctx context.Context, input GetFileContentInput) ([]byte, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "at", input.At, "")
 	client.SetQueryParam(queryParams, "markup", input.Markup, "")
@@ -149,6 +154,7 @@ func (c *BitbucketClient) GetFileContent(input GetFileContentInput) ([]byte, err
 	client.SetQueryParam(queryParams, "hardwrap", input.Hardwrap, "")
 
 	respBody, err := client.ExecuteStream(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "raw", input.Path},
@@ -181,7 +187,7 @@ func (c *BitbucketClient) GetFileContent(input GetFileContentInput) ([]byte, err
 // Returns:
 //   - types.MapOutput: The files data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetFiles(input GetFilesInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetFiles(ctx context.Context, input GetFilesInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "at", input.At, "")
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
@@ -194,6 +200,7 @@ func (c *BitbucketClient) GetFiles(input GetFilesInput) (types.MapOutput, error)
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		pathSegments,
@@ -219,7 +226,7 @@ func (c *BitbucketClient) GetFiles(input GetFilesInput) (types.MapOutput, error)
 // Returns:
 //   - types.MapOutput: The changes data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetChanges(input GetChangesInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetChanges(ctx context.Context, input GetChangesInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "until", input.Until, "")
 	client.SetQueryParam(queryParams, "since", input.Since, "")
@@ -228,6 +235,7 @@ func (c *BitbucketClient) GetChanges(input GetChangesInput) (types.MapOutput, er
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "changes"},
@@ -253,7 +261,7 @@ func (c *BitbucketClient) GetChanges(input GetChangesInput) (types.MapOutput, er
 // Returns:
 //   - types.MapOutput: The comparison data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) CompareChanges(input CompareChangesInput) (types.MapOutput, error) {
+func (c *BitbucketClient) CompareChanges(ctx context.Context, input CompareChangesInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "from", input.From, "")
 	client.SetQueryParam(queryParams, "to", input.To, "")
@@ -263,6 +271,7 @@ func (c *BitbucketClient) CompareChanges(input CompareChangesInput) (types.MapOu
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "compare", "changes"},
@@ -288,13 +297,14 @@ func (c *BitbucketClient) CompareChanges(input CompareChangesInput) (types.MapOu
 // Returns:
 //   - types.MapOutput: The forks data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetForks(input GetForksInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetForks(ctx context.Context, input GetForksInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "forks"},
@@ -320,7 +330,7 @@ func (c *BitbucketClient) GetForks(input GetForksInput) (types.MapOutput, error)
 // Returns:
 //   - types.MapOutput: The README data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetReadme(input GetReadmeInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetReadme(ctx context.Context, input GetReadmeInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "at", input.At, "")
 	client.SetQueryParam(queryParams, "markup", input.Markup, "")
@@ -330,6 +340,7 @@ func (c *BitbucketClient) GetReadme(input GetReadmeInput) (types.MapOutput, erro
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "readme"},
@@ -355,13 +366,14 @@ func (c *BitbucketClient) GetReadme(input GetReadmeInput) (types.MapOutput, erro
 // Returns:
 //   - types.MapOutput: The related repositories data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetRelatedRepositories(input GetRelatedRepositoriesInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetRelatedRepositories(ctx context.Context, input GetRelatedRepositoriesInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "related"},

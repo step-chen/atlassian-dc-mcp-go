@@ -2,6 +2,7 @@ package confluence
 
 import (
 	"atlassian-dc-mcp-go/internal/client/testutils"
+	"context"
 	"strings"
 	"testing"
 
@@ -60,7 +61,7 @@ func TestSearch(t *testing.T) {
 				},
 				IncludeArchivedSpaces: false,
 			}
-			result, err := client.Search(input)
+			result, err := client.Search(context.Background(), input)
 
 			if tt.expectError {
 				assert.Error(t, err)

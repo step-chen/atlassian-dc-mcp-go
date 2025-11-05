@@ -1,6 +1,7 @@
 package jira
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 
@@ -16,9 +17,10 @@ import (
 // Returns:
 //   - types.MapOutput: The project data
 //   - error: An error if the request fails
-func (c *JiraClient) GetProject(input GetProjectInput) (types.MapOutput, error) {
+func (c *JiraClient) GetProject(ctx context.Context, input GetProjectInput) (types.MapOutput, error) {
 	var output types.MapOutput
 	err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "2", "project", input.ProjectKey},
@@ -42,7 +44,7 @@ func (c *JiraClient) GetProject(input GetProjectInput) (types.MapOutput, error) 
 // Returns:
 //   - []types.MapOutput: The projects data
 //   - error: An error if the request fails
-func (c *JiraClient) GetAllProjects(input GetAllProjectsInput) ([]types.MapOutput, error) {
+func (c *JiraClient) GetAllProjects(ctx context.Context, input GetAllProjectsInput) ([]types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "expand", input.Expand, "")
 	client.SetQueryParam(queryParams, "recent", input.Recent, 0)
@@ -51,6 +53,7 @@ func (c *JiraClient) GetAllProjects(input GetAllProjectsInput) ([]types.MapOutpu
 
 	var outputs []types.MapOutput
 	err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "2", "project"},

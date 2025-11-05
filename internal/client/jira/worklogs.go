@@ -3,6 +3,7 @@ package jira
 import (
 	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -17,7 +18,7 @@ import (
 // Returns:
 //   - types.MapOutput: The worklogs data
 //   - error: An error if the request fails
-func (c *JiraClient) GetWorklogs(input GetWorklogsInput) (types.MapOutput, error) {
+func (c *JiraClient) GetWorklogs(ctx context.Context, input GetWorklogsInput) (types.MapOutput, error) {
 	pathSegments := []any{"rest", "api", "2", "issue", input.IssueKey, "worklog"}
 	if input.WorklogId != "" {
 		pathSegments = append(pathSegments, input.WorklogId)
@@ -25,6 +26,7 @@ func (c *JiraClient) GetWorklogs(input GetWorklogsInput) (types.MapOutput, error
 
 	var output types.MapOutput
 	err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		pathSegments,
@@ -48,7 +50,7 @@ func (c *JiraClient) GetWorklogs(input GetWorklogsInput) (types.MapOutput, error
 // Returns:
 //   - types.MapOutput: The created worklog data
 //   - error: An error if the request fails
-func (c *JiraClient) AddWorklog(input AddWorklogInput) (types.MapOutput, error) {
+func (c *JiraClient) AddWorklog(ctx context.Context, input AddWorklogInput) (types.MapOutput, error) {
 	pathSegments := []any{"rest", "api", "2", "issue", input.IssueKey, "worklog"}
 
 	// Prepare query parameters
@@ -70,6 +72,7 @@ func (c *JiraClient) AddWorklog(input AddWorklogInput) (types.MapOutput, error) 
 
 	var output types.MapOutput
 	err = client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPost,
 		pathSegments,

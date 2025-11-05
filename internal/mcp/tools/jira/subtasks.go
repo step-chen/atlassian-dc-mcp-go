@@ -18,7 +18,7 @@ type GetSubtasksResult struct {
 
 // getSubtasksHandler handles getting subtasks for a Jira issue
 func (h *Handler) getSubtasksHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetSubtasksInput) (*mcp.CallToolResult, GetSubtasksResult, error) {
-	subtasks, err := h.client.GetSubtasks(input)
+	subtasks, err := h.client.GetSubtasks(ctx, input)
 	if err != nil {
 		return nil, GetSubtasksResult{}, fmt.Errorf("get subtasks failed: %w", err)
 	}
@@ -32,7 +32,7 @@ func (h *Handler) getSubtasksHandler(ctx context.Context, req *mcp.CallToolReque
 
 // createSubTaskHandler handles creating a subtask for a Jira issue
 func (h *Handler) createSubTaskHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.CreateSubTaskInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	subtask, err := h.client.CreateSubTask(input)
+	subtask, err := h.client.CreateSubTask(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("create subtask failed: %w", err)
 	}

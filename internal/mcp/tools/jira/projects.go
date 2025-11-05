@@ -13,7 +13,7 @@ import (
 
 // getProjectHandler handles getting a Jira project by key.
 func (h *Handler) getProjectHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetProjectInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	project, err := h.client.GetProject(input)
+	project, err := h.client.GetProject(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get project failed: %w", err)
 	}
@@ -23,7 +23,7 @@ func (h *Handler) getProjectHandler(ctx context.Context, req *mcp.CallToolReques
 
 // getProjectsHandler handles getting all Jira projects with optional filters and expansions.
 func (h *Handler) getProjectsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetAllProjectsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	projects, err := h.client.GetAllProjects(input)
+	projects, err := h.client.GetAllProjects(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get projects failed: %w", err)
 	}

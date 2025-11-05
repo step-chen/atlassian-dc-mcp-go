@@ -55,7 +55,7 @@ func buildURL(baseURL string, pathSegments []any, queryParams map[string][]strin
 	return u.String(), nil
 }
 
-func buildHttpRequest(method, baseURL string, pathSegments []any, queryParams map[string][]string, body []byte, token string, accept Accept) (*http.Request, error) {
+func buildHttpRequest(method, baseURL string, pathSegments []any, queryParams map[string][]string, body []byte, accept Accept) (*http.Request, error) {
 	url, err := buildURL(baseURL, pathSegments, queryParams)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build URL: %w", err)
@@ -76,7 +76,6 @@ func buildHttpRequest(method, baseURL string, pathSegments []any, queryParams ma
 		req.Header.Set("Content-Type", string(AcceptJSON))
 	}
 
-	req.Header.Set("Authorization", "Bearer "+token)
 	//  "application/json" or "text/plain"
 	req.Header.Set("Accept", string(accept))
 

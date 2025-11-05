@@ -13,7 +13,7 @@ import (
 
 // getBoardsHandler handles getting Jira boards
 func (h *Handler) getBoardsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetBoardsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	boards, err := h.client.GetBoards(input)
+	boards, err := h.client.GetBoards(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get boards failed: %w", err)
 	}
@@ -23,7 +23,7 @@ func (h *Handler) getBoardsHandler(ctx context.Context, req *mcp.CallToolRequest
 
 // getBoardHandler handles getting a Jira board
 func (h *Handler) getBoardHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetBoardInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	board, err := h.client.GetBoard(input)
+	board, err := h.client.GetBoard(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get board failed: %w", err)
 	}
@@ -33,7 +33,7 @@ func (h *Handler) getBoardHandler(ctx context.Context, req *mcp.CallToolRequest,
 
 // getBoardBacklogHandler handles getting backlog for a Jira board
 func (h *Handler) getBoardBacklogHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetBoardBacklogInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	backlog, err := h.client.GetBoardBacklog(input)
+	backlog, err := h.client.GetBoardBacklog(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get board backlog failed: %w", err)
 	}
@@ -43,7 +43,7 @@ func (h *Handler) getBoardBacklogHandler(ctx context.Context, req *mcp.CallToolR
 
 // getBoardEpicsHandler handles getting epics for a Jira board
 func (h *Handler) getBoardEpicsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetBoardEpicsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	epics, err := h.client.GetBoardEpics(input)
+	epics, err := h.client.GetBoardEpics(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get board epics failed: %w", err)
 	}
@@ -53,7 +53,7 @@ func (h *Handler) getBoardEpicsHandler(ctx context.Context, req *mcp.CallToolReq
 
 // getBoardSprintsHandler handles getting sprints for a Jira board
 func (h *Handler) getBoardSprintsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetBoardSprintsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	sprints, err := h.client.GetBoardSprints(input)
+	sprints, err := h.client.GetBoardSprints(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get board sprints failed: %w", err)
 	}
@@ -63,7 +63,7 @@ func (h *Handler) getBoardSprintsHandler(ctx context.Context, req *mcp.CallToolR
 
 // getSprintHandler handles getting a Jira sprint
 func (h *Handler) getSprintHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetSprintInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	sprint, err := h.client.GetSprint(input)
+	sprint, err := h.client.GetSprint(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get sprint failed: %w", err)
 	}
@@ -73,7 +73,7 @@ func (h *Handler) getSprintHandler(ctx context.Context, req *mcp.CallToolRequest
 
 // getSprintIssuesHandler handles getting issues for a Jira sprint
 func (h *Handler) getSprintIssuesHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetSprintIssuesInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	issues, err := h.client.GetSprintIssues(input)
+	issues, err := h.client.GetSprintIssues(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get sprint issues failed: %w", err)
 	}

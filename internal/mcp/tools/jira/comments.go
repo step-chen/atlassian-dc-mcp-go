@@ -13,7 +13,7 @@ import (
 
 // getCommentsHandler handles getting comments for a Jira issue
 func (h *Handler) getCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetCommentsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	comments, err := h.client.GetComments(input)
+	comments, err := h.client.GetComments(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get comments failed: %w", err)
 	}
@@ -23,7 +23,7 @@ func (h *Handler) getCommentsHandler(ctx context.Context, req *mcp.CallToolReque
 
 // addCommentHandler handles adding a comment to a Jira issue
 func (h *Handler) addCommentHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.AddCommentInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	comment, err := h.client.AddComment(input)
+	comment, err := h.client.AddComment(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("add comment failed: %w", err)
 	}

@@ -39,9 +39,9 @@ func DefaultHTTPClientConfig() *HTTPClientConfig {
 }
 
 // NewRetryableHTTPClient creates a new retryable HTTP client with the provided configuration
-func NewRetryableHTTPClient(config *HTTPClientConfig) *retryablehttp.Client {
+func NewRetryableHTTPClient(config *HTTPClientConfig, transport http.RoundTripper) *retryablehttp.Client {
 	// Create base transport with the provided configuration
-	transport := &http.Transport{
+	baseTransport := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
 			Timeout:   config.Timeout,
@@ -53,6 +53,14 @@ func NewRetryableHTTPClient(config *HTTPClientConfig) *retryablehttp.Client {
 		IdleConnTimeout:       config.IdleConnTimeout,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
+	}
+
+	// Set the custom transport to wrap the base transport.
+	if rt, ok := transport.(*TokenAuthTransport); ok {
+		rt.Transport = baseTransport
+	} else {
+		// If it's not a TokenAuthTransport, use the base transport directly.
+		transport = baseTransport
 	}
 
 	// Create base HTTP client
@@ -74,15 +82,15 @@ func NewRetryableHTTPClient(config *HTTPClientConfig) *retryablehttp.Client {
 
 // ExecuteRequest executes an HTTP request with the provided parameters.
 // It builds the request and executes it with retry logic.
-func ExecuteRequest(client *BaseClient, method string, pathSegments []any, queryParams map[string][]string, body []byte, accept Accept, result any) error {
+func ExecuteRequest(ctx context.Context, client *BaseClient, method string, pathSegments []any, queryParams map[string][]string, body []byte, accept Accept, result any) error {
 	// Build the HTTP request
-	req, err := buildHttpRequest(method, client.Config.URL, pathSegments, queryParams, body, client.Config.Token, accept)
+	req, err := buildHttpRequest(method, client.Config.URL, pathSegments, queryParams, body, accept)
 	if err != nil {
 		return fmt.Errorf("failed to build request: %w", err)
 	}
 
 	// Convert http.Request to retryablehttp.Request
-	retryReq, err := retryablehttp.FromRequest(req)
+	retryReq, err := retryablehttp.FromRequest(req.WithContext(ctx))
 	if err != nil {
 		return fmt.Errorf("[%s] failed to convert request: %w", client.Name, err)
 	}
@@ -111,15 +119,14 @@ func ExecuteRequest(client *BaseClient, method string, pathSegments []any, query
 
 // ExecuteStream executes an HTTP request and returns a stream of the response body.
 // It builds the request and executes it with retry logic and timeout.
-func ExecuteStream(client *BaseClient, method string, pathSegments []any, queryParams map[string][]string, body []byte, accept Accept, timeout time.Duration) (io.ReadCloser, error) {
+func ExecuteStream(ctx context.Context, client *BaseClient, method string, pathSegments []any, queryParams map[string][]string, body []byte, accept Accept, timeout time.Duration) (io.ReadCloser, error) {
 	// Build the HTTP request
-	req, err := buildHttpRequest(method, client.Config.URL, pathSegments, queryParams, body, client.Config.Token, accept)
+	req, err := buildHttpRequest(method, client.Config.URL, pathSegments, queryParams, body, accept)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build request: %w", err)
 	}
 
 	// Create a context with timeout
-	ctx := context.Background()
 	if timeout > 0 {
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(ctx, timeout)

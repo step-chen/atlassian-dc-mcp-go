@@ -1,6 +1,7 @@
 package bitbucket
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 )
 
 // SearchCode performs a code search in Bitbucket
-func (c *BitbucketClient) SearchCode(input SearchCodeInput) (types.MapOutput, error) {
+func (c *BitbucketClient) SearchCode(ctx context.Context, input SearchCodeInput) (types.MapOutput, error) {
 	var queryBuilder strings.Builder
 	// Build the enhanced query string
 	queryBuilder.WriteString(fmt.Sprintf("project:%s", input.ProjectKey))
@@ -45,6 +46,7 @@ func (c *BitbucketClient) SearchCode(input SearchCodeInput) (types.MapOutput, er
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPost,
 		[]any{"rest", "search", "latest", "search"},

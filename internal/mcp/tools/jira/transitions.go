@@ -13,7 +13,7 @@ import (
 
 // getTransitionsHandler handles getting transitions for a Jira issue
 func (h *Handler) getTransitionsHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetTransitionsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	transitions, err := h.client.GetTransitions(input)
+	transitions, err := h.client.GetTransitions(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get transitions failed: %w", err)
 	}
@@ -23,7 +23,7 @@ func (h *Handler) getTransitionsHandler(ctx context.Context, req *mcp.CallToolRe
 
 // transitionIssueHandler handles transitioning a Jira issue
 func (h *Handler) transitionIssueHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.TransitionIssueInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	err := h.client.TransitionIssue(input)
+	err := h.client.TransitionIssue(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("transition issue failed: %w", err)
 	}

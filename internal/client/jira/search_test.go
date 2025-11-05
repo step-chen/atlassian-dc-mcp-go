@@ -2,6 +2,7 @@ package jira
 
 import (
 	"atlassian-dc-mcp-go/internal/client/testutils"
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -61,7 +62,7 @@ func TestSearchIssues(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.SearchIssues(SearchIssuesInput{
+			result, err := client.SearchIssues(context.Background(), SearchIssuesInput{
 				JQL:            tt.jql,
 				ProjectKeyOrId: tt.projectKey,
 				OrderBy:        tt.orderBy,

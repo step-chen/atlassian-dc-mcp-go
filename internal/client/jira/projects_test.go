@@ -2,6 +2,7 @@ package jira
 
 import (
 	"atlassian-dc-mcp-go/internal/client/testutils"
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -40,7 +41,7 @@ func TestGetProject(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetProject(GetProjectInput{
+			result, err := client.GetProject(context.Background(), GetProjectInput{
 				ProjectKey: tt.projectKey,
 			})
 
@@ -74,7 +75,7 @@ func TestGetAllProjects(t *testing.T) {
 	require.NotNil(t, client, "Jira client should not be nil")
 
 	t.Run("GetAllProjects", func(t *testing.T) {
-		result, err := client.GetAllProjects(GetAllProjectsInput{
+		result, err := client.GetAllProjects(context.Background(), GetAllProjectsInput{
 			Expand:          "",
 			Recent:          0,
 			IncludeArchived: false,

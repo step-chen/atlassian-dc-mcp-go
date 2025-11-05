@@ -1,6 +1,7 @@
 package jira
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -56,11 +57,11 @@ func TestGetUser(t *testing.T) {
 
 			switch tt.testType {
 			case "byname":
-				output, err = client.GetUserByName(GetUserByNameInput{
+				output, err = client.GetUserByName(context.Background(), GetUserByNameInput{
 					Username: tt.username,
 				})
 			case "bykey":
-				output, err = client.GetUserByKey(GetUserByKeyInput{
+				output, err = client.GetUserByKey(context.Background(), GetUserByKeyInput{
 					Key: tt.userKey,
 				})
 			}
@@ -93,7 +94,7 @@ func TestSearchUsers(t *testing.T) {
 	}
 
 	t.Run("SearchUsers", func(t *testing.T) {
-		result, err := client.SearchUsers(SearchUsersInput{
+		result, err := client.SearchUsers(context.Background(), SearchUsersInput{
 			Query: testConfig.Users.SearchQuery,
 			PaginationInput: PaginationInput{
 				StartAt:    0,
@@ -119,7 +120,7 @@ func TestGetCurrentUser(t *testing.T) {
 	}
 
 	t.Run("GetCurrentUser", func(t *testing.T) {
-		result, err := client.GetCurrentUser()
+		result, err := client.GetCurrentUser(context.Background())
 
 		if err == nil {
 			assert.NotNil(t, result)

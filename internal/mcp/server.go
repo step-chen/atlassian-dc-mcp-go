@@ -7,10 +7,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"reflect"
 	"sync"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/client/bitbucket"
 	"atlassian-dc-mcp-go/internal/client/confluence"
 	"atlassian-dc-mcp-go/internal/client/jira"
@@ -21,9 +23,16 @@ import (
 	jiraTools "atlassian-dc-mcp-go/internal/mcp/tools/jira"
 )
 
+const (
+	BitbucketTokenHeader  = "Bitbucket-Token"
+	JiraTokenHeader       = "Jira-Token"
+	ConfluenceTokenHeader = "Confluence-Token"
+)
+
 // Server represents the MCP server instance
 type Server struct {
 	config           *config.Config
+	authMode         string
 	jiraClient       *jira.JiraClient
 	confluenceClient *confluence.ConfluenceClient
 	bitbucketClient  *bitbucket.BitbucketClient
@@ -36,25 +45,36 @@ type Server struct {
 }
 
 // NewServer creates a new MCP server instance with the provided configuration
-func NewServer(cfg *config.Config) *Server {
+func NewServer(cfg *config.Config, authMode string) *Server {
 	return &Server{
 		config:       cfg,
+		authMode:     authMode,
 		shutdownChan: make(chan struct{}),
 	}
 }
 
 // Initialize sets up the server with clients for Jira, Confluence, and Bitbucket based on configuration
 func (s *Server) Initialize() error {
-	if s.config.Jira.URL != "" && s.config.Jira.Token != "" {
-		s.jiraClient = jira.NewJiraClient(&s.config.Jira)
+	var err error
+	if s.config.Jira.URL != "" {
+		s.jiraClient, err = jira.NewJiraClient(&s.config.Jira)
+		if err != nil {
+			return fmt.Errorf("failed to create Jira client: %w", err)
+		}
 	}
 
-	if s.config.Confluence.URL != "" && s.config.Confluence.Token != "" {
-		s.confluenceClient = confluence.NewConfluenceClient(&s.config.Confluence)
+	if s.config.Confluence.URL != "" {
+		s.confluenceClient, err = confluence.NewConfluenceClient(&s.config.Confluence)
+		if err != nil {
+			return fmt.Errorf("failed to create Confluence client: %w", err)
+		}
 	}
 
-	if s.config.Bitbucket.URL != "" && s.config.Bitbucket.Token != "" {
-		s.bitbucketClient = bitbucket.NewBitbucketClient(&s.config.Bitbucket)
+	if s.config.Bitbucket.URL != "" {
+		s.bitbucketClient, err = bitbucket.NewBitbucketClient(&s.config.Bitbucket)
+		if err != nil {
+			return fmt.Errorf("failed to create Bitbucket client: %w", err)
+		}
 	}
 
 	s.mcpServer = mcp.NewServer(&mcp.Implementation{
@@ -78,6 +98,7 @@ func (s *Server) Start(ctx context.Context) error {
 
 	// Create a single HTTP mux for all HTTP-based transports
 	mux := http.NewServeMux()
+	authMux := s.AuthMiddleware(mux)
 
 	// Start all requested transports
 	for _, transport := range s.config.Transport.Modes {
@@ -124,7 +145,7 @@ func (s *Server) Start(ctx context.Context) error {
 		addr := fmt.Sprintf(":%d", s.config.Port)
 		s.httpServer = &http.Server{
 			Addr:    addr,
-			Handler: mux,
+			Handler: authMux,
 		}
 
 		// Start HTTP server in a goroutine
@@ -198,6 +219,63 @@ func (s *Server) addTools() {
 	if s.bitbucketClient != nil {
 		s.addBitbucketTools()
 	}
+}
+
+// AuthMiddleware injects the authentication token into the request context
+// based on the server's configured authentication mode.
+func (s *Server) AuthMiddleware(next http.Handler) http.Handler {
+	type serviceConfig struct {
+		headerKey   string
+		configField string
+		ctxKey      client.ContextKey
+		url         *string
+	}
+
+	services := []serviceConfig{
+		{
+			headerKey:   BitbucketTokenHeader,
+			configField: config.BitbucketField,
+			ctxKey:      client.BitbucketTokenKey,
+			url:         &s.config.Bitbucket.URL,
+		},
+		{
+			headerKey:   JiraTokenHeader,
+			configField: config.JiraField,
+			ctxKey:      client.JiraTokenKey,
+			url:         &s.config.Jira.URL,
+		},
+		{
+			headerKey:   ConfluenceTokenHeader,
+			configField: config.ConfluenceField,
+			ctxKey:      client.ConfluenceTokenKey,
+			url:         &s.config.Confluence.URL,
+		},
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		tokenValues := make(map[client.ContextKey]string)
+
+		for _, svc := range services {
+			if s.authMode == "header" {
+				tokenValues[svc.ctxKey] = r.Header.Get(svc.headerKey)
+				continue
+			}
+
+			cfgVal := reflect.ValueOf(s.config).Elem().FieldByName(svc.configField)
+			if cfgVal.IsValid() && cfgVal.String() != "" {
+				tokenValues[svc.ctxKey] = cfgVal.String()
+			}
+		}
+
+		for key, token := range tokenValues {
+			if token != "" {
+				ctx = context.WithValue(ctx, key, token)
+			}
+		}
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 // addJiraTools registers all Jira-related tools with the MCP server

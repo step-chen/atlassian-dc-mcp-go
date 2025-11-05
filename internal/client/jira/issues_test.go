@@ -2,6 +2,7 @@ package jira
 
 import (
 	"atlassian-dc-mcp-go/internal/client/testutils"
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -40,7 +41,7 @@ func TestGetIssue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetIssue(GetIssueInput{
+			result, err := client.GetIssue(context.Background(), GetIssueInput{
 				IssueKey: tt.issueKey,
 				Fields:   nil,
 			})
@@ -98,7 +99,7 @@ func TestGetTransitions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetTransitions(GetTransitionsInput{
+			result, err := client.GetTransitions(context.Background(), GetTransitionsInput{
 				IssueKey: tt.issueKey,
 			})
 
@@ -156,7 +157,7 @@ func TestGetSubtasks(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetSubtasks(GetSubtasksInput{
+			result, err := client.GetSubtasks(context.Background(), GetSubtasksInput{
 				IssueKey: tt.issueKey,
 			})
 
@@ -226,7 +227,7 @@ func TestGetAgileIssue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetAgileIssue(GetAgileIssueInput{
+			result, err := client.GetAgileIssue(context.Background(), GetAgileIssueInput{
 				IssueIdOrKey:  tt.issueIdOrKey,
 				Expand:        tt.expand,
 				Fields:        tt.fields,
@@ -292,7 +293,7 @@ func TestGetIssueEstimationForBoard(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := client.GetIssueEstimationForBoard(GetIssueEstimationForBoardInput{
+			result, err := client.GetIssueEstimationForBoard(context.Background(), GetIssueEstimationForBoardInput{
 				IssueIdOrKey: tt.issueKey,
 				BoardId:      tt.boardId,
 			})

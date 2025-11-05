@@ -1,6 +1,7 @@
 package bitbucket
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 
@@ -19,9 +20,10 @@ import (
 // Returns:
 //   - types.MapOutput: The user data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetUser(input GetUserInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetUser(ctx context.Context, input GetUserInput) (types.MapOutput, error) {
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "users", input.UserSlug},
@@ -47,7 +49,7 @@ func (c *BitbucketClient) GetUser(input GetUserInput) (types.MapOutput, error) {
 // Returns:
 //   - types.MapOutput: The users data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetUsers(input GetUsersInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetUsers(ctx context.Context, input GetUsersInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "filter", input.Filter, "")
 	client.SetQueryParam(queryParams, "permission", input.Permission, "")
@@ -64,6 +66,7 @@ func (c *BitbucketClient) GetUsers(input GetUsersInput) (types.MapOutput, error)
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "users"},

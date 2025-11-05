@@ -1,6 +1,7 @@
 package jira
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 
@@ -16,7 +17,7 @@ import (
 // Returns:
 //   - types.MapOutput: The boards data
 //   - error: An error if the request fails
-func (c *JiraClient) GetBoards(input GetBoardsInput) (types.MapOutput, error) {
+func (c *JiraClient) GetBoards(ctx context.Context, input GetBoardsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
 	client.SetQueryParam(queryParams, "maxResults", input.MaxResults, 0)
@@ -26,6 +27,7 @@ func (c *JiraClient) GetBoards(input GetBoardsInput) (types.MapOutput, error) {
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "agile", "1.0", "board"},
@@ -48,9 +50,10 @@ func (c *JiraClient) GetBoards(input GetBoardsInput) (types.MapOutput, error) {
 // Returns:
 //   - types.MapOutput: The board data
 //   - error: An error if the request fails
-func (c *JiraClient) GetBoard(input GetBoardInput) (types.MapOutput, error) {
+func (c *JiraClient) GetBoard(ctx context.Context, input GetBoardInput) (types.MapOutput, error) {
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "agile", "1.0", "board", input.Id},
@@ -73,7 +76,7 @@ func (c *JiraClient) GetBoard(input GetBoardInput) (types.MapOutput, error) {
 // Returns:
 //   - types.MapOutput: The backlog data
 //   - error: An error if the request fails
-func (c *JiraClient) GetBoardBacklog(input GetBoardBacklogInput) (types.MapOutput, error) {
+func (c *JiraClient) GetBoardBacklog(ctx context.Context, input GetBoardBacklogInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
 	client.SetQueryParam(queryParams, "maxResults", input.MaxResults, 0)
@@ -89,6 +92,7 @@ func (c *JiraClient) GetBoardBacklog(input GetBoardBacklogInput) (types.MapOutpu
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "agile", "1.0", "board", input.BoardId, "backlog"},
@@ -111,7 +115,7 @@ func (c *JiraClient) GetBoardBacklog(input GetBoardBacklogInput) (types.MapOutpu
 // Returns:
 //   - types.MapOutput: The epics data
 //   - error: An error if the request fails
-func (c *JiraClient) GetBoardEpics(input GetBoardEpicsInput) (types.MapOutput, error) {
+func (c *JiraClient) GetBoardEpics(ctx context.Context, input GetBoardEpicsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
 	client.SetQueryParam(queryParams, "maxResults", input.MaxResults, 0)
@@ -119,6 +123,7 @@ func (c *JiraClient) GetBoardEpics(input GetBoardEpicsInput) (types.MapOutput, e
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "agile", "1.0", "board", input.BoardId, "epic"},
@@ -141,7 +146,7 @@ func (c *JiraClient) GetBoardEpics(input GetBoardEpicsInput) (types.MapOutput, e
 // Returns:
 //   - types.MapOutput: The sprints data
 //   - error: An error if the request fails
-func (c *JiraClient) GetBoardSprints(input GetBoardSprintsInput) (types.MapOutput, error) {
+func (c *JiraClient) GetBoardSprints(ctx context.Context, input GetBoardSprintsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
 	client.SetQueryParam(queryParams, "maxResults", input.MaxResults, 0)
@@ -149,6 +154,7 @@ func (c *JiraClient) GetBoardSprints(input GetBoardSprintsInput) (types.MapOutpu
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "agile", "1.0", "board", input.BoardId, "sprint"},
@@ -171,9 +177,10 @@ func (c *JiraClient) GetBoardSprints(input GetBoardSprintsInput) (types.MapOutpu
 // Returns:
 //   - types.MapOutput: The sprint data
 //   - error: An error if the request fails
-func (c *JiraClient) GetSprint(input GetSprintInput) (types.MapOutput, error) {
+func (c *JiraClient) GetSprint(ctx context.Context, input GetSprintInput) (types.MapOutput, error) {
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "agile", "1.0", "sprint", input.SprintId},
@@ -196,7 +203,7 @@ func (c *JiraClient) GetSprint(input GetSprintInput) (types.MapOutput, error) {
 // Returns:
 //   - types.MapOutput: The issues data
 //   - error: An error if the request fails
-func (c *JiraClient) GetSprintIssues(input GetSprintIssuesInput) (types.MapOutput, error) {
+func (c *JiraClient) GetSprintIssues(ctx context.Context, input GetSprintIssuesInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
 	client.SetQueryParam(queryParams, "maxResults", input.MaxResults, 0)
@@ -212,6 +219,7 @@ func (c *JiraClient) GetSprintIssues(input GetSprintIssuesInput) (types.MapOutpu
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "agile", "1.0", "sprint", input.SprintId, "issue"},

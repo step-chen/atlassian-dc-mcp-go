@@ -13,7 +13,7 @@ import (
 
 // getContentChildrenHandler handles getting content children
 func (h *Handler) getContentChildrenHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentChildrenInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	children, err := h.client.GetContentChildren(input)
+	children, err := h.client.GetContentChildren(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get content children failed: %w", err)
 	}
@@ -23,7 +23,7 @@ func (h *Handler) getContentChildrenHandler(ctx context.Context, req *mcp.CallTo
 
 // getContentChildrenByTypeHandler handles getting content children by type
 func (h *Handler) getContentChildrenByTypeHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentChildrenByTypeInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	children, err := h.client.GetContentChildrenByType(input)
+	children, err := h.client.GetContentChildrenByType(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get content children by type failed: %w", err)
 	}
@@ -33,7 +33,7 @@ func (h *Handler) getContentChildrenByTypeHandler(ctx context.Context, req *mcp.
 
 // getContentCommentsHandler handles getting content comments
 func (h *Handler) getContentCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentCommentsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	comments, err := h.client.GetContentComments(input)
+	comments, err := h.client.GetContentComments(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get content comments failed: %w", err)
 	}

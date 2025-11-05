@@ -13,7 +13,7 @@ import (
 
 // getRelatedLabelsHandler handles getting related labels
 func (h *Handler) getRelatedLabelsHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetRelatedLabelsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	labels, err := h.client.GetRelatedLabels(input)
+	labels, err := h.client.GetRelatedLabels(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get related labels failed: %w", err)
 	}
@@ -23,7 +23,7 @@ func (h *Handler) getRelatedLabelsHandler(ctx context.Context, req *mcp.CallTool
 
 // getLabelsHandler handles getting labels
 func (h *Handler) getLabelsHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetLabelsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	labels, err := h.client.GetLabels(input)
+	labels, err := h.client.GetLabels(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get labels failed: %w", err)
 	}

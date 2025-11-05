@@ -1,6 +1,7 @@
 package bitbucket
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 
@@ -19,7 +20,7 @@ import (
 // Returns:
 //   - types.MapOutput: The projects data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetProjects(input GetProjectsInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetProjects(ctx context.Context, input GetProjectsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
@@ -28,6 +29,7 @@ func (c *BitbucketClient) GetProjects(input GetProjectsInput) (types.MapOutput, 
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects"},
@@ -53,9 +55,10 @@ func (c *BitbucketClient) GetProjects(input GetProjectsInput) (types.MapOutput, 
 // Returns:
 //   - types.MapOutput: The project data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetProject(input GetProjectInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetProject(ctx context.Context, input GetProjectInput) (types.MapOutput, error) {
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey},
@@ -81,9 +84,10 @@ func (c *BitbucketClient) GetProject(input GetProjectInput) (types.MapOutput, er
 // Returns:
 //   - types.MapOutput: The entity link data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetProjectPrimaryEnhancedEntityLink(input GetProjectPrimaryEnhancedEntityLinkInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetProjectPrimaryEnhancedEntityLink(ctx context.Context, input GetProjectPrimaryEnhancedEntityLinkInput) (types.MapOutput, error) {
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "jira", "latest", "projects", input.ProjectKey, "primary-enhanced-entitylink"},
@@ -109,7 +113,7 @@ func (c *BitbucketClient) GetProjectPrimaryEnhancedEntityLink(input GetProjectPr
 // Returns:
 //   - types.MapOutput: The tasks data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetProjectTasks(input GetProjectTasksInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetProjectTasks(ctx context.Context, input GetProjectTasksInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "markup", input.Markup, "")
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
@@ -117,6 +121,7 @@ func (c *BitbucketClient) GetProjectTasks(input GetProjectTasksInput) (types.Map
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "default-tasks", "latest", "projects", input.ProjectKey, "tasks"},
@@ -142,7 +147,7 @@ func (c *BitbucketClient) GetProjectTasks(input GetProjectTasksInput) (types.Map
 // Returns:
 //   - types.MapOutput: The tasks data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetRepositoryTasks(input GetRepositoryTasksInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetRepositoryTasks(ctx context.Context, input GetRepositoryTasksInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "markup", input.Markup, "")
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
@@ -150,6 +155,7 @@ func (c *BitbucketClient) GetRepositoryTasks(input GetRepositoryTasksInput) (typ
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "default-tasks", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "tasks"},

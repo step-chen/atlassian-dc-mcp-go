@@ -13,7 +13,7 @@ import (
 
 // getTagsHandler handles getting tags
 func (h *Handler) getTagsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetTagsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	tags, err := h.client.GetTags(input)
+	tags, err := h.client.GetTags(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get tags failed: %w", err)
 	}
@@ -23,7 +23,7 @@ func (h *Handler) getTagsHandler(ctx context.Context, req *mcp.CallToolRequest, 
 
 // getTagHandler handles getting a tag
 func (h *Handler) getTagHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetTagInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	tag, err := h.client.GetTag(input)
+	tag, err := h.client.GetTag(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get tag failed: %w", err)
 	}

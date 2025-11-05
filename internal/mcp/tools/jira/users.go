@@ -13,7 +13,7 @@ import (
 
 // getCurrentUserHandler handles getting current user
 func (h *Handler) getCurrentUserHandler(ctx context.Context, req *mcp.CallToolRequest, input types.EmptyInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	user, err := h.client.GetCurrentUser()
+	user, err := h.client.GetCurrentUser(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get current user failed: %w", err)
 	}
@@ -23,7 +23,7 @@ func (h *Handler) getCurrentUserHandler(ctx context.Context, req *mcp.CallToolRe
 
 // getUserByNameHandler handles getting user by username
 func (h *Handler) getUserByNameHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetUserByNameInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	user, err := h.client.GetUserByName(input)
+	user, err := h.client.GetUserByName(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get user by name failed: %w", err)
 	}
@@ -33,7 +33,7 @@ func (h *Handler) getUserByNameHandler(ctx context.Context, req *mcp.CallToolReq
 
 // getUserByKeyHandler handles getting user by key
 func (h *Handler) getUserByKeyHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetUserByKeyInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	user, err := h.client.GetUserByKey(input)
+	user, err := h.client.GetUserByKey(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get user by key failed: %w", err)
 	}
@@ -43,7 +43,7 @@ func (h *Handler) getUserByKeyHandler(ctx context.Context, req *mcp.CallToolRequ
 
 // searchUsersHandler handles searching users
 func (h *Handler) searchUsersHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.SearchUsersInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	users, err := h.client.SearchUsers(input)
+	users, err := h.client.SearchUsers(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("search users failed: %w", err)
 	}

@@ -1,6 +1,7 @@
 package bitbucket
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 
@@ -15,7 +16,7 @@ import (
 // Returns:
 //   - types.MapOutput: The commits data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetCommits(input GetCommitsInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetCommits(ctx context.Context, input GetCommitsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "until", input.Until, "")
 	client.SetQueryParam(queryParams, "since", input.Since, "")
@@ -29,6 +30,7 @@ func (c *BitbucketClient) GetCommits(input GetCommitsInput) (types.MapOutput, er
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits"},
@@ -56,7 +58,7 @@ func (c *BitbucketClient) GetCommits(input GetCommitsInput) (types.MapOutput, er
 // Returns:
 //   - types.MapOutput: The commits data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestCommits(input GetPullRequestCommitsInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetPullRequestCommits(ctx context.Context, input GetPullRequestCommitsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "avatarScheme", input.AvatarScheme, "")
 	client.SetQueryParam(queryParams, "withCounts", input.WithCounts, "")
@@ -66,6 +68,7 @@ func (c *BitbucketClient) GetPullRequestCommits(input GetPullRequestCommitsInput
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "commits"},
@@ -91,12 +94,13 @@ func (c *BitbucketClient) GetPullRequestCommits(input GetPullRequestCommitsInput
 // Returns:
 //   - types.MapOutput: The commit data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetCommit(input GetCommitInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetCommit(ctx context.Context, input GetCommitInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "path", input.Path, "")
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID},
@@ -114,15 +118,15 @@ func (c *BitbucketClient) GetCommit(input GetCommitInput) (types.MapOutput, erro
 // GetCommitChanges retrieves changes for a specific commit.
 //
 // This function makes an HTTP GET request to the Bitbucket API to fetch changes
-// made in a specific commit.
+// for a specific commit with various filtering options.
 //
 // Parameters:
 //   - input: GetCommitChangesInput containing the parameters for the request
 //
 // Returns:
-//   - types.MapOutput: The changes data retrieved from the API
+//   - types.MapOutput: The commit changes data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetCommitChanges(input GetCommitChangesInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetCommitChanges(ctx context.Context, input GetCommitChangesInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
@@ -131,6 +135,7 @@ func (c *BitbucketClient) GetCommitChanges(input GetCommitChangesInput) (types.M
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID, "changes"},
@@ -156,7 +161,7 @@ func (c *BitbucketClient) GetCommitChanges(input GetCommitChangesInput) (types.M
 // Returns:
 //   - types.MapOutput: The diff statistics summary retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetCommitDiffStatsSummary(input GetCommitDiffStatsSummaryInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetCommitDiffStatsSummary(ctx context.Context, input GetCommitDiffStatsSummaryInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 
 	client.SetQueryParam(queryParams, "srcPath", input.SrcPath, "")
@@ -166,6 +171,7 @@ func (c *BitbucketClient) GetCommitDiffStatsSummary(input GetCommitDiffStatsSumm
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID, "diff-stats-summary", input.Path},
@@ -191,7 +197,7 @@ func (c *BitbucketClient) GetCommitDiffStatsSummary(input GetCommitDiffStatsSumm
 // Returns:
 //   - string: The diff content as a string
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetDiffBetweenCommits(input GetDiffBetweenCommitsInput) (string, error) {
+func (c *BitbucketClient) GetDiffBetweenCommits(ctx context.Context, input GetDiffBetweenCommitsInput) (string, error) {
 	queryParams := url.Values{}
 
 	client.SetQueryParam(queryParams, "contextLines", input.ContextLines, 0)
@@ -203,6 +209,7 @@ func (c *BitbucketClient) GetDiffBetweenCommits(input GetDiffBetweenCommitsInput
 
 	var output string
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "compare", "diff" + input.Path},
@@ -228,7 +235,7 @@ func (c *BitbucketClient) GetDiffBetweenCommits(input GetDiffBetweenCommitsInput
 // Returns:
 //   - string: The diff content as a string
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetDiffBetweenRevisions(input GetDiffBetweenRevisionsInput) (string, error) {
+func (c *BitbucketClient) GetDiffBetweenRevisions(ctx context.Context, input GetDiffBetweenRevisionsInput) (string, error) {
 	queryParams := url.Values{}
 
 	client.SetQueryParam(queryParams, "contextLines", input.ContextLines, 0)
@@ -241,6 +248,7 @@ func (c *BitbucketClient) GetDiffBetweenRevisions(input GetDiffBetweenRevisionsI
 
 	var output string
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID, "diff", input.Path},
@@ -266,9 +274,10 @@ func (c *BitbucketClient) GetDiffBetweenRevisions(input GetDiffBetweenRevisionsI
 // Returns:
 //   - types.MapOutput: The comment data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetCommitComment(input GetCommitCommentInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetCommitComment(ctx context.Context, input GetCommitCommentInput) (types.MapOutput, error) {
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID, "comments", input.CommentID},
@@ -294,7 +303,7 @@ func (c *BitbucketClient) GetCommitComment(input GetCommitCommentInput) (types.M
 // Returns:
 //   - types.MapOutput: The comments data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetCommitComments(input GetCommitCommentsInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetCommitComments(ctx context.Context, input GetCommitCommentsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
@@ -303,6 +312,7 @@ func (c *BitbucketClient) GetCommitComments(input GetCommitCommentsInput) (types
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "commits", input.CommitID, "comments"},
@@ -328,7 +338,7 @@ func (c *BitbucketClient) GetCommitComments(input GetCommitCommentsInput) (types
 // Returns:
 //   - types.MapOutput: The commits data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetJiraIssueCommits(input GetJiraIssueCommitsInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetJiraIssueCommits(ctx context.Context, input GetJiraIssueCommitsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
@@ -336,6 +346,7 @@ func (c *BitbucketClient) GetJiraIssueCommits(input GetJiraIssueCommitsInput) (t
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "jira", "latest", "issues", input.IssueKey, "commits"},
@@ -361,7 +372,7 @@ func (c *BitbucketClient) GetJiraIssueCommits(input GetJiraIssueCommitsInput) (t
 // Returns:
 //   - string: The diff content as a string
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetDiffBetweenRevisionsForPath(input GetDiffBetweenRevisionsForPathInput) (string, error) {
+func (c *BitbucketClient) GetDiffBetweenRevisionsForPath(ctx context.Context, input GetDiffBetweenRevisionsForPathInput) (string, error) {
 	queryParams := url.Values{}
 
 	client.SetQueryParam(queryParams, "contextLines", input.ContextLines, 0)
@@ -372,6 +383,7 @@ func (c *BitbucketClient) GetDiffBetweenRevisionsForPath(input GetDiffBetweenRev
 
 	var output string
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "diff", input.Path},

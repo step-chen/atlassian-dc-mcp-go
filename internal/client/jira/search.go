@@ -3,6 +3,7 @@ package jira
 import (
 	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/types"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -17,7 +18,7 @@ import (
 // Returns:
 //   - types.MapOutput: The search results
 //   - error: An error if the request fails
-func (c *JiraClient) SearchIssues(input SearchIssuesInput) (types.MapOutput, error) {
+func (c *JiraClient) SearchIssues(ctx context.Context, input SearchIssuesInput) (types.MapOutput, error) {
 
 	finalJQL := input.JQL
 	if finalJQL == "" {
@@ -52,6 +53,7 @@ func (c *JiraClient) SearchIssues(input SearchIssuesInput) (types.MapOutput, err
 
 	var output types.MapOutput
 	err = client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPost,
 		[]any{"rest", "api", "2", "search"},

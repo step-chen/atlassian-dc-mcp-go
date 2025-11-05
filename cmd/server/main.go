@@ -24,6 +24,7 @@ func main() {
 	flag.StringVar(configPath, "config", "", "Path to config file (optional)")
 	help := flag.Bool("h", false, "Show help message")
 	flag.BoolVar(help, "help", false, "Show help message")
+	authMode := flag.String("auth-mode", "config", "Authentication mode. One of: config, header")
 	flag.Parse()
 
 	if *help {
@@ -34,7 +35,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	cfg, err := config.LoadConfig(*configPath)
+	cfg, err := config.LoadConfig(*configPath, *authMode)
 	if err != nil {
 		// Use standard log since logger is not initialized yet
 		log.Fatalf("Failed to load configuration: %v", err)
@@ -52,9 +53,9 @@ func main() {
 
 	config.WatchConfigOnChange(func() {
 		logger.Info("Configuration reloaded")
-	})
+	}, *authMode)
 
-	mcpServer := mcp.NewServer(cfg)
+	mcpServer := mcp.NewServer(cfg, *authMode)
 
 	if err := mcpServer.Initialize(); err != nil {
 		logger.Fatal("Failed to initialize MCP server", zap.Error(err))

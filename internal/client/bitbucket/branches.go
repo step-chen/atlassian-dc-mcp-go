@@ -2,6 +2,7 @@
 package bitbucket
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -22,7 +23,7 @@ import (
 // Returns:
 //   - types.MapOutput: The branches data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetBranches(input GetBranchesInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetBranches(ctx context.Context, input GetBranchesInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "base", input.Base, "")
 	client.SetQueryParam(queryParams, "details", input.Details, false)
@@ -35,6 +36,7 @@ func (c *BitbucketClient) GetBranches(input GetBranchesInput) (types.MapOutput, 
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "branches"},
@@ -60,9 +62,10 @@ func (c *BitbucketClient) GetBranches(input GetBranchesInput) (types.MapOutput, 
 // Returns:
 //   - types.MapOutput: The default branch data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetDefaultBranch(input GetDefaultBranchInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetDefaultBranch(ctx context.Context, input GetDefaultBranchInput) (types.MapOutput, error) {
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "default-branch"},
@@ -88,13 +91,14 @@ func (c *BitbucketClient) GetDefaultBranch(input GetDefaultBranchInput) (types.M
 // Returns:
 //   - types.MapOutput: The branch information retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetBranch(input GetBranchInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetBranch(ctx context.Context, input GetBranchInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "branch-utils", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "branches", "info", input.CommitId},
@@ -122,7 +126,7 @@ func (c *BitbucketClient) GetBranch(input GetBranchInput) (types.MapOutput, erro
 // Returns:
 //   - types.MapOutput: The created branch data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) CreateBranch(input CreateBranchInput) (types.MapOutput, error) {
+func (c *BitbucketClient) CreateBranch(ctx context.Context, input CreateBranchInput) (types.MapOutput, error) {
 	payload := types.MapOutput{}
 	client.SetRequestBodyParam(payload, "name", input.Name)
 	client.SetRequestBodyParam(payload, "startPoint", input.StartPoint)
@@ -134,6 +138,7 @@ func (c *BitbucketClient) CreateBranch(input CreateBranchInput) (types.MapOutput
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPost,
 		[]any{"rest", "branch-utils", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "branches"},

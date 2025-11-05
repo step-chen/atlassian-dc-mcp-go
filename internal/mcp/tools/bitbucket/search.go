@@ -16,7 +16,7 @@ import (
 func (h *Handler) searchCodeHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.SearchCodeInput) (*mcp.CallToolResult, types.MapOutput, error) {
 
 	// Perform the search
-	searchResult, err := h.client.SearchCode(input)
+	searchResult, err := h.client.SearchCode(ctx, input)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{

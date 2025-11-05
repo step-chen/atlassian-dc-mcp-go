@@ -14,7 +14,7 @@ import (
 
 // getBranchesHandler handles getting branches
 func (h *Handler) getBranchesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetBranchesInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	branches, err := h.client.GetBranches(input)
+	branches, err := h.client.GetBranches(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get branches failed: %w", err)
 	}
@@ -24,7 +24,7 @@ func (h *Handler) getBranchesHandler(ctx context.Context, req *mcp.CallToolReque
 
 // getDefaultBranchHandler handles getting the default branch
 func (h *Handler) getDefaultBranchHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetDefaultBranchInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	branch, err := h.client.GetDefaultBranch(input)
+	branch, err := h.client.GetDefaultBranch(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get default branch failed: %w", err)
 	}
@@ -34,7 +34,7 @@ func (h *Handler) getDefaultBranchHandler(ctx context.Context, req *mcp.CallTool
 
 // getBranchInfoByCommitIdHandler handles getting branch information by commit ID
 func (h *Handler) getBranchHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetBranchInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	branchInfo, err := h.client.GetBranch(input)
+	branchInfo, err := h.client.GetBranch(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get branch info by commit id failed: %w", err)
 	}
@@ -44,7 +44,7 @@ func (h *Handler) getBranchHandler(ctx context.Context, req *mcp.CallToolRequest
 
 // createBranchHandler handles creating a new branch
 func (h *Handler) createBranchHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.CreateBranchInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	branch, err := h.client.CreateBranch(input)
+	branch, err := h.client.CreateBranch(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("create branch failed: %w", err)
 	}
@@ -59,7 +59,7 @@ func AddBranchTools(server *mcp.Server, client *bitbucket.BitbucketClient, permi
 	utils.RegisterTool[bitbucket.GetBranchesInput, types.MapOutput](server, "bitbucket_get_branches", "Get branches for a repository", handler.getBranchesHandler)
 	utils.RegisterTool[bitbucket.GetDefaultBranchInput, types.MapOutput](server, "bitbucket_get_default_branch", "Get the default branch of a repository", handler.getDefaultBranchHandler)
 	utils.RegisterTool[bitbucket.GetBranchInput, types.MapOutput](server, "bitbucket_get_branch_info_by_commit_id", "Get branch information by commit ID", handler.getBranchHandler)
-	
+
 	// Only register write operations if write permission is enabled
 	if permissions["bitbucket_create_branch"] {
 		utils.RegisterTool[bitbucket.CreateBranchInput, types.MapOutput](server, "bitbucket_create_branch", "Create a new branch in a repository", handler.createBranchHandler)

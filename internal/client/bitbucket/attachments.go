@@ -1,6 +1,7 @@
 package bitbucket
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 
@@ -19,9 +20,10 @@ import (
 // Returns:
 //   - []byte: The attachment content as bytes
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetAttachment(input GetAttachmentInput) ([]byte, error) {
+func (c *BitbucketClient) GetAttachment(ctx context.Context, input GetAttachmentInput) ([]byte, error) {
 	var content []byte
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "attachments", input.AttachmentId},
@@ -47,9 +49,10 @@ func (c *BitbucketClient) GetAttachment(input GetAttachmentInput) ([]byte, error
 // Returns:
 //   - types.MapOutput: The attachment metadata retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetAttachmentMetadata(input GetAttachmentMetadataInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetAttachmentMetadata(ctx context.Context, input GetAttachmentMetadataInput) (types.MapOutput, error) {
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "attachments", input.AttachmentId, "metadata"},
@@ -73,8 +76,9 @@ func (c *BitbucketClient) GetAttachmentMetadata(input GetAttachmentMetadataInput
 //
 // Returns:
 //   - error: An error if the request fails
-func (c *BitbucketClient) DeleteAttachment(input DeleteAttachmentInput) error {
+func (c *BitbucketClient) DeleteAttachment(ctx context.Context, input DeleteAttachmentInput) error {
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodDelete,
 		[]any{"rest", "attachment", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestId, "attachments", input.AttachmentId},
@@ -99,12 +103,13 @@ func (c *BitbucketClient) DeleteAttachment(input DeleteAttachmentInput) error {
 // Returns:
 //   - types.MapOutput: The created attachment data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) CreateAttachment(input CreateAttachmentInput) (types.MapOutput, error) {
+func (c *BitbucketClient) CreateAttachment(ctx context.Context, input CreateAttachmentInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "filename", input.FileName, "")
 
 	var output types.MapOutput
 	if err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPost,
 		[]any{"rest", "attachment", "latest", "projects", input.ProjectKey, "repos", input.RepoSlug, "pull-requests", input.PullRequestID, "attachments"},

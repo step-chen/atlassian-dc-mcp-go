@@ -13,7 +13,7 @@ import (
 
 // getCommitsHandler handles getting commits
 func (h *Handler) getCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	commits, err := h.client.GetCommits(input)
+	commits, err := h.client.GetCommits(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get commits failed: %w", err)
 	}
@@ -23,7 +23,7 @@ func (h *Handler) getCommitsHandler(ctx context.Context, req *mcp.CallToolReques
 
 // getPullRequestCommitsHandler handles getting commits for a pull request
 func (h *Handler) getPullRequestCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestCommitsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	commits, err := h.client.GetPullRequestCommits(input)
+	commits, err := h.client.GetPullRequestCommits(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get pull request commits failed: %w", err)
 	}
@@ -33,7 +33,7 @@ func (h *Handler) getPullRequestCommitsHandler(ctx context.Context, req *mcp.Cal
 
 // getCommitHandler handles getting a specific commit
 func (h *Handler) getCommitHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	commit, err := h.client.GetCommit(input)
+	commit, err := h.client.GetCommit(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get commit failed: %w", err)
 	}
@@ -43,7 +43,7 @@ func (h *Handler) getCommitHandler(ctx context.Context, req *mcp.CallToolRequest
 
 // getCommitChangesHandler handles getting changes for a specific commit
 func (h *Handler) getCommitChangesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitChangesInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	changes, err := h.client.GetCommitChanges(input)
+	changes, err := h.client.GetCommitChanges(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get commit changes failed: %w", err)
 	}
@@ -53,7 +53,7 @@ func (h *Handler) getCommitChangesHandler(ctx context.Context, req *mcp.CallTool
 
 // getCommitCommentHandler handles getting a specific comment on a commit
 func (h *Handler) getCommitCommentHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitCommentInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	comment, err := h.client.GetCommitComment(input)
+	comment, err := h.client.GetCommitComment(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get commit comment failed: %w", err)
 	}
@@ -63,7 +63,7 @@ func (h *Handler) getCommitCommentHandler(ctx context.Context, req *mcp.CallTool
 
 // getCommitCommentsHandler handles getting comments on a commit
 func (h *Handler) getCommitCommentsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitCommentsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	comments, err := h.client.GetCommitComments(input)
+	comments, err := h.client.GetCommitComments(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get commit comments failed: %w", err)
 	}
@@ -73,7 +73,7 @@ func (h *Handler) getCommitCommentsHandler(ctx context.Context, req *mcp.CallToo
 
 // getCommitDiffStatsSummaryHandler handles getting diff statistics summary for a commit
 func (h *Handler) getCommitDiffStatsSummaryHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetCommitDiffStatsSummaryInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	stats, err := h.client.GetCommitDiffStatsSummary(input)
+	stats, err := h.client.GetCommitDiffStatsSummary(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get commit diff stats summary failed: %w", err)
 	}
@@ -83,7 +83,7 @@ func (h *Handler) getCommitDiffStatsSummaryHandler(ctx context.Context, req *mcp
 
 // getDiffBetweenCommitsHandler handles getting diff between commits
 func (h *Handler) getDiffBetweenCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetDiffBetweenCommitsInput) (*mcp.CallToolResult, DiffOutput, error) {
-	diff, err := h.client.GetDiffBetweenCommits(input)
+	diff, err := h.client.GetDiffBetweenCommits(ctx, input)
 	if err != nil {
 		return nil, DiffOutput{}, fmt.Errorf("get diff between commits failed: %w", err)
 	}
@@ -93,7 +93,7 @@ func (h *Handler) getDiffBetweenCommitsHandler(ctx context.Context, req *mcp.Cal
 
 // getDiffBetweenRevisionsHandler handles getting the diff between revisions
 func (h *Handler) getDiffBetweenRevisionsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetDiffBetweenRevisionsInput) (*mcp.CallToolResult, DiffOutput, error) {
-	diff, err := h.client.GetDiffBetweenRevisions(input)
+	diff, err := h.client.GetDiffBetweenRevisions(ctx, input)
 	if err != nil {
 		return nil, DiffOutput{}, fmt.Errorf("get diff between revisions failed: %w", err)
 	}
@@ -103,7 +103,7 @@ func (h *Handler) getDiffBetweenRevisionsHandler(ctx context.Context, req *mcp.C
 
 // getJiraIssueCommitsHandler handles getting commits related to a Jira issue
 func (h *Handler) getJiraIssueCommitsHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetJiraIssueCommitsInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	commits, err := h.client.GetJiraIssueCommits(input)
+	commits, err := h.client.GetJiraIssueCommits(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get Jira issue commits failed: %w", err)
 	}
@@ -113,7 +113,7 @@ func (h *Handler) getJiraIssueCommitsHandler(ctx context.Context, req *mcp.CallT
 
 // getDiffBetweenRevisionsForPathHandler handles getting the diff between revisions for a specific path
 func (h *Handler) getDiffBetweenRevisionsForPathHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetDiffBetweenRevisionsForPathInput) (*mcp.CallToolResult, DiffOutput, error) {
-	diff, err := h.client.GetDiffBetweenRevisionsForPath(input)
+	diff, err := h.client.GetDiffBetweenRevisionsForPath(ctx, input)
 	if err != nil {
 		return nil, DiffOutput{}, fmt.Errorf("get diff between revisions for path failed: %w", err)
 	}

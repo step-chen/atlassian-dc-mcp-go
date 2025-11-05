@@ -13,7 +13,7 @@ import (
 
 // getSpaceHandler handles getting a specific Confluence space
 func (h *Handler) getSpaceHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetSpaceInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	space, err := h.client.GetSpace(input)
+	space, err := h.client.GetSpace(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get space failed: %w", err)
 	}
@@ -23,7 +23,7 @@ func (h *Handler) getSpaceHandler(ctx context.Context, req *mcp.CallToolRequest,
 
 // getContentsInSpaceHandler handles getting contents in a specific Confluence space
 func (h *Handler) getContentsInSpaceHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentsInSpaceInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	contents, err := h.client.GetContentsInSpace(input)
+	contents, err := h.client.GetContentsInSpace(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get contents in space failed: %w", err)
 	}
@@ -33,7 +33,7 @@ func (h *Handler) getContentsInSpaceHandler(ctx context.Context, req *mcp.CallTo
 
 // getContentsByTypeHandler handles getting contents by type in a specific Confluence space
 func (h *Handler) getContentsByTypeHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentsByTypeInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	contents, err := h.client.GetContentsByType(input)
+	contents, err := h.client.GetContentsByType(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get contents by type failed: %w", err)
 	}
@@ -43,7 +43,7 @@ func (h *Handler) getContentsByTypeHandler(ctx context.Context, req *mcp.CallToo
 
 // getSpacesByKeyHandler handles getting spaces by key
 func (h *Handler) getSpacesByKeyHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetSpacesByKeyInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	spaces, err := h.client.GetSpacesByKey(input)
+	spaces, err := h.client.GetSpacesByKey(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get spaces by key failed: %w", err)
 	}

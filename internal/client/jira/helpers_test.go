@@ -89,7 +89,10 @@ func newJiraIntegrationClient() (*config.ClientConfig, *JiraClient, error) {
 			return nil, nil, nil
 		}
 
-		client := NewJiraClient(&cfg.Jira)
+		client, err := NewJiraClient(&cfg.Jira)
+		if err != nil {
+			return nil, nil, err
+		}
 		return &cfg.Jira, client, nil
 	})
 

@@ -13,7 +13,7 @@ import (
 
 // getUserHandler handles getting a user
 func (h *Handler) getUserHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetUserInput) (*mcp.CallToolResult, GetUserOutput, error) {
-	user, err := h.client.GetUser(input)
+	user, err := h.client.GetUser(ctx, input)
 	if err != nil {
 		return nil, GetUserOutput{}, fmt.Errorf("get user failed: %w", err)
 	}
@@ -23,7 +23,7 @@ func (h *Handler) getUserHandler(ctx context.Context, req *mcp.CallToolRequest, 
 
 // getUsersHandler handles getting Bitbucket users
 func (h *Handler) getUsersHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetUsersInput) (*mcp.CallToolResult, types.MapOutput, error) {
-	users, err := h.client.GetUsers(input)
+	users, err := h.client.GetUsers(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get users failed: %w", err)
 	}

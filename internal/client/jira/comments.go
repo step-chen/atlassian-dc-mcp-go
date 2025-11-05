@@ -1,6 +1,7 @@
 package jira
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -18,7 +19,7 @@ import (
 // Returns:
 //   - types.MapOutput: The comments data
 //   - error: An error if the request fails
-func (c *JiraClient) GetComments(input GetCommentsInput) (types.MapOutput, error) {
+func (c *JiraClient) GetComments(ctx context.Context, input GetCommentsInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "startAt", input.StartAt, 0)
 	client.SetQueryParam(queryParams, "maxResults", input.MaxResults, 0)
@@ -27,6 +28,7 @@ func (c *JiraClient) GetComments(input GetCommentsInput) (types.MapOutput, error
 
 	var output types.MapOutput
 	err := client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodGet,
 		[]any{"rest", "api", "2", "issue", input.IssueKey, "comment"},
@@ -50,7 +52,7 @@ func (c *JiraClient) GetComments(input GetCommentsInput) (types.MapOutput, error
 // Returns:
 //   - types.MapOutput: The added comment data
 //   - error: An error if the request fails
-func (c *JiraClient) AddComment(input AddCommentInput) (types.MapOutput, error) {
+func (c *JiraClient) AddComment(ctx context.Context, input AddCommentInput) (types.MapOutput, error) {
 	payload := types.MapOutput{}
 	client.SetRequestBodyParam(payload, "body", input.Comment)
 
@@ -61,6 +63,7 @@ func (c *JiraClient) AddComment(input AddCommentInput) (types.MapOutput, error) 
 
 	var output types.MapOutput
 	err = client.ExecuteRequest(
+		ctx,
 		c.BaseClient,
 		http.MethodPost,
 		[]any{"rest", "api", "2", "issue", input.IssueKey, "comment"},

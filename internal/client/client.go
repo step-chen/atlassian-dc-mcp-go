@@ -15,15 +15,19 @@ type BaseClient struct {
 }
 
 // NewBaseClient creates a new BaseClient with the provided configuration and name.
-func NewBaseClient(config *config.ClientConfig, name string) *BaseClient {
+func NewBaseClient(config *config.ClientConfig, name string, tokenKey ContextKey) (*BaseClient, error) {
 	clientConfig := DefaultHTTPClientConfig()
 	if config.Timeout > 0 {
 		clientConfig.Timeout = time.Duration(config.Timeout) * time.Second
 	}
 
+	httpClient := NewRetryableHTTPClient(clientConfig, &TokenAuthTransport{
+		TokenKey: tokenKey,
+	})
+
 	return &BaseClient{
 		Config:     config,
-		HTTPClient: NewRetryableHTTPClient(clientConfig),
+		HTTPClient: httpClient,
 		Name:       name,
-	}
+	}, nil
 }

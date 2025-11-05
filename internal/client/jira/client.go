@@ -12,8 +12,13 @@ type JiraClient struct {
 }
 
 // NewJiraClient creates a new Jira client with the provided configuration.
-func NewJiraClient(config *config.ClientConfig) *JiraClient {
-	return &JiraClient{
-		BaseClient: client.NewBaseClient(config, "jira"),
+func NewJiraClient(config *config.ClientConfig) (*JiraClient, error) {
+	baseClient, err := client.NewBaseClient(config, "jira", client.JiraTokenKey)
+	if err != nil {
+		return nil, err
 	}
+
+	return &JiraClient{
+		BaseClient: baseClient,
+	}, nil
 }
