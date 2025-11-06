@@ -78,6 +78,40 @@ When using header-based authentication, your client will need to pass the approp
 - `Confluence-Token`: API token for Confluence
 - `Bitbucket-Token`: API token for Bitbucket
 
+Here's a complete example for header-based authentication:
+
+```json
+{
+  "mcpServers": {
+    "atlassian-dc-mcp-local": {
+      "url": "http://localhost:8090/sse",
+      "headers": {
+        "Jira-Token": "your-jira-api-token",
+        "Confluence-Token": "your-confluence-api-token",
+        "Bitbucket-Token": "your-bitbucket-api-token"
+      }
+    }
+  }
+}
+```
+
+Alternatively, you can use environment variables for the tokens:
+
+```json
+{
+  "mcpServers": {
+    "atlassian-dc-mcp-local": {
+      "url": "http://localhost:8090/sse",
+      "headers": {
+        "Jira-Token": "${JIRA_TOKEN}",
+        "Confluence-Token": "${CONFLUENCE_TOKEN}",
+        "Bitbucket-Token": "${BITBUCKET_TOKEN}"
+      }
+    }
+  }
+}
+```
+
 ### 6. Stop the Service
 
 To stop the service, simply press `Ctrl+C` in the terminal to gracefully shut down the service.

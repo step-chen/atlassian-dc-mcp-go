@@ -78,6 +78,40 @@ INFO[0000] Starting Atlassian DC MCP Server on port 8090
 - `Confluence-Token`：Confluence的API令牌
 - `Bitbucket-Token`：Bitbucket的API令牌
 
+以下是基于header认证的完整配置示例：
+
+```json
+{
+  "mcpServers": {
+    "atlassian-dc-mcp-local": {
+      "url": "http://localhost:8090/sse",
+      "headers": {
+        "Jira-Token": "your-jira-api-token",
+        "Confluence-Token": "your-confluence-api-token",
+        "Bitbucket-Token": "your-bitbucket-api-token"
+      }
+    }
+  }
+}
+```
+
+或者，您也可以使用环境变量来配置令牌：
+
+```json
+{
+  "mcpServers": {
+    "atlassian-dc-mcp-local": {
+      "url": "http://localhost:8090/sse",
+      "headers": {
+        "Jira-Token": "${JIRA_TOKEN}",
+        "Confluence-Token": "${CONFLUENCE_TOKEN}",
+        "Bitbucket-Token": "${BITBUCKET_TOKEN}"
+      }
+    }
+  }
+}
+```
+
 ### 6. 停止服务
 
 要停止服务，只需在终端中按 `Ctrl+C` 即可优雅地关闭服务。

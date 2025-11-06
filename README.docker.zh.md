@@ -89,6 +89,40 @@ docker compose up -d
 - `Confluence-Token`：Confluence的API令牌
 - `Bitbucket-Token`：Bitbucket的API令牌
 
+以下是基于header认证的完整配置示例：
+
+```json
+{
+  "mcpServers": {
+    "atlassian-dc-mcp-sse": {
+      "url": "http://localhost:8090/sse",
+      "headers": {
+        "Jira-Token": "your-jira-api-token",
+        "Confluence-Token": "your-confluence-api-token",
+        "Bitbucket-Token": "your-bitbucket-api-token"
+      }
+    }
+  }
+}
+```
+
+或者，您也可以使用环境变量来配置令牌：
+
+```json
+{
+  "mcpServers": {
+    "atlassian-dc-mcp-sse": {
+      "url": "http://localhost:8090/sse",
+      "headers": {
+        "Jira-Token": "${JIRA_TOKEN}",
+        "Confluence-Token": "${CONFLUENCE_TOKEN}",
+        "Bitbucket-Token": "${BITBUCKET_TOKEN}"
+      }
+    }
+  }
+}
+```
+
 ## 停止服务
 
 如果您需要停止服务，可以运行以下命令：
