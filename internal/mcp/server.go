@@ -82,6 +82,7 @@ func (s *Server) Initialize() error {
 	}, nil)
 
 	s.mcpServer.AddReceivingMiddleware(LoggingMiddleware())
+	s.mcpServer.AddReceivingMiddleware(ErrorMiddleware())
 
 	s.addTools()
 

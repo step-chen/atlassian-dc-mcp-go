@@ -26,7 +26,8 @@ func LoggingMiddleware() mcp.Middleware {
 
 			// Only log if duration exceeds threshold or an error occurred
 			if err != nil {
-				logger.Error("Method failed",
+				// Errors are handled by a dedicated error middleware, here we only record execution time information
+				logger.Debug("Method failed",
 					zap.String("method", method),
 					zap.Duration("duration", duration),
 					zap.Error(err),

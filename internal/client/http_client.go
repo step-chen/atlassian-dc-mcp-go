@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/go-retryablehttp"
 	"go.uber.org/zap"
 
+	"atlassian-dc-mcp-go/internal/types"
 	"atlassian-dc-mcp-go/internal/utils/logging"
 )
 
@@ -24,6 +25,14 @@ type HTTPClientConfig struct {
 	IdleConnTimeout     time.Duration
 	RetryAttempts       int
 	RetryDelay          time.Duration
+}
+
+// HTTPErrorHandlingOptions defines optional configuration for HTTP error handling
+type HTTPErrorHandlingOptions struct {
+	SkipLogging     bool
+	MaxBodySize     int64
+	SkipBodyReading bool
+	CustomErrorHandler func(*http.Response) error
 }
 
 // DefaultHTTPClientConfig returns a default HTTP client configuration
@@ -156,47 +165,106 @@ func ExecuteStream(ctx context.Context, client *BaseClient, method string, pathS
 }
 
 // HandleHTTPError handles HTTP errors based on status codes and logs them
-func HandleHTTPError(resp *http.Response, service string) error {
-	strErr := ""
+func HandleHTTPError(resp *http.Response, service string, opts ...HTTPErrorHandlingOptions) error {
+	options := HTTPErrorHandlingOptions{
+		MaxBodySize: 1024 * 1024, // 1MB default
+	}
+	
+	if len(opts) > 0 {
+		options = opts[0]
+	}
+	
+	// Use custom error handler if provided
+	if options.CustomErrorHandler != nil {
+		if err := options.CustomErrorHandler(resp); err != nil {
+			return err
+		}
+		// Continue with default handling if custom handler doesn't return an error
+	}
+	
+	// Check if status code indicates success
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		return nil
+	}
+	
+	var bodyString string
+	if !options.SkipBodyReading {
+		// Limit the size of response body read
+		limitReader := io.LimitReader(resp.Body, options.MaxBodySize)
+		bodyBytes, _ := io.ReadAll(limitReader)
+		bodyString = string(bodyBytes)
+	}
+	
+	// Log error (unless skipped)
+	if !options.SkipLogging {
+		logging.GetLogger().Warn("HTTP request failed",
+			zap.String("service", service),
+			zap.Int("status_code", resp.StatusCode),
+			zap.String("response_body", bodyString))
+	}
+	
+	// Return appropriate error based on status code
 	switch resp.StatusCode {
 	case http.StatusBadRequest:
-		strErr = "bad request"
+		return &types.Error{
+			Code:    "BAD_REQUEST",
+			Message: fmt.Sprintf("[%s] bad request: %s", service, bodyString),
+		}
 	case http.StatusUnauthorized:
-		strErr = "unauthorized"
+		return &types.Error{
+			Code:    "UNAUTHORIZED",
+			Message: fmt.Sprintf("[%s] unauthorized: %s", service, bodyString),
+		}
 	case http.StatusForbidden:
-		strErr = "forbidden"
+		return &types.Error{
+			Code:    "FORBIDDEN",
+			Message: fmt.Sprintf("[%s] forbidden: %s", service, bodyString),
+		}
 	case http.StatusNotFound:
-		strErr = "not found"
+		return &types.Error{
+			Code:    "NOT_FOUND",
+			Message: fmt.Sprintf("[%s] not found: %s", service, bodyString),
+		}
 	case http.StatusTooManyRequests:
-		strErr = "too many requests"
+		return &types.Error{
+			Code:    "TOO_MANY_REQUESTS",
+			Message: fmt.Sprintf("[%s] too many requests: %s", service, bodyString),
+		}
 	case http.StatusInternalServerError:
-		strErr = "internal server error"
+		return &types.Error{
+			Code:    "INTERNAL_SERVER_ERROR",
+			Message: fmt.Sprintf("[%s] internal server error: %s", service, bodyString),
+		}
 	case http.StatusBadGateway:
-		strErr = "bad gateway"
+		return &types.Error{
+			Code:    "BAD_GATEWAY",
+			Message: fmt.Sprintf("[%s] bad gateway: %s", service, bodyString),
+		}
 	case http.StatusServiceUnavailable:
-		strErr = "service unavailable"
+		return &types.Error{
+			Code:    "SERVICE_UNAVAILABLE",
+			Message: fmt.Sprintf("[%s] service unavailable: %s", service, bodyString),
+		}
 	case http.StatusGatewayTimeout:
-		strErr = "gateway timeout"
+		return &types.Error{
+			Code:    "GATEWAY_TIMEOUT",
+			Message: fmt.Sprintf("[%s] gateway timeout: %s", service, bodyString),
+		}
 	default:
-		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-			return nil
-		} else if resp.StatusCode >= 400 && resp.StatusCode < 500 {
-			strErr = "client error"
+		if resp.StatusCode >= 400 && resp.StatusCode < 500 {
+			return &types.Error{
+				Code:    "CLIENT_ERROR",
+				Message: fmt.Sprintf("[%s] client error %d: %s", service, resp.StatusCode, bodyString),
+			}
 		} else if resp.StatusCode >= 500 {
-			strErr = "server error"
-		} else {
-			strErr = "unknown error"
+			return &types.Error{
+				Code:    "SERVER_ERROR",
+				Message: fmt.Sprintf("[%s] server error %d: %s", service, resp.StatusCode, bodyString),
+			}
+		}
+		return &types.Error{
+			Code:    "UNKNOWN_ERROR",
+			Message: fmt.Sprintf("[%s] unexpected error with status %d: %s", service, resp.StatusCode, bodyString),
 		}
 	}
-
-	bodyBytes, _ := io.ReadAll(resp.Body)
-	bodyString := string(bodyBytes)
-
-	logging.GetLogger().Warn("HTTP request failed",
-		zap.String("service", service),
-		zap.Int("status_code", resp.StatusCode),
-		zap.String("error", strErr),
-		zap.String("response_body", bodyString))
-
-	return fmt.Errorf("[%s] %s : %d - %s", service, strErr, resp.StatusCode, bodyString)
 }

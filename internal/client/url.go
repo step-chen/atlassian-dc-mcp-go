@@ -61,7 +61,7 @@ func buildHttpRequest(method, baseURL string, pathSegments []any, queryParams ma
 		return nil, fmt.Errorf("failed to build URL: %w", err)
 	}
 
-	logging.GetLogger().Info("Building request", zap.String("method", method), zap.String("url", url))
+	logging.GetLogger().Debug("Building request", zap.String("method", method), zap.String("url", url))
 	var req *http.Request
 	if body != nil {
 		req, err = http.NewRequest(method, url, bytes.NewBuffer(body))
