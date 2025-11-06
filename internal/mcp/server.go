@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"reflect"
 	"sync"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
@@ -225,30 +224,30 @@ func (s *Server) addTools() {
 // based on the server's configured authentication mode.
 func (s *Server) AuthMiddleware(next http.Handler) http.Handler {
 	type serviceConfig struct {
-		headerKey   string
-		configField string
-		ctxKey      client.ContextKey
-		url         *string
+		headerKey string
+		cfgToken  func() string
+		ctxKey    client.ContextKey
+		url       *string
 	}
 
 	services := []serviceConfig{
 		{
-			headerKey:   BitbucketTokenHeader,
-			configField: config.BitbucketField,
-			ctxKey:      client.BitbucketTokenKey,
-			url:         &s.config.Bitbucket.URL,
+			headerKey: BitbucketTokenHeader,
+			cfgToken:  func() string { return s.config.Bitbucket.Token },
+			ctxKey:    client.BitbucketTokenKey,
+			url:       &s.config.Bitbucket.URL,
 		},
 		{
-			headerKey:   JiraTokenHeader,
-			configField: config.JiraField,
-			ctxKey:      client.JiraTokenKey,
-			url:         &s.config.Jira.URL,
+			headerKey: JiraTokenHeader,
+			cfgToken:  func() string { return s.config.Jira.Token },
+			ctxKey:    client.JiraTokenKey,
+			url:       &s.config.Jira.URL,
 		},
 		{
-			headerKey:   ConfluenceTokenHeader,
-			configField: config.ConfluenceField,
-			ctxKey:      client.ConfluenceTokenKey,
-			url:         &s.config.Confluence.URL,
+			headerKey: ConfluenceTokenHeader,
+			cfgToken:  func() string { return s.config.Confluence.Token },
+			ctxKey:    client.ConfluenceTokenKey,
+			url:       &s.config.Confluence.URL,
 		},
 	}
 
@@ -262,9 +261,9 @@ func (s *Server) AuthMiddleware(next http.Handler) http.Handler {
 				continue
 			}
 
-			cfgVal := reflect.ValueOf(s.config).Elem().FieldByName(svc.configField)
-			if cfgVal.IsValid() && cfgVal.String() != "" {
-				tokenValues[svc.ctxKey] = cfgVal.String()
+			token := svc.cfgToken()
+			if token != "" {
+				tokenValues[svc.ctxKey] = token
 			}
 		}
 

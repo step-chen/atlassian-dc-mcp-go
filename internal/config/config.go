@@ -47,12 +47,6 @@ type Config struct {
 	ClientTimeout int             `mapstructure:"client_timeout"`
 }
 
-const (
-	BitbucketField  = "Bitbucket.Token"
-	ConfluenceField = "Confluence.Token"
-	JiraField       = "Jira.Token"
-)
-
 // Validate checks that the configuration is valid
 func (c *Config) Validate(authMode string) error {
 	// Validate port
