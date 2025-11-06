@@ -7,6 +7,11 @@ GOCLEAN := $(GOCMD) clean
 GOTEST  := $(GOCMD) test
 GOMOD   := $(GOCMD) mod
 
+# Version information
+VERSION ?= $(shell git describe --tags --match "v*" 2>/dev/null | sed 's/^v//' || echo "dev")
+COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+DATE ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+
 # Build variables
 BUILD_DIR     := dist
 SERVER_BINARY := atlassian-dc-mcp-server
@@ -14,9 +19,9 @@ BINARY_PATH   := $(BUILD_DIR)/$(SERVER_BINARY)
 SERVER_MAIN   := ./cmd/server
 
 # Build flags
-LDFLAGS := -ldflags="-s -w"
+LDFLAGS := -ldflags="-s -w -X main.version=$(VERSION) -X main.commit=$(COMMIT) -X main.date=$(DATE)"
 # Release build flags (static linking)
-RELEASE_LDFLAGS := -ldflags="-s -w -extldflags '-static'"
+RELEASE_LDFLAGS := -ldflags="-s -w -extldflags '-static' -X main.version=$(VERSION) -X main.commit=$(COMMIT) -X main.date=$(DATE)"
 
 # Default target
 .PHONY: all build build-linux build-windows build-macos release clean deps test run-server lint help
@@ -42,21 +47,21 @@ build-linux:
 	@echo "Building for Linux (amd64)..."
 	@mkdir -p $(BUILD_DIR)
 	@GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_PATH)-linux-amd64 $(LDFLAGS) $(SERVER_MAIN)
-	@echo "Linux (amd64) binary built at $(BINARY_PATH)-linux-amd64"
+	@echo "Linux (amd64) server binary built at $(BINARY_PATH)-linux-amd64"
 	@echo "Binary size: $$(du -h $(BINARY_PATH)-linux-amd64 | cut -f1)"
 
 build-windows:
 	@echo "Building for Windows (amd64)..."
 	@mkdir -p $(BUILD_DIR)
 	@GOOS=windows GOARCH=amd64 $(GOBUILD) -o $(BINARY_PATH)-windows-amd64.exe $(LDFLAGS) $(SERVER_MAIN)
-	@echo "Windows (amd64) binary built at $(BINARY_PATH)-windows-amd64.exe"
+	@echo "Windows (amd64) server binary built at $(BINARY_PATH)-windows-amd64.exe"
 	@echo "Binary size: $$(du -h $(BINARY_PATH)-windows-amd64.exe | cut -f1)"
 
 build-macos:
 	@echo "Building for macOS (amd64)..."
 	@mkdir -p $(BUILD_DIR)
 	@GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BINARY_PATH)-darwin-amd64 $(LDFLAGS) $(SERVER_MAIN)
-	@echo "macOS (amd64) binary built at $(BINARY_PATH)-darwin-amd64"
+	@echo "macOS (amd64) server binary built at $(BINARY_PATH)-darwin-amd64"
 	@echo "Binary size: $$(du -h $(BINARY_PATH)-darwin-amd64 | cut -f1)"
 
 # Build statically linked release version
@@ -64,7 +69,7 @@ release:
 	@echo "Building release binary (statically linked)..."
 	@mkdir -p $(BUILD_DIR)
 	@CGO_ENABLED=0 $(GOBUILD) -a -o $(BINARY_PATH) $(RELEASE_LDFLAGS) $(SERVER_MAIN)
-	@echo "Release binary built at $(BINARY_PATH)"
+	@echo "Release server binary built at $(BINARY_PATH)"
 	@echo "Binary size: $$(du -h $(BINARY_PATH) | cut -f1)"
 
 # Install dependencies

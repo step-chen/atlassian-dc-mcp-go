@@ -32,6 +32,7 @@ const (
 type Server struct {
 	config           *config.Config
 	authMode         string
+	version          string
 	jiraClient       *jira.JiraClient
 	confluenceClient *confluence.ConfluenceClient
 	bitbucketClient  *bitbucket.BitbucketClient
@@ -43,11 +44,12 @@ type Server struct {
 	shutdownChan chan struct{}
 }
 
-// NewServer creates a new MCP server instance with the provided configuration
-func NewServer(cfg *config.Config, authMode string) *Server {
+// NewServer creates a new MCP server instance with the provided configuration and version
+func NewServer(cfg *config.Config, authMode, version string) *Server {
 	return &Server{
 		config:       cfg,
 		authMode:     authMode,
+		version:      version,
 		shutdownChan: make(chan struct{}),
 	}
 }
@@ -77,11 +79,11 @@ func (s *Server) Initialize() error {
 	}
 
 	s.mcpServer = mcp.NewServer(&mcp.Implementation{
-		Name:    "atlassian-dc-mcp",
-		Version: "1.0.0",
+		Name:    "Atlassian Data Center MCP Server",
+		Version: s.version,
 	}, nil)
 
-	s.mcpServer.AddReceivingMiddleware(LoggingMiddleware())
+	s.mcpServer.AddReceivingMiddleware(LoggingMiddleware(&s.config.Logging))
 	s.mcpServer.AddReceivingMiddleware(ErrorMiddleware())
 
 	s.addTools()

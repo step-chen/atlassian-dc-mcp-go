@@ -18,12 +18,20 @@ import (
 	"go.uber.org/zap"
 )
 
+// These variables are populated at build time by ldflags
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
+
 func main() {
 	// Define command line flags
 	configPath := flag.String("c", "", "Path to config file (optional)")
 	flag.StringVar(configPath, "config", "", "Path to config file (optional)")
 	help := flag.Bool("h", false, "Show help message")
 	flag.BoolVar(help, "help", false, "Show help message")
+	versionFlag := flag.Bool("version", false, "Show version information")
 	authMode := flag.String("auth-mode", "config", "Authentication mode. One of: config, header")
 	flag.Parse()
 
@@ -32,6 +40,13 @@ func main() {
 		fmt.Println("Usage: server [options]")
 		fmt.Println("Options:")
 		flag.PrintDefaults()
+		os.Exit(0)
+	}
+
+	if *versionFlag {
+		fmt.Printf("Atlassian Data Center MCP Server Version: %s\n", version)
+		fmt.Printf("Commit: %s\n", commit)
+		fmt.Printf("Date: %s\n", date)
 		os.Exit(0)
 	}
 
@@ -49,19 +64,23 @@ func main() {
 		_ = logger.Sync()
 	}()
 
-	logger.Info("Configuration loaded successfully")
+	logger.Info("Configuration loaded successfully",
+		zap.String("version", version),
+		zap.String("commit", commit),
+		zap.String("date", date))
 
 	config.WatchConfigOnChange(func() {
 		logger.Info("Configuration reloaded")
 	}, *authMode)
 
-	mcpServer := mcp.NewServer(cfg, *authMode)
+	mcpServer := mcp.NewServer(cfg, *authMode, version)
 
 	if err := mcpServer.Initialize(); err != nil {
 		logger.Fatal("Failed to initialize MCP server", zap.Error(err))
 	}
 
-	logger.Info("Atlassian Data Center MCP (Model Context Protocol) server starting...")
+	logger.Info("Atlassian Data Center MCP (Model Context Protocol) server starting...",
+		zap.String("version", version))
 
 	// Create a context that can be cancelled but without timeout
 	ctx, cancel := context.WithCancel(context.Background())

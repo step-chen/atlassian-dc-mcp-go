@@ -31,6 +31,9 @@ logging:
   
   # Log level (debug, info, warn, error, fatal)
   level: "info"
+  
+  # Log threshold in milliseconds for logging slow operations (default is 100 if not specified)
+  log_threshold: 100
 
   # File logging configuration (optional)
   # Path to the log file (if not specified, file logging is disabled)

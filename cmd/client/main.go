@@ -14,12 +14,20 @@ import (
 	"go.uber.org/zap"
 )
 
+// These variables are populated at build time by ldflags
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
+
 func main() {
 	// Define command line flags
 	configPath := flag.String("c", "", "Path to config file (optional)")
 	flag.StringVar(configPath, "config", "", "Path to config file (optional)")
 	help := flag.Bool("h", false, "Show help message")
 	flag.BoolVar(help, "help", false, "Show help message")
+	versionFlag := flag.Bool("version", false, "Show version information")
 	authMode := flag.String("auth-mode", "config", "Authentication mode. One of: config, header")
 	flag.Parse()
 
@@ -28,6 +36,13 @@ func main() {
 		fmt.Println("Usage: client [options]")
 		fmt.Println("Options:")
 		flag.PrintDefaults()
+		os.Exit(0)
+	}
+	
+	if *versionFlag {
+		fmt.Printf("Atlassian Data Center MCP Client Version: %s\n", version)
+		fmt.Printf("Commit: %s\n", commit)
+		fmt.Printf("Date: %s\n", date)
 		os.Exit(0)
 	}
 
@@ -47,7 +62,10 @@ func main() {
 		logger.Fatal("Failed to load configuration", zap.Error(err))
 	}
 
-	logger.Info("Atlassian Data Center MCP Client starting...")
+	logger.Info("Atlassian Data Center MCP Client starting...",
+		zap.String("version", version),
+		zap.String("commit", commit),
+		zap.String("date", date))
 
 	// Log configured services
 	if cfg.Jira.URL != "" {
@@ -66,8 +84,8 @@ func main() {
 
 	// Create an MCP client
 	client := mcp.NewClient(&mcp.Implementation{
-		Name:    "mcp-client",
-		Version: "1.0.0",
+		Name:    "atlassian-dc-mcp-client",
+		Version: version,
 	}, nil)
 
 	// Connect to the server via stdio
