@@ -20,6 +20,9 @@ import (
 	"atlassian-dc-mcp-go/internal/mcp/tools/common"
 	confluenceTools "atlassian-dc-mcp-go/internal/mcp/tools/confluence"
 	jiraTools "atlassian-dc-mcp-go/internal/mcp/tools/jira"
+	"atlassian-dc-mcp-go/internal/utils/logging"
+
+	"go.uber.org/zap"
 )
 
 const (
@@ -145,9 +148,17 @@ func (s *Server) Start(ctx context.Context) error {
 
 	if hasHTTP {
 		addr := fmt.Sprintf(":%d", s.config.Port)
+		// Only use requestLogger in debug mode
+		var handler http.Handler
+		if s.config.Logging.Level == "debug" {
+			handler = requestLogger(authMux)
+		} else {
+			handler = authMux
+		}
+		
 		s.httpServer = &http.Server{
 			Addr:    addr,
-			Handler: authMux,
+			Handler: handler,
 		}
 
 		// Start HTTP server in a goroutine
@@ -165,6 +176,22 @@ func (s *Server) Start(ctx context.Context) error {
 
 	// Return nil to indicate that the server was stopped by the context
 	return nil
+}
+
+// requestLogger is a middleware that logs all incoming HTTP requests
+func requestLogger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Log the request
+		logging.GetLogger().Debug("HTTP Request",
+			zap.String("method", r.Method),
+			zap.String("url", r.URL.String()),
+			zap.String("remote_addr", r.RemoteAddr),
+			zap.String("user_agent", r.UserAgent()),
+		)
+
+		// Call the next handler
+		next.ServeHTTP(w, r)
+	})
 }
 
 // Stop gracefully stops the MCP server

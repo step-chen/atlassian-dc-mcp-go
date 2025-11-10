@@ -99,7 +99,7 @@ lint:
 DOCKER_IMAGE_NAME ?= ghcr.io/step-chen/atlassian-dc-mcp-go
 DOCKER_IMAGE_TAG  ?= latest
 
-.PHONY: docker-build docker-build-host-net docker-push docker-compose-up docker-compose-down docker-compose-nginx-up docker-compose-nginx-down
+.PHONY: docker-build docker-build-host-net docker-push docker-compose-up docker-compose-down docker-compose-nginx-up docker-compose-nginx-down docker-compose-traefik-up docker-compose-traefik-down
 
 # Build the Docker image
 docker-build:
@@ -136,6 +136,16 @@ docker-compose-nginx-down:
 	@echo "Stopping services with Nginx..."
 	@IMAGE_NAME=$(DOCKER_IMAGE_NAME) docker compose -f docker-compose.nginx.yml down
 
+# Run services with Traefik using docker-compose
+docker-compose-traefik-up:
+	@echo "Starting services with Traefik and HTTPS..."
+	@IMAGE_NAME=$(DOCKER_IMAGE_NAME) docker compose -f docker-compose.traefik.yml up -d
+
+# Stop services with Traefik using docker-compose
+docker-compose-traefik-down:
+	@echo "Stopping services with Traefik..."
+	@IMAGE_NAME=$(DOCKER_IMAGE_NAME) docker compose -f docker-compose.traefik.yml down
+
 # Help information
 help:
 	@echo "Available commands:"
@@ -159,5 +169,7 @@ help:
 	@echo "  make docker-compose-down       Stop services using docker compose."
 	@echo "  make docker-compose-nginx-up   Start services with Nginx and HTTPS."
 	@echo "  make docker-compose-nginx-down Stop services with Nginx."
+	@echo "  make docker-compose-traefik-up   Start services with Traefik and HTTPS."
+	@echo "  make docker-compose-traefik-down Stop services with Traefik."
 	@echo ""
 	@echo "  make help          Show this help message."

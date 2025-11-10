@@ -1,0 +1,73 @@
+# Docker Compose file for Atlassian DC MCP with Traefik
+# This configuration uses Traefik as a reverse proxy with HTTPS support using mkcert certificates
+
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.5
+    container_name: traefik-proxy
+    restart: always
+    command:
+      # Load configuration from static config file
+      - "--configFile=/etc/traefik/traefik.yml"
+    ports:
+      - "443:443"
+    volumes:
+      # Access to Docker socket to discover services
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount mkcert generated certificates
+      - ./certs:/certs:ro
+      # Mount Traefik static configuration file
+      - ./traefik-config/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik-config/certs.yml:/etc/traefik/certs.yml:ro
+    networks:
+      - mcp-network
+    depends_on:
+      - mcp-server
+
+  mcp-server:
+    image: ${IMAGE_NAME:-ghcr.io/step-chen/atlassian-dc-mcp-go}:latest
+    # Build the image from the Dockerfile in the current directory
+    build: .
+    container_name: atlassian-dc-mcp
+    # Mount the local config file into the container
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    # Use config file for authentication
+    # Expose ports only within the Docker network
+    expose:
+      - "${MCP_PORT:-8090}"
+    # Environment variables
+    environment:
+      - MCP_PORT=${MCP_PORT:-8090}
+      - AUTH_MODE=header
+    # Command to run with auth-mode
+    command: ["-auth-mode=header"]
+    # Healthcheck to ensure the application is running correctly
+    #healthcheck:
+    #  test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:${MCP_PORT:-8090}/health"]
+    #  interval: 30s
+    #  timeout: 10s
+    #  retries: 3
+    #  start_period: 15s
+    # Restart policy
+    restart: on-failure
+    networks:
+      - mcp-network
+    labels:
+      - "traefik.enable=true"
+      # Route: match Host=localhost and PathPrefix=/sse
+      - "traefik.http.routers.mcp-sse.rule=Host(`localhost`) && PathPrefix(`/sse`)"
+      #- "traefik.http.routers.mcp-sse.middlewares=strip-sse"
+      #- "traefik.http.middlewares.strip-sse.stripprefix.prefixes=/sse"
+      - "traefik.http.routers.mcp-sse.entrypoints=websecure"
+      - "traefik.http.routers.mcp-sse.tls=true"
+      # Force h2 (backend supports h2c)
+      - "traefik.http.routers.mcp-sse.service=mcp-sse"
+      - "traefik.http.services.mcp-sse.loadbalancer.server.scheme=http"
+      - "traefik.http.services.mcp-sse.loadbalancer.server.port=8090"
+
+networks:
+  mcp-network:
+    driver: bridge

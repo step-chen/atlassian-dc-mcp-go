@@ -13,6 +13,7 @@ This project provides a Go-based Model Context Protocol (MCP) service for managi
 - **Permissions**: Fine-grained read/write permissions for each service
 - **Health Monitoring**: Built-in health checks for all services
 - **Docker Support**: Ready for containerized deployment
+- **Reverse Proxy Support**: Configurations for Nginx and Traefik with HTTPS support
 
 ## Running the Application
 
@@ -21,6 +22,12 @@ You can run the application in multiple ways: directly using Go, by building bin
 For detailed instructions on running the application:
 - [Running with Docker](README.docker.en.md) - Instructions for running the service using Docker and Docker Compose
 - [Running locally](README.local.en.md) - Instructions for running the service directly on your system
+
+## Reverse Proxy Configuration
+
+For reverse proxy configurations, please refer to the separate documentation:
+- [Nginx Configuration with mkcert](NGINX_MKCERT_HTTPS.md) - Instructions for setting up HTTPS access using Nginx
+- [Traefik Configuration with mkcert](TRAEFIK_MKCERT_HTTPS.md) - Instructions for setting up HTTPS access using Traefik
 
 Below are basic commands for development purposes:
 

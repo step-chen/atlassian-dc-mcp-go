@@ -95,6 +95,23 @@ func main() {
 		}
 	}()
 
+	// Print message that server has started, port and service paths
+	httpPath := cfg.Transport.HTTP.Path
+	if httpPath == "" {
+		httpPath = "/mcp"
+	}
+
+	ssePath := cfg.Transport.SSE.Path
+	if ssePath == "" {
+		ssePath = "/sse"
+	}
+
+	logger.Info("Server started. ",
+		zap.Int("port", cfg.Port),
+		zap.String("http_path", httpPath),
+		zap.String("sse_path", ssePath),
+		zap.Strings("transport_modes", cfg.Transport.Modes))
+
 	// Set up signal handling for graceful shutdown
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
