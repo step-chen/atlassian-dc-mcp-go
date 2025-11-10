@@ -22,7 +22,18 @@ brew install nss # 如果使用 Firefox 浏览器
 
 ### Linux
 
-在 Linux 上，你需要安装 mkcert 的二进制文件：
+#### Ubuntu/Debian (使用 apt)
+
+在 Ubuntu/Debian 系统上，您可以直接使用 apt 安装 mkcert：
+
+```bash
+sudo apt update
+sudo apt install mkcert
+```
+
+#### 其他 Linux 发行版
+
+在其他 Linux 发行版上，您需要手动安装 mkcert 二进制文件：
 
 ```bash
 # 下载最新版本的 mkcert
@@ -108,3 +119,65 @@ docker-compose -f docker-compose.traefik.yml logs -f
   }
 }
 ```
+
+## 生产环境部署
+
+对于使用 Let's Encrypt 自动 SSL 证书的生产部署，请使用以下设置：
+
+1. 更新 `docker-compose.traefik-prod.yml` 中的域名
+   - 将服务标签中的 `your-domain.com` 替换为您的实际域名
+2. 更新 `traefik-config/traefik-prod.yml` 中的邮箱地址
+   - 将 `your-email@example.com` 替换为您的邮箱，用于 Let's Encrypt 证书注册
+3. 确保您的 DNS 已正确配置指向您的服务器
+4. 运行以下命令：
+
+```bash
+docker-compose -f docker-compose.traefik-prod.yml up -d
+```
+
+此设置将自动：
+- 从 Let's Encrypt 获取 SSL 证书
+- 自动续订证书
+- 将 HTTP 流量重定向到 HTTPS
+- 提供安全的 MCP 服务访问
+
+## 故障排除
+
+### 证书不被信任
+
+如果浏览器仍提示证书不被信任，请确保：
+
+1. 您已正确运行 `mkcert -install`
+2. 重新启动浏览器
+3. 在 Linux 上，您可能需要手动在系统或浏览器中安装证书
+
+### 端口冲突
+
+如果端口 80 或 443 已被占用，您可以修改 [docker-compose.traefik.yml](docker-compose.traefik.yml) 中的端口映射：
+
+```yaml
+ports:
+  - "8080:80"
+  - "8443:443"
+```
+
+然后通过 https://localhost:8443 访问服务。
+
+### 无法连接到 MCP 服务
+
+请检查以下内容：
+
+1. MCP 服务是否正常运行：`docker-compose -f docker-compose.traefik.yml logs mcp-server`
+2. Traefik 配置是否正确：`docker-compose -f docker-compose.traefik.yml logs traefik-proxy`
+3. 网络连接是否正常：确保两个容器在同一个网络中
+
+## 生产环境注意事项
+
+此配置仅适用于开发和测试环境。在生产环境中，您应该：
+
+1. 使用有效的 SSL 证书（如 Let's Encrypt）
+2. 配置适当的防火墙规则
+3. 加强 Traefik 安全配置
+4. 使用适当的负载均衡和高可用性配置
+5. 将 `--api.insecure=true` 替换为生产环境中的适当身份验证
+6. 使用有效的邮箱地址进行 Let's Encrypt 证书注册

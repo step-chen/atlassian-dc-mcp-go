@@ -22,7 +22,18 @@ brew install nss # if using Firefox browser
 
 ### Linux
 
-On Linux, you need to install the mkcert binary:
+#### Ubuntu/Debian (using apt)
+
+On Ubuntu/Debian systems, you can install mkcert directly using apt:
+
+```bash
+sudo apt update
+sudo apt install mkcert
+```
+
+#### Other Linux distributions
+
+On other Linux distributions, you need to install the mkcert binary manually:
 
 ```bash
 # Download the latest version of mkcert
@@ -142,3 +153,16 @@ This configuration is only suitable for development and testing environments. In
 2. Configure appropriate firewall rules
 3. Strengthen Nginx security configuration
 4. Use appropriate load balancing and high availability configurations
+
+For production deployments with Let's Encrypt certificates, you can modify the Nginx configuration to use certificates obtained via Certbot or other Let's Encrypt clients. You would need to:
+
+1. Update the `nginx.conf` file to reference the Let's Encrypt certificate paths
+2. Set up a cron job or systemd timer to automatically renew certificates
+3. Ensure proper file permissions for the certificates
+4. Configure DNS to point your domain to the server
+
+Example Nginx configuration for Let's Encrypt certificates:
+```nginx
+ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+```

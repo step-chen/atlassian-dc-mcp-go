@@ -22,7 +22,18 @@ brew install nss # if using Firefox browser
 
 ### Linux
 
-On Linux, you need to install the mkcert binary:
+#### Ubuntu/Debian (using apt)
+
+On Ubuntu/Debian systems, you can install mkcert directly using apt:
+
+```bash
+sudo apt update
+sudo apt install mkcert
+```
+
+#### Other Linux distributions
+
+On other Linux distributions, you need to install the mkcert binary manually:
 
 ```bash
 # Download the latest version of mkcert
@@ -108,3 +119,65 @@ When configuring the MCP service in your AI assistant, use the following configu
   }
 }
 ```
+
+## Production Environment Deployment
+
+For production deployments with automatic SSL certificates from Let's Encrypt, use the following setup:
+
+1. Update the domain name in `docker-compose.traefik-prod.yml`
+   - Replace `your-domain.com` with your actual domain in the service labels
+2. Update the email address in `traefik-config/traefik-prod.yml` 
+   - Replace `your-email@example.com` with your email for Let's Encrypt registration
+3. Ensure your DNS is properly configured to point to your server
+4. Run with:
+
+```bash
+docker-compose -f docker-compose.traefik-prod.yml up -d
+```
+
+This setup will automatically:
+- Obtain SSL certificates from Let's Encrypt
+- Renew certificates automatically
+- Redirect HTTP traffic to HTTPS
+- Provide secure access to your MCP service
+
+## Troubleshooting
+
+### Certificate Not Trusted
+
+If the browser still indicates that the certificate is not trusted, make sure:
+
+1. You have correctly run `mkcert -install`
+2. Restart your browser
+3. On Linux, you may need to manually install the certificate in the system or browser
+
+### Port Conflicts
+
+If ports 80 or 443 are already in use, you can modify the port mapping in [docker-compose.traefik.yml](docker-compose.traefik.yml):
+
+```yaml
+ports:
+  - "8080:80"
+  - "8443:443"
+```
+
+Then access the service via https://localhost:8443.
+
+### Cannot Connect to MCP Service
+
+Check the following:
+
+1. Is the MCP service running correctly: `docker-compose -f docker-compose.traefik.yml logs mcp-server`
+2. Is the Traefik configuration correct: `docker-compose -f docker-compose.traefik.yml logs traefik-proxy`
+3. Is the network connection normal: Ensure both containers are on the same network
+
+## Production Environment Considerations
+
+This configuration is only suitable for development and testing environments. In production environments, you should:
+
+1. Use valid SSL certificates (such as Let's Encrypt)
+2. Configure appropriate firewall rules
+3. Strengthen Traefik security configuration
+4. Use appropriate load balancing and high availability configurations
+5. Replace `--api.insecure=true` with proper authentication in production
+6. Use a valid email address for Let's Encrypt certificate registration

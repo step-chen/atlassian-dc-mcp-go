@@ -28,6 +28,7 @@ For detailed instructions on running the application:
 For reverse proxy configurations, please refer to the separate documentation:
 - [Nginx Configuration with mkcert](NGINX_MKCERT_HTTPS.md) - Instructions for setting up HTTPS access using Nginx
 - [Traefik Configuration with mkcert](TRAEFIK_MKCERT_HTTPS.md) - Instructions for setting up HTTPS access using Traefik
+- [Production Deployment with Let's Encrypt](TRAEFIK_MKCERT_HTTPS.md#production-environment-deployment) - Instructions for production deployment with automatic SSL certificates
 
 Below are basic commands for development purposes:
 

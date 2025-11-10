@@ -22,7 +22,18 @@ brew install nss # 如果使用 Firefox 浏览器
 
 ### Linux
 
-在 Linux 上，你需要安装 mkcert 的二进制文件：
+#### Ubuntu/Debian (使用 apt)
+
+在 Ubuntu/Debian 系统上，您可以直接使用 apt 安装 mkcert：
+
+```bash
+sudo apt update
+sudo apt install mkcert
+```
+
+#### 其他 Linux 发行版
+
+在其他 Linux 发行版上，你需要安装 mkcert 的二进制文件：
 
 ```bash
 # 下载最新版本的 mkcert

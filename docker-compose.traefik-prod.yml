@@ -1,0 +1,81 @@
+# Docker Compose file for Atlassian DC MCP with Traefik in Production
+# This configuration uses Traefik as a reverse proxy with HTTPS support using Let's Encrypt certificates
+
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.5
+    container_name: traefik-proxy
+    restart: always
+    command:
+      # Load configuration from static config file
+      - "--configFile=/etc/traefik/traefik.yml"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Access to Docker socket to discover services
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount Traefik static configuration file
+      - ./traefik-config/traefik-prod.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik-config/certs-prod.yml:/etc/traefik/certs.yml:ro
+      # Volume to store Let's Encrypt certificates
+      - ./acme:/etc/traefik/acme
+    networks:
+      - mcp-network
+    depends_on:
+      - mcp-server
+
+  mcp-server:
+    image: ${IMAGE_NAME:-ghcr.io/step-chen/atlassian-dc-mcp-go}:latest
+    # Build the image from the Dockerfile in the current directory
+    build: .
+    container_name: atlassian-dc-mcp
+    # Mount the local config file into the container
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    # Use config file for authentication
+    # Expose ports only within the Docker network
+    expose:
+      - "${MCP_PORT:-8090}"
+    # Environment variables
+    environment:
+      - MCP_PORT=${MCP_PORT:-8090}
+      - AUTH_MODE=header
+    # Command to run with auth-mode
+    command: ["-auth-mode=header"]
+    # Healthcheck to ensure the application is running correctly
+    #healthcheck:
+    #  test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:${MCP_PORT:-8090}/health"]
+    #  interval: 30s
+    #  timeout: 10s
+    #  retries: 3
+    #  start_period: 15s
+    # Restart policy
+    restart: on-failure
+    networks:
+      - mcp-network
+    labels:
+      - "traefik.enable=true"
+      # Route: match your domain and PathPrefix=/sse
+      # IMPORTANT: Replace 'your-domain.com' with your actual domain name
+      - "traefik.http.routers.mcp-sse.rule=Host(`your-domain.com`) && PathPrefix(`/sse`)"
+      - "traefik.http.routers.mcp-sse.entrypoints=websecure"
+      - "traefik.http.routers.mcp-sse.tls=true"
+      - "traefik.http.routers.mcp-sse.tls.certresolver=letsencrypt"
+      # Force h2 (backend supports h2c)
+      - "traefik.http.routers.mcp-sse.service=mcp-sse"
+      - "traefik.http.services.mcp-sse.loadbalancer.server.scheme=http"
+      - "traefik.http.services.mcp-sse.loadbalancer.server.port=8090"
+      # Web UI route
+      # IMPORTANT: Replace 'your-domain.com' with your actual domain name
+      - "traefik.http.routers.traefik.rule=Host(`your-domain.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+
+networks:
+  mcp-network:
+    driver: bridge
