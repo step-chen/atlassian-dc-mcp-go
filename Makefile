@@ -96,15 +96,20 @@ lint:
 # ==============================================================================
 # Docker Targets
 # ==============================================================================
-DOCKER_IMAGE_NAME ?= github.com/step-chen/atlassian-dc-mcp
+DOCKER_IMAGE_NAME ?= ghcr.io/step-chen/atlassian-dc-mcp-go
 DOCKER_IMAGE_TAG  ?= latest
 
-.PHONY: docker-build docker-push docker-compose-up docker-compose-down
+.PHONY: docker-build docker-build-host-net docker-push docker-compose-up docker-compose-down docker-compose-nginx-up docker-compose-nginx-down
 
 # Build the Docker image
 docker-build:
 	@echo "Building Docker image $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)..."
 	@docker build -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) .
+
+# Build the Docker image with host network
+docker-build-host-net:
+	@echo "Building Docker image $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) with host network..."
+	@docker build --network=host -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) .
 
 # Push the Docker image to a registry
 docker-push: docker-build
@@ -120,6 +125,16 @@ docker-compose-up:
 docker-compose-down:
 	@echo "Stopping services with docker compose..."
 	@IMAGE_NAME=$(DOCKER_IMAGE_NAME) docker compose down
+
+# Run services with Nginx using docker-compose
+docker-compose-nginx-up:
+	@echo "Starting services with Nginx and HTTPS..."
+	@IMAGE_NAME=$(DOCKER_IMAGE_NAME) docker compose -f docker-compose.nginx.yml up -d
+
+# Stop services with Nginx using docker-compose
+docker-compose-nginx-down:
+	@echo "Stopping services with Nginx..."
+	@IMAGE_NAME=$(DOCKER_IMAGE_NAME) docker compose -f docker-compose.nginx.yml down
 
 # Help information
 help:
@@ -137,9 +152,12 @@ help:
 	@echo "  make clean         Remove the build directory."
 	@echo ""
 	@echo "Docker Commands:"
-	@echo "  make docker-build        Build the Docker image."
-	@echo "  make docker-push         Push the Docker image to a registry."
-	@echo "  make docker-compose-up   Start services using docker compose."
-	@echo "  make docker-compose-down Stop services using docker compose."
+	@echo "  make docker-build              Build the Docker image."
+	@echo "  make docker-build-host-net     Build the Docker image with host network."
+	@echo "  make docker-push               Push the Docker image to a registry."
+	@echo "  make docker-compose-up         Start services using docker compose."
+	@echo "  make docker-compose-down       Stop services using docker compose."
+	@echo "  make docker-compose-nginx-up   Start services with Nginx and HTTPS."
+	@echo "  make docker-compose-nginx-down Stop services with Nginx."
 	@echo ""
 	@echo "  make help          Show this help message."

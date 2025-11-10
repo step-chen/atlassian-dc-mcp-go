@@ -1,6 +1,6 @@
 services:
   mcp-server:
-    image: ${IMAGE_NAME:-atlassian-dc-mcp}:latest
+    image: ${IMAGE_NAME:-ghcr.io/step-chen/atlassian-dc-mcp-go}:latest
     # Build the image from the Dockerfile in the current directory
     build: .
     container_name: atlassian-dc-mcp

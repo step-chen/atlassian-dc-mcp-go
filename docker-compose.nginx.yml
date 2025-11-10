@@ -1,0 +1,54 @@
+# Docker Compose file for Atlassian DC MCP with Nginx
+# This configuration uses Nginx as a reverse proxy with HTTPS support using mkcert certificates
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Mount Nginx configuration file
+      - ./nginx-config/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Mount mkcert generated certificates (need to generate certificates with mkcert first)
+      - ./certs:/etc/ssl/certs:ro
+    depends_on:
+      - mcp-server
+    networks:
+      - mcp-network
+
+  mcp-server:
+    image: ${IMAGE_NAME:-ghcr.io/step-chen/atlassian-dc-mcp-go}:latest
+    # Build the image from the Dockerfile in the current directory
+    build: .
+    container_name: atlassian-dc-mcp
+    # Mount the local config file into the container
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    # Use config file for authentication
+    # Expose ports only within the Docker network
+    expose:
+      - "${MCP_PORT:-8090}"
+    # Environment variables
+    environment:
+      - MCP_PORT=${MCP_PORT:-8090}
+      - AUTH_MODE=header
+    # Command to run with auth-mode
+    command: ["-auth-mode=header"]
+    # Healthcheck to ensure the application is running correctly
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:${MCP_PORT:-8090}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    # Restart policy
+    restart: on-failure
+    networks:
+      - mcp-network
+
+networks:
+  mcp-network:
+    driver: bridge

@@ -80,3 +80,5 @@ bitbucket:
     bitbucket_delete_attachment: false
     bitbucket_update_pull_request_status: false
     bitbucket_create_branch: false
+    bitbucket_delete_branch: false
+    bitbucket_create_tag: false
