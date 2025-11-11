@@ -77,6 +77,36 @@ The project already includes the Nginx configuration file [nginx-config/nginx.co
 2. SSL certificate configuration
 3. Reverse proxy to the MCP service
 
+## Configuration Details
+
+The Nginx configuration in [nginx-config/nginx.conf](file:///home/stephen/workspace/atlassian-dc-mcp-go/nginx-config/nginx.conf) includes specific settings for handling SSE (Server-Sent Events) connections, which are used for streaming responses in the MCP protocol.
+
+### SSE Endpoint Configuration
+
+The `/sse` location block contains specific optimizations for SSE connections:
+
+1. **Buffering disabled**: `proxy_buffering off` and `proxy_cache off` ensure that SSE events are immediately sent to clients without buffering.
+2. **Extended timeouts**: `proxy_read_timeout 86400` allows SSE connections to remain open for up to 24 hours.
+3. **HTTP/1.1 support**: Required for SSE connections to work properly.
+4. **Connection pool optimization**: 
+   - `proxy_connect_timeout 5s` - Fast connection establishment
+   - `proxy_send_timeout 86400` - Long timeout for SSE streams
+   - `keepalive_timeout 86400` - Long keepalive for persistent SSE connections
+   - `keepalive_requests 1000` - High number of requests per keepalive connection
+
+### Regular HTTP Endpoint Configuration
+
+The root `/` location block handles regular HTTP requests with different timeout settings:
+
+1. **Standard buffering**: Buffering is enabled for better performance with regular requests.
+2. **WebSocket support**: Configuration for upgrading connections to WebSockets.
+3. **Connection pool optimization**:
+   - `proxy_connect_timeout 5s` - Standard connection timeout
+   - `proxy_send_timeout 60s` - Reasonable timeout for regular requests
+   - `proxy_read_timeout 60s` - Reasonable timeout for regular requests
+   - `keepalive_timeout 65` - Standard keepalive timeout
+   - `keepalive_requests 100` - Standard number of requests per keepalive connection
+
 ## Starting the Service
 
 Use the following commands to start the service with Nginx:

@@ -11,8 +11,9 @@ entryPoints:
     http:
       tls:
         certResolver: letsencrypt
-      #http2:
-      #  maxConcurrentStreams: 250
+    transport:
+      respondingTimeouts:
+        idleTimeout: 120s
 
 providers:
   docker:
@@ -20,11 +21,11 @@ providers:
     network: mcp-network
     endpoint: "unix:///var/run/docker.sock"
   file:
-    filename: /etc/traefik/certs.yml
+    filename: /etc/traefik/dynamic.yml
 
 api:
   dashboard: true
-  insecure: true
+  insecure: false
 
 certificatesResolvers:
   letsencrypt:

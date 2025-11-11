@@ -1,0 +1,24 @@
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+
+http:
+  routers:
+    mcp-sse:
+      rule: Host(`your-domain.com`) && PathPrefix(`/sse`)
+      entryPoints:
+        - websecure
+      service: mcp-sse-service
+      tls:
+        certResolver: letsencrypt
+  services:
+    mcp-sse-service:
+      loadBalancer:
+        servers:
+          - url: http://mcp-server:8090
+        passHostHeader: true
+        serversTransport: mcp-transport@file
+  serversTransports:
+    mcp-transport:
+      maxIdleConnsPerHost: 50

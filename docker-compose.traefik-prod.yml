@@ -19,7 +19,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # Mount Traefik static configuration file
       - ./traefik-config/traefik-prod.yml:/etc/traefik/traefik.yml:ro
-      - ./traefik-config/certs-prod.yml:/etc/traefik/certs.yml:ro
+      - ./traefik-config/dynamic-prod.yml:/etc/traefik/dynamic.yml:ro
       # Volume to store Let's Encrypt certificates
       - ./acme:/etc/traefik/acme
     networks:
@@ -58,23 +58,6 @@ services:
       - mcp-network
     labels:
       - "traefik.enable=true"
-      # Route: match your domain and PathPrefix=/sse
-      # IMPORTANT: Replace 'your-domain.com' with your actual domain name
-      - "traefik.http.routers.mcp-sse.rule=Host(`your-domain.com`) && PathPrefix(`/sse`)"
-      - "traefik.http.routers.mcp-sse.entrypoints=websecure"
-      - "traefik.http.routers.mcp-sse.tls=true"
-      - "traefik.http.routers.mcp-sse.tls.certresolver=letsencrypt"
-      # Force h2 (backend supports h2c)
-      - "traefik.http.routers.mcp-sse.service=mcp-sse"
-      - "traefik.http.services.mcp-sse.loadbalancer.server.scheme=http"
-      - "traefik.http.services.mcp-sse.loadbalancer.server.port=8090"
-      # Web UI route
-      # IMPORTANT: Replace 'your-domain.com' with your actual domain name
-      - "traefik.http.routers.traefik.rule=Host(`your-domain.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
-      - "traefik.http.routers.traefik.service=api@internal"
-      - "traefik.http.routers.traefik.entrypoints=websecure"
-      - "traefik.http.routers.traefik.tls=true"
-      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
 
 networks:
   mcp-network:

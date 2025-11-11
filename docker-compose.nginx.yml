@@ -1,13 +1,11 @@
 # Docker Compose file for Atlassian DC MCP with Nginx
 # This configuration uses Nginx as a reverse proxy with HTTPS support using mkcert certificates
-
 services:
   nginx:
     image: nginx:alpine
     container_name: nginx-proxy
     restart: always
     ports:
-      - "80:80"
       - "443:443"
     volumes:
       # Mount Nginx configuration file
@@ -37,13 +35,7 @@ services:
       - AUTH_MODE=header
     # Command to run with auth-mode
     command: ["-auth-mode=header"]
-    # Healthcheck to ensure the application is running correctly
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:${MCP_PORT:-8090}/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
+    # Healthcheck is disabled as it's not compatible with header-based auth without proper setup
     # Restart policy
     restart: on-failure
     networks:

@@ -5,7 +5,7 @@ version: '3.8'
 
 services:
   traefik:
-    image: traefik:v3.5
+    image: traefik:latest
     container_name: traefik-proxy
     restart: always
     command:
@@ -13,6 +13,7 @@ services:
       - "--configFile=/etc/traefik/traefik.yml"
     ports:
       - "443:443"
+      - "8080:8080"
     volumes:
       # Access to Docker socket to discover services
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -20,7 +21,7 @@ services:
       - ./certs:/certs:ro
       # Mount Traefik static configuration file
       - ./traefik-config/traefik.yml:/etc/traefik/traefik.yml:ro
-      - ./traefik-config/certs.yml:/etc/traefik/certs.yml:ro
+      - ./traefik-config/dynamic.yml:/etc/traefik/dynamic.yml:ro
     networks:
       - mcp-network
     depends_on:
@@ -57,16 +58,6 @@ services:
       - mcp-network
     labels:
       - "traefik.enable=true"
-      # Route: match Host=localhost and PathPrefix=/sse
-      - "traefik.http.routers.mcp-sse.rule=Host(`localhost`) && PathPrefix(`/sse`)"
-      #- "traefik.http.routers.mcp-sse.middlewares=strip-sse"
-      #- "traefik.http.middlewares.strip-sse.stripprefix.prefixes=/sse"
-      - "traefik.http.routers.mcp-sse.entrypoints=websecure"
-      - "traefik.http.routers.mcp-sse.tls=true"
-      # Force h2 (backend supports h2c)
-      - "traefik.http.routers.mcp-sse.service=mcp-sse"
-      - "traefik.http.services.mcp-sse.loadbalancer.server.scheme=http"
-      - "traefik.http.services.mcp-sse.loadbalancer.server.port=8090"
 
 networks:
   mcp-network:
