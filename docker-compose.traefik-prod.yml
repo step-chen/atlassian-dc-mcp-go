@@ -1,11 +1,8 @@
 # Docker Compose file for Atlassian DC MCP with Traefik in Production
 # This configuration uses Traefik as a reverse proxy with HTTPS support using Let's Encrypt certificates
-
-version: '3.8'
-
 services:
   traefik:
-    image: traefik:v3.5
+    image: traefik:latest
     container_name: traefik-proxy
     restart: always
     command:
@@ -29,8 +26,6 @@ services:
 
   mcp-server:
     image: ${IMAGE_NAME:-ghcr.io/step-chen/atlassian-dc-mcp-go}:latest
-    # Build the image from the Dockerfile in the current directory
-    build: .
     container_name: atlassian-dc-mcp
     # Mount the local config file into the container
     volumes:
@@ -46,12 +41,12 @@ services:
     # Command to run with auth-mode
     command: ["-auth-mode=header"]
     # Healthcheck to ensure the application is running correctly
-    #healthcheck:
-    #  test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:${MCP_PORT:-8090}/health"]
-    #  interval: 30s
-    #  timeout: 10s
-    #  retries: 3
-    #  start_period: 15s
+    healthcheck:
+      test: ["CMD", "./healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
     # Restart policy
     restart: on-failure
     networks:

@@ -19,8 +19,6 @@ services:
 
   mcp-server:
     image: ${IMAGE_NAME:-ghcr.io/step-chen/atlassian-dc-mcp-go}:latest
-    # Build the image from the Dockerfile in the current directory
-    build: .
     container_name: atlassian-dc-mcp
     # Mount the local config file into the container
     volumes:
@@ -35,7 +33,13 @@ services:
       - AUTH_MODE=header
     # Command to run with auth-mode
     command: ["-auth-mode=header"]
-    # Healthcheck is disabled as it's not compatible with header-based auth without proper setup
+    # Healthcheck to ensure the application is running correctly
+    healthcheck:
+      test: ["CMD", "./healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
     # Restart policy
     restart: on-failure
     networks:

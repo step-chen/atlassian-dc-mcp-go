@@ -33,6 +33,12 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
     -o /atlassian-dc-mcp-server \
     ./cmd/server
 
+# Build a simple health check utility
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags="-s -w -extldflags '-static'" \
+    -o /healthcheck \
+    ./cmd/tools/healthcheck
+
 # ---- Final Stage ----
 # Use a distroless static image for the final stage.
 # It's a minimal image that contains only the bare necessities for a static binary,
@@ -45,6 +51,7 @@ WORKDIR /app
 # Copy the compiled binary from the builder stage.
 # Note: We are not copying config.yaml. Configuration should be mounted at runtime.
 COPY --from=builder /atlassian-dc-mcp-server .
+COPY --from=builder /healthcheck .
 
 # Expose the default port (only relevant for HTTP/SSE modes)
 # This is for documentation; the actual port is set via config.

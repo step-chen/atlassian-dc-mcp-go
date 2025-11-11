@@ -5,9 +5,11 @@ package mcp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -36,6 +38,7 @@ type Server struct {
 	config           *config.Config
 	authMode         string
 	version          string
+	startTime        time.Time
 	jiraClient       *jira.JiraClient
 	confluenceClient *confluence.ConfluenceClient
 	bitbucketClient  *bitbucket.BitbucketClient
@@ -53,6 +56,7 @@ func NewServer(cfg *config.Config, authMode, version string) *Server {
 		config:       cfg,
 		authMode:     authMode,
 		version:      version,
+		startTime:    time.Now(),
 		shutdownChan: make(chan struct{}),
 	}
 }
@@ -86,6 +90,7 @@ func (s *Server) Initialize() error {
 		Version: s.version,
 	}, nil)
 
+	// Add middleware for logging and error handling
 	s.mcpServer.AddReceivingMiddleware(LoggingMiddleware(&s.config.Logging))
 	s.mcpServer.AddReceivingMiddleware(ErrorMiddleware())
 
@@ -103,72 +108,19 @@ func (s *Server) Start(ctx context.Context) error {
 
 	// Create a single HTTP mux for all HTTP-based transports
 	mux := http.NewServeMux()
+
+	// Register health and readiness check endpoints
+	s.registerHealthEndpoints(mux)
+
+	// Initialize all requested transport modes
+	s.initTransports(ctx, mux, serverFactory)
+
+	// Apply authentication middleware
 	authMux := s.AuthMiddleware(mux)
 
-	// Start all requested transports
-	for _, transport := range s.config.Transport.Modes {
-		switch transport {
-		case "stdio":
-			s.wg.Add(1)
-			go func() {
-				defer s.wg.Done()
-				// Create a new context that can be cancelled independently
-				stdioCtx, cancel := context.WithCancel(ctx)
-				defer cancel()
-
-				if err := s.mcpServer.Run(stdioCtx, &mcp.StdioTransport{}); err != nil {
-					fmt.Printf("Stdio transport error: %v\n", err)
-				}
-			}()
-		case "sse":
-			sseHandler := mcp.NewSSEHandler(serverFactory, &mcp.SSEOptions{})
-			ssePath := s.config.Transport.SSE.Path
-			if ssePath == "" {
-				ssePath = "/sse"
-			}
-			mux.Handle(ssePath, sseHandler)
-		case "http":
-			handler := mcp.NewStreamableHTTPHandler(serverFactory, nil)
-			httpPath := s.config.Transport.HTTP.Path
-			if httpPath == "" {
-				httpPath = "/mcp"
-			}
-			mux.Handle(httpPath, handler)
-		}
-	}
-
 	// If we have HTTP-based transports, start the HTTP server
-	hasHTTP := false
-	for _, t := range s.config.Transport.Modes {
-		if t == "http" || t == "sse" {
-			hasHTTP = true
-			break
-		}
-	}
-
-	if hasHTTP {
-		addr := fmt.Sprintf(":%d", s.config.Port)
-		// Only use requestLogger in debug mode
-		var handler http.Handler
-		if s.config.Logging.Level == "debug" {
-			handler = requestLogger(authMux)
-		} else {
-			handler = authMux
-		}
-		
-		s.httpServer = &http.Server{
-			Addr:    addr,
-			Handler: handler,
-		}
-
-		// Start HTTP server in a goroutine
-		s.wg.Add(1)
-		go func() {
-			defer s.wg.Done()
-			if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-				fmt.Printf("HTTP server error: %v\n", err)
-			}
-		}()
+	if s.hasHTTPTransports() {
+		s.startHTTPServer(authMux)
 	}
 
 	// Wait for context cancellation or shutdown signal
@@ -305,6 +257,126 @@ func (s *Server) AuthMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+// registerHealthEndpoints registers health and readiness check endpoints
+func (s *Server) registerHealthEndpoints(mux *http.ServeMux) {
+	// Add a simple health check endpoint that doesn't require authentication
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		uptime := time.Since(s.startTime).String()
+		response := fmt.Sprintf(`{"status": "ok", "version": "%s", "uptime": "%s"}`, s.version, uptime)
+		_, _ = w.Write([]byte(response))
+	})
+
+	// Add a readiness check endpoint that verifies service dependencies
+	mux.HandleFunc("/ready", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		
+		// Check if clients are initialized
+		readiness := map[string]interface{}{
+			"status": "ok",
+		}
+
+		issues := []string{}
+
+		if s.config.Jira.URL != "" && s.jiraClient == nil {
+			issues = append(issues, "Jira client not initialized")
+		}
+
+		if s.config.Confluence.URL != "" && s.confluenceClient == nil {
+			issues = append(issues, "Confluence client not initialized")
+		}
+
+		if s.config.Bitbucket.URL != "" && s.bitbucketClient == nil {
+			issues = append(issues, "Bitbucket client not initialized")
+		}
+
+		if len(issues) > 0 {
+			readiness["status"] = "not ready"
+			readiness["issues"] = issues
+			w.WriteHeader(http.StatusServiceUnavailable)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
+
+		// Convert map to JSON and write to response
+		jsonData, _ := json.Marshal(readiness)
+		_, _ = w.Write(jsonData)
+	})
+}
+
+// initTransports initializes all requested transport modes
+func (s *Server) initTransports(ctx context.Context, mux *http.ServeMux, serverFactory func(req *http.Request) *mcp.Server) {
+	// Start all requested transports
+	for _, transport := range s.config.Transport.Modes {
+		switch transport {
+		case "stdio":
+			s.wg.Add(1)
+			go func() {
+				defer s.wg.Done()
+				// Create a new context that can be cancelled independently
+				stdioCtx, cancel := context.WithCancel(ctx)
+				defer cancel()
+
+				if err := s.mcpServer.Run(stdioCtx, &mcp.StdioTransport{}); err != nil {
+					fmt.Printf("Stdio transport error: %v\n", err)
+				}
+			}()
+		case "sse":
+			sseHandler := mcp.NewSSEHandler(serverFactory, &mcp.SSEOptions{})
+			ssePath := s.config.Transport.SSE.Path
+			if ssePath == "" {
+				ssePath = "/sse"
+			}
+			mux.Handle(ssePath, sseHandler)
+		case "http":
+			handler := mcp.NewStreamableHTTPHandler(serverFactory, nil)
+			httpPath := s.config.Transport.HTTP.Path
+			if httpPath == "" {
+				httpPath = "/mcp"
+			}
+			mux.Handle(httpPath, handler)
+		}
+	}
+}
+
+// hasHTTPTransports checks if HTTP-based transports (http or sse) are configured
+func (s *Server) hasHTTPTransports() bool {
+	for _, t := range s.config.Transport.Modes {
+		if t == "http" || t == "sse" {
+			return true
+		}
+	}
+	return false
+}
+
+// startHTTPServer starts the HTTP server with the provided handler
+func (s *Server) startHTTPServer(authMux http.Handler) {
+	addr := fmt.Sprintf(":%d", s.config.Port)
+	// Only use requestLogger in debug mode
+	var handler http.Handler
+	if s.config.Logging.Level == "debug" {
+		handler = requestLogger(authMux)
+	} else {
+		handler = authMux
+	}
+
+	s.httpServer = &http.Server{
+		Addr:    addr,
+		Handler: handler,
+	}
+
+	// Start HTTP server in a goroutine
+	s.wg.Add(1)
+	go func() {
+		defer s.wg.Done()
+		if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			fmt.Printf("HTTP server error: %v\n", err)
+		}
+	}()
 }
 
 // addJiraTools registers all Jira-related tools with the MCP server
