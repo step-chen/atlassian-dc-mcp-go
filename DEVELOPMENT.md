@@ -247,3 +247,31 @@ All new functionality should include appropriate tests:
 4. **Use jsonschema tags**: These are used to generate documentation for the tools
 5. **Write clear comments**: Document public functions and complex logic
 6. **Keep functions focused**: Each function should have a single responsibility
+
+## Configuration
+
+The application is configured via `config.yaml`. An example configuration file is provided in `config.yaml.example`.
+
+### HTTP Client Connection Pool Configuration
+
+The application now supports configuring HTTP client connection pool settings for each Atlassian product (Jira, Confluence, Bitbucket). These settings allow you to optimize performance based on your specific usage patterns.
+
+Each product section in the configuration file now includes an `http` subsection with the following options:
+
+- `max_idle_conns`: Maximum number of idle connections across all hosts (default: 100)
+- `max_idle_conns_per_host`: Maximum number of idle connections per host (default: 20)
+- `idle_conn_timeout`: Maximum amount of time an idle connection will remain idle before closing (default: 90 seconds)
+
+Example configuration:
+
+```yaml
+jira:
+  url: "https://your-jira-instance.domain"
+  token: "your-jira-api-token"
+  http:
+    max_idle_conns: 100
+    max_idle_conns_per_host: 20
+    idle_conn_timeout: 90
+```
+
+These settings help optimize the connection handling between the MCP server and Atlassian products, particularly in high-throughput scenarios.

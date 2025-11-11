@@ -21,6 +21,11 @@ func NewBaseClient(config *config.ClientConfig, name string, tokenKey ContextKey
 		clientConfig.Timeout = time.Duration(config.Timeout) * time.Second
 	}
 
+	// Apply HTTP client connection pool settings from config
+	clientConfig.MaxIdleConns = config.HTTP.MaxIdleConns
+	clientConfig.MaxIdleConnsPerHost = config.HTTP.MaxIdleConnsPerHost
+	clientConfig.IdleConnTimeout = time.Duration(config.HTTP.IdleConnTimeout) * time.Second
+
 	httpClient := NewRetryableHTTPClient(clientConfig, &TokenAuthTransport{
 		TokenKey: tokenKey,
 	})

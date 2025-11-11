@@ -12,13 +12,21 @@ import (
 	"github.com/spf13/viper"
 )
 
+// HTTPClientConfig represents the HTTP client configuration for connection pooling
+type HTTPClientConfig struct {
+	MaxIdleConns        int `mapstructure:"max_idle_conns"`
+	MaxIdleConnsPerHost int `mapstructure:"max_idle_conns_per_host"`
+	IdleConnTimeout     int `mapstructure:"idle_conn_timeout"`
+}
+
 type Permissions map[string]bool
 
 type ClientConfig struct {
-	URL         string      `mapstructure:"url"`
-	Token       string      `mapstructure:"token"`
-	Permissions Permissions `mapstructure:"permissions"`
-	Timeout     int         `mapstructure:"timeout"`
+	URL         string         `mapstructure:"url"`
+	Token       string         `mapstructure:"token"`
+	Permissions Permissions    `mapstructure:"permissions"`
+	Timeout     int            `mapstructure:"timeout"`
+	HTTP        HTTPClientConfig `mapstructure:"http"`
 }
 
 type TransportConfig struct {
@@ -89,6 +97,37 @@ func (c *Config) Validate(authMode string) error {
 		c.Bitbucket.Timeout = c.ClientTimeout
 	}
 
+	// Set default HTTP client config values if not specified
+	if c.Jira.HTTP.MaxIdleConns <= 0 {
+		c.Jira.HTTP.MaxIdleConns = 100
+	}
+	if c.Jira.HTTP.MaxIdleConnsPerHost <= 0 {
+		c.Jira.HTTP.MaxIdleConnsPerHost = 20
+	}
+	if c.Jira.HTTP.IdleConnTimeout <= 0 {
+		c.Jira.HTTP.IdleConnTimeout = 90
+	}
+
+	if c.Confluence.HTTP.MaxIdleConns <= 0 {
+		c.Confluence.HTTP.MaxIdleConns = 100
+	}
+	if c.Confluence.HTTP.MaxIdleConnsPerHost <= 0 {
+		c.Confluence.HTTP.MaxIdleConnsPerHost = 20
+	}
+	if c.Confluence.HTTP.IdleConnTimeout <= 0 {
+		c.Confluence.HTTP.IdleConnTimeout = 90
+	}
+
+	if c.Bitbucket.HTTP.MaxIdleConns <= 0 {
+		c.Bitbucket.HTTP.MaxIdleConns = 100
+	}
+	if c.Bitbucket.HTTP.MaxIdleConnsPerHost <= 0 {
+		c.Bitbucket.HTTP.MaxIdleConnsPerHost = 20
+	}
+	if c.Bitbucket.HTTP.IdleConnTimeout <= 0 {
+		c.Bitbucket.HTTP.IdleConnTimeout = 90
+	}
+
 	if authMode != "header" {
 		if c.Jira.URL != "" && c.Jira.Token == "" {
 			return fmt.Errorf("jira token must be set when jira url is configured")
@@ -151,6 +190,15 @@ func LoadConfig(configPath string, authMode string) (*Config, error) {
 	viper.SetDefault("transport.modes", []string{"http", "sse"})
 	viper.SetDefault("transport.http.path", "/mcp")
 	viper.SetDefault("transport.sse.path", "/sse")
+	viper.SetDefault("jira.http.max_idle_conns", 100)
+	viper.SetDefault("jira.http.max_idle_conns_per_host", 20)
+	viper.SetDefault("jira.http.idle_conn_timeout", 90)
+	viper.SetDefault("confluence.http.max_idle_conns", 100)
+	viper.SetDefault("confluence.http.max_idle_conns_per_host", 20)
+	viper.SetDefault("confluence.http.idle_conn_timeout", 90)
+	viper.SetDefault("bitbucket.http.max_idle_conns", 100)
+	viper.SetDefault("bitbucket.http.max_idle_conns_per_host", 20)
+	viper.SetDefault("bitbucket.http.idle_conn_timeout", 90)
 
 	viper.SetEnvPrefix("MCP")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
