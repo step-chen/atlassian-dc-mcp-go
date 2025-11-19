@@ -18,7 +18,7 @@ import (
 // Returns:
 //   - types.MapOutput: The search results
 //   - error: An error if the request fails
-func (c *JiraClient) SearchIssues(ctx context.Context, input SearchIssuesInput) (types.MapOutput, error) {
+func (c *JiraClient) SearchIssues(ctx context.Context, input SearchIssuesInput) (*Issues, error) {
 
 	finalJQL := input.JQL
 	if finalJQL == "" {
@@ -51,7 +51,7 @@ func (c *JiraClient) SearchIssues(ctx context.Context, input SearchIssuesInput) 
 		return nil, fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	var output types.MapOutput
+	var output *Issues
 	err = client.ExecuteRequest(
 		ctx,
 		c.BaseClient,

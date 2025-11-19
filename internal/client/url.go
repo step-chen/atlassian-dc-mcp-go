@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"go.uber.org/zap"
 
@@ -104,7 +105,7 @@ func SetQueryParam(queryParams url.Values, key string, value any, invalid any) b
 		if len(v) == 0 {
 			return false
 		}
-		queryParams[key] = v
+		queryParams.Set(key, strings.Join(v, ","))
 		return true
 	case *string:
 		if v != nil && *v != "" && *v != invalid {

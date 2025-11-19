@@ -127,8 +127,8 @@ func performHealthCheck(ctx context.Context, jiraClient *jira.JiraClient, conflu
 		defer wg.Done()
 		jiraStatus := checkJiraHealth(ctx, jiraClient)
 		status.Jira = ServiceStatus{
-			Status:  jiraStatus["status"].(string),
-			Message: jiraStatus["message"].(string),
+			Status:  getStringValue(jiraStatus["status"]),
+			Message: getStringValue(jiraStatus["message"]),
 		}
 	}()
 
@@ -138,8 +138,8 @@ func performHealthCheck(ctx context.Context, jiraClient *jira.JiraClient, conflu
 		defer wg.Done()
 		confluenceStatus := checkConfluenceHealth(ctx, confluenceClient)
 		status.Confluence = ServiceStatus{
-			Status:  confluenceStatus["status"].(string),
-			Message: confluenceStatus["message"].(string),
+			Status:  getStringValue(confluenceStatus["status"]),
+			Message: getStringValue(confluenceStatus["message"]),
 		}
 	}()
 
@@ -149,14 +149,25 @@ func performHealthCheck(ctx context.Context, jiraClient *jira.JiraClient, conflu
 		defer wg.Done()
 		bitbucketStatus := checkBitbucketHealth(ctx, bitbucketClient)
 		status.Bitbucket = ServiceStatus{
-			Status:  bitbucketStatus["status"].(string),
-			Message: bitbucketStatus["message"].(string),
+			Status:  getStringValue(bitbucketStatus["status"]),
+			Message: getStringValue(bitbucketStatus["message"]),
 		}
 	}()
 
 	wg.Wait()
 
 	return status
+}
+
+// getStringValue safely extracts a string value from an interface{}
+func getStringValue(v interface{}) string {
+	if v == nil {
+		return ""
+	}
+	if str, ok := v.(string); ok {
+		return str
+	}
+	return ""
 }
 
 // healthCheckHandler handles the health check tool call using the new generic API.

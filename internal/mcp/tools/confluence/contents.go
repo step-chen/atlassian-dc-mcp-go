@@ -13,7 +13,7 @@ import (
 )
 
 // getContentHandler handles getting Confluence content
-func (h *Handler) getContentHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentInput) (*mcp.CallToolResult, types.MapOutput, error) {
+func (h *Handler) getContentHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentInput) (*mcp.CallToolResult, *confluence.Contents, error) {
 	content, err := h.client.GetContent(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get content failed: %w", err)
@@ -33,7 +33,7 @@ func (h *Handler) searchContentHandler(ctx context.Context, req *mcp.CallToolReq
 }
 
 // getContentByIDHandler handles getting Confluence content by ID
-func (h *Handler) getContentByIDHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentByIDInput) (*mcp.CallToolResult, types.MapOutput, error) {
+func (h *Handler) getContentByIDHandler(ctx context.Context, req *mcp.CallToolRequest, input confluence.GetContentByIDInput) (*mcp.CallToolResult, *confluence.Content, error) {
 	content, err := h.client.GetContentByID(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get content by ID failed: %w", err)
@@ -150,9 +150,9 @@ func (h *Handler) addCommentHandler(ctx context.Context, req *mcp.CallToolReques
 func AddContentTools(server *mcp.Server, client *confluence.ConfluenceClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	utils.RegisterTool[confluence.GetContentInput, types.MapOutput](server, "confluence_get_content", "Get a list of Confluence content. This tool allows you to retrieve multiple content items with various filter options.", handler.getContentHandler)
+	utils.RegisterTool[confluence.GetContentInput, *confluence.Contents](server, "confluence_get_content", "Get a list of Confluence content. This tool allows you to retrieve multiple content items with various filter options.", handler.getContentHandler)
 	utils.RegisterTool[confluence.SearchContentInput, types.MapOutput](server, "confluence_search_content", "Search for Confluence content using CQL (Confluence Query Language). This tool allows you to find content based on various criteria such as text, space, labels, and more.", handler.searchContentHandler)
-	utils.RegisterTool[confluence.GetContentByIDInput, types.MapOutput](server, "confluence_get_content_by_id", "Get a specific Confluence content item by its ID. This tool allows you to retrieve detailed information about a content item including its body, metadata, and version history.", handler.getContentByIDHandler)
+	utils.RegisterTool[confluence.GetContentByIDInput, *confluence.Content](server, "confluence_get_content_by_id", "Get a specific Confluence content item by its ID. This tool allows you to retrieve detailed information about a content item including its body, metadata, and version history.", handler.getContentByIDHandler)
 	utils.RegisterTool[confluence.GetContentHistoryInput, types.MapOutput](server, "confluence_get_content_history", "Retrieve the history of a Confluence content item. This tool provides detailed information about all versions of a content item.", handler.getContentHistoryHandler)
 	utils.RegisterTool[confluence.GetContentLabelsInput, types.MapOutput](server, "confluence_get_content_labels", "Get labels for a specific Confluence content item. This tool allows you to retrieve all labels associated with a content item.", handler.getContentLabelsHandler)
 	utils.RegisterTool[confluence.GetAttachmentsInput, types.MapOutput](server, "confluence_get_attachments", "Get attachments for a specific Confluence content item.", handler.getAttachmentsHandler)

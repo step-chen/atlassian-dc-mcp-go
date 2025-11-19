@@ -235,3 +235,114 @@ type Suggestion struct {
 	Content string `json:"content"`
 	EndLine *int   `json:"endLine,omitempty"`
 }
+
+type Ref struct {
+	DisplayId    string `json:"displayId"`
+	ID           string `json:"id"`
+	LatestCommit string `json:"latestCommit"`
+	Repository   struct {
+		ID      int    `json:"id"`
+		Name    string `json:"name"`
+		Public  bool   `json:"public"`
+		ScmId   string `json:"scmId"`
+		Slug    string `json:"slug"`
+		State   string `json:"state"`
+		Project struct {
+			Description string `json:"description"`
+			ID          int    `json:"id"`
+			Key         string `json:"key"`
+			Name        string `json:"name"`
+			Public      bool   `json:"public"`
+			Type        string `json:"type"`
+		} `json:"project"`
+	} `json:"repository"`
+	Type string `json:"type"`
+}
+
+type User struct {
+	Active      bool   `json:"active"`
+	DisplayName string `json:"displayName"`
+}
+
+// PullRequest represents a Bitbucket pull request.
+type PullRequest struct {
+	ID          int    `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	State       string `json:"state"`
+	Open        bool   `json:"open"`
+	Closed      bool   `json:"closed"`
+	Draft       bool   `json:"draft"`
+	CreatedDate int64  `json:"createdDate"`
+	UpdatedDate int64  `json:"updatedDate"`
+	ClosedDate  int64  `json:"closedDate,omitempty"`
+	Version     int    `json:"version"`
+	Locked      bool   `json:"locked"`
+
+	Author struct {
+		Approved bool   `json:"approved"`
+		Role     string `json:"role"`
+		Status   string `json:"status"`
+		User     User   `json:"user"`
+	} `json:"author"`
+
+	FromRef Ref `json:"fromRef"`
+	ToRef   Ref `json:"toRef"`
+
+	Reviewers []struct {
+		Approved           bool   `json:"approved"`
+		LastReviewedCommit string `json:"lastReviewedCommit,omitempty"`
+		Role               string `json:"role"`
+		Status             string `json:"status"`
+		User               User   `json:"user"`
+	} `json:"reviewers"`
+
+	Links struct {
+		Self []struct {
+			Href string `json:"href"`
+		} `json:"self"`
+	} `json:"links"`
+}
+
+type Author struct {
+	DisplayName string `json:"displayName"`
+}
+
+// PullRequestActivities represents a simplified version of Bitbucket pull request activities
+type PullRequestActivities struct {
+	IsLastPage bool `json:"isLastPage"` // Indicates if this is the last page of results
+	Limit      int  `json:"limit"`      // The limit of activities per page
+	Size       int  `json:"size"`       // The actual number of activities in the current page
+	Start      int  `json:"start"`      // The start index of activities in the current page
+
+	Values []struct {
+		ID            int    `json:"id"`
+		Action        string `json:"action"`      // Type of activity (e.g. COMMENTED, MERGED, APPROVED, OPENED)
+		CreatedDate   int64  `json:"createdDate"` // Timestamp when the activity was created
+		AutoMerge     bool   `json:"autoMerge,omitempty"`
+		CommentAction string `json:"commentAction,omitempty"`
+		User          User   `json:"user"`
+
+		// Comment details (for COMMENTED actions)
+		Comment *struct {
+			Author      Author `json:"author"`
+			ID          int    `json:"id"`
+			State       string `json:"state"`
+			Text        string `json:"text"`
+			CreatedDate int64  `json:"createdDate"`
+			UpdatedDate int64  `json:"updatedDate"`
+			Version     int    `json:"version"`
+		} `json:"comment,omitempty"`
+
+		// Commit details (for MERGED actions)
+		Commit *struct {
+			Author             Author `json:"author"`
+			Committer          Author `json:"committer"`
+			AuthorTimestamp    int64  `json:"authorTimestamp"`
+			CommitterTimestamp int64  `json:"committerTimestamp"`
+			DisplayID          string `json:"displayId"`
+			ID                 string `json:"id"`
+			Message            string `json:"message"`
+		} `json:"commit,omitempty"`
+	} `json:"values"`
+}

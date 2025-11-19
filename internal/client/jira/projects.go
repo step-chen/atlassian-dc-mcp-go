@@ -6,7 +6,6 @@ import (
 	"net/url"
 
 	"atlassian-dc-mcp-go/internal/client"
-	"atlassian-dc-mcp-go/internal/types"
 )
 
 // GetProject retrieves a specific project by its key.
@@ -17,8 +16,8 @@ import (
 // Returns:
 //   - types.MapOutput: The project data
 //   - error: An error if the request fails
-func (c *JiraClient) GetProject(ctx context.Context, input GetProjectInput) (types.MapOutput, error) {
-	var output types.MapOutput
+func (c *JiraClient) GetProject(ctx context.Context, input GetProjectInput) (*Project, error) {
+	var output *Project
 	err := client.ExecuteRequest(
 		ctx,
 		c.BaseClient,
@@ -44,14 +43,14 @@ func (c *JiraClient) GetProject(ctx context.Context, input GetProjectInput) (typ
 // Returns:
 //   - []types.MapOutput: The projects data
 //   - error: An error if the request fails
-func (c *JiraClient) GetAllProjects(ctx context.Context, input GetAllProjectsInput) ([]types.MapOutput, error) {
+func (c *JiraClient) GetAllProjects(ctx context.Context, input GetAllProjectsInput) ([]Project, error) {
 	queryParams := url.Values{}
 	client.SetQueryParam(queryParams, "expand", input.Expand, "")
 	client.SetQueryParam(queryParams, "recent", input.Recent, 0)
 	client.SetQueryParam(queryParams, "includeArchived", input.IncludeArchived, false)
 	client.SetQueryParam(queryParams, "browseArchive", input.BrowseArchive, false)
 
-	var outputs []types.MapOutput
+	var outputs []Project
 	err := client.ExecuteRequest(
 		ctx,
 		c.BaseClient,

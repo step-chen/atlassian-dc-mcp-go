@@ -25,10 +25,10 @@ import (
 //   - input: GetPullRequestInput containing the parameters for the request
 //
 // Returns:
-//   - types.MapOutput: The pull request data retrieved from the API
+//   - *PullRequest: The pull request data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequest(ctx context.Context, input GetPullRequestInput) (types.MapOutput, error) {
-	var output types.MapOutput
+func (c *BitbucketClient) GetPullRequest(ctx context.Context, input GetPullRequestInput) (*PullRequest, error) {
+	var output PullRequest
 
 	if err := client.ExecuteRequest(
 		ctx,
@@ -43,7 +43,7 @@ func (c *BitbucketClient) GetPullRequest(ctx context.Context, input GetPullReque
 		return nil, err
 	}
 
-	return output, nil
+	return &output, nil
 }
 
 // GetPullRequestActivities retrieves activities for a specific pull request.
@@ -57,7 +57,7 @@ func (c *BitbucketClient) GetPullRequest(ctx context.Context, input GetPullReque
 // Returns:
 //   - types.MapOutput: The activities data retrieved from the API
 //   - error: An error if the request fails
-func (c *BitbucketClient) GetPullRequestActivities(ctx context.Context, input GetPullRequestActivitiesInput) (types.MapOutput, error) {
+func (c *BitbucketClient) GetPullRequestActivities(ctx context.Context, input GetPullRequestActivitiesInput) (*PullRequestActivities, error) {
 	queryParams := url.Values{}
 
 	client.SetQueryParam(queryParams, "fromType", input.FromType, "")
@@ -65,7 +65,7 @@ func (c *BitbucketClient) GetPullRequestActivities(ctx context.Context, input Ge
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
-	var output types.MapOutput
+	var output *PullRequestActivities
 	if err := client.ExecuteRequest(
 		ctx,
 		c.BaseClient,
@@ -958,7 +958,7 @@ func (c *BitbucketClient) formatSuggestionComment(commentText, suggestion string
 		lineInfo = fmt.Sprintf(" (lines %d-%d)", startLine, endLine)
 	}
 
-	suggestionBlock := fmt.Sprintf("```suggestion\n%s\n```", suggestion)
+	suggestionBlock := fmt.Sprintf("``suggestion\n%s\n```", suggestion)
 	if commentText != "" {
 		return fmt.Sprintf("%s%s\n\n%s", commentText, lineInfo, suggestionBlock)
 	}

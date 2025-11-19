@@ -98,3 +98,110 @@ type ScanContentBySpaceKeyInput struct {
 	Expand     []string `json:"expand,omitempty" jsonschema:"Fields to expand in the response"`
 	Cursor     string   `json:"cursor,omitempty" jsonschema:"The cursor for pagination"`
 }
+
+type Contents struct {
+	Limit   int       `json:"limit,omitempty"`
+	Size    int       `json:"size,omitempty"`
+	Start   int       `json:"start,omitempty"`
+	Links   Links     `json:"_links,omitempty"`
+	Content []Content `json:"results,omitempty"`
+}
+
+type Content struct {
+	Expandable map[string]string `json:"_expandable,omitempty"`
+	Links      Links             `json:"_links,omitempty"`
+	ID         string            `json:"id,omitempty"`
+	Position   int               `json:"position,omitempty"`
+	Status     string            `json:"status,omitempty"`
+	Title      string            `json:"title,omitempty"`
+	Type       string            `json:"type,omitempty"`
+	Body       Body              `json:"body,omitempty"`
+	Container  Container         `json:"container,omitempty"`
+	Metadata   Metadata          `json:"metadata,omitempty"`
+	Space      Space             `json:"space,omitempty"`
+	Version    Version           `json:"version,omitempty"`
+}
+
+type Links struct {
+	Base  string `json:"base,omitempty"`
+	Self  string `json:"self,omitempty"`
+	Webui string `json:"webui,omitempty"`
+	Next  string `json:"next,omitempty"`
+	Prev  string `json:"prev,omitempty"`
+}
+
+type Body struct {
+	Expandable map[string]string `json:"_expandable,omitempty"`
+	Storage    Storage           `json:"storage,omitempty"`
+}
+
+type Storage struct {
+	Content StorageContent `json:"content,omitempty"`
+	Value   string         `json:"value,omitempty"`
+}
+
+type StorageContent struct {
+	Expandable map[string]string `json:"_expandable,omitempty"`
+	Links      Links             `json:"_links,omitempty"`
+	ID         string            `json:"id,omitempty"`
+	Position   int               `json:"position,omitempty"`
+	Status     string            `json:"status,omitempty"`
+	Title      string            `json:"title,omitempty"`
+	Type       string            `json:"type,omitempty"`
+}
+
+type Container struct {
+	Expandable map[string]string `json:"_expandable,omitempty"`
+	Links      Links             `json:"_links,omitempty"`
+	ID         int               `json:"id,omitempty"`
+	Key        string            `json:"key,omitempty"`
+	Name       string            `json:"name,omitempty"`
+	Status     string            `json:"status,omitempty"`
+	Type       string            `json:"type,omitempty"`
+}
+
+type Metadata struct {
+	Expandable map[string]string `json:"_expandable,omitempty"`
+	Labels     Labels            `json:"labels,omitempty"`
+}
+
+type Labels struct {
+	Links   Links         `json:"_links,omitempty"`
+	Limit   int           `json:"limit,omitempty"`
+	Results []interface{} `json:"results,omitempty"`
+	Size    int           `json:"size,omitempty"`
+	Start   int           `json:"start,omitempty"`
+}
+
+type Space struct {
+	Expandable map[string]string `json:"_expandable,omitempty"`
+	Links      Links             `json:"_links,omitempty"`
+	ID         int               `json:"id,omitempty"`
+	Key        string            `json:"key,omitempty"`
+	Name       string            `json:"name,omitempty"`
+	Status     string            `json:"status,omitempty"`
+	Type       string            `json:"type,omitempty"`
+}
+
+type Version struct {
+	Links   Links          `json:"_links,omitempty"`
+	By      By             `json:"by,omitempty"`
+	Content VersionContent `json:"content,omitempty"`
+	Number  int            `json:"number,omitempty"`
+	When    string         `json:"when,omitempty"`
+}
+
+type By struct {
+	Expandable  map[string]string `json:"_expandable,omitempty"`
+	DisplayName string            `json:"displayName,omitempty"`
+}
+
+type VersionContent struct {
+	Expandable map[string]string `json:"_expandable,omitempty"`
+	Links      Links             `json:"_links,omitempty"`
+	ID         string            `json:"id,omitempty"`
+	Position   int               `json:"position,omitempty"`
+	Status     string            `json:"status,omitempty"`
+	Title      string            `json:"title,omitempty"`
+	Type       string            `json:"type,omitempty"`
+}
