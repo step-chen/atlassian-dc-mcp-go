@@ -13,7 +13,7 @@ import (
 )
 
 // getIssueHandler retrieves a Jira issue by its key with default fields.
-func (h *Handler) getIssueHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetIssueInput) (*mcp.CallToolResult, *jira.Issue, error) {
+func (h *Handler) getIssueHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetIssueInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	issue, err := h.client.GetIssue(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get issue failed: %w", err)
@@ -93,7 +93,7 @@ func (h *Handler) setIssueEstimationForBoardHandler(ctx context.Context, req *mc
 }
 
 // searchIssuesHandler searches for Jira issues using a JQL query.
-func (h *Handler) searchIssuesHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.SearchIssuesInput) (*mcp.CallToolResult, *jira.Issues, error) {
+func (h *Handler) searchIssuesHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.SearchIssuesInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	issues, err := h.client.SearchIssues(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("search issues failed: %w", err)
@@ -106,8 +106,8 @@ func (h *Handler) searchIssuesHandler(ctx context.Context, req *mcp.CallToolRequ
 func AddIssueTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	utils.RegisterTool[jira.SearchIssuesInput, *jira.Issues](server, "jira_search_issues", "Search for Jira issues using JQL", handler.searchIssuesHandler)
-	utils.RegisterTool[jira.GetIssueInput, *jira.Issue](server, "jira_get_issue", "Get a specific Jira issue by key or ID", handler.getIssueHandler)
+	utils.RegisterTool[jira.SearchIssuesInput, types.MapOutput](server, "jira_search_issues", "Search for Jira issues using JQL", handler.searchIssuesHandler)
+	utils.RegisterTool[jira.GetIssueInput, types.MapOutput](server, "jira_get_issue", "Get a specific Jira issue by key or ID", handler.getIssueHandler)
 	utils.RegisterTool[jira.GetAgileIssueInput, types.MapOutput](server, "jira_get_agile_issue", "Get an agile Jira issue by key or ID", handler.getAgileIssueHandler)
 	utils.RegisterTool[jira.GetIssueEstimationForBoardInput, types.MapOutput](server, "jira_get_issue_estimation_for_board", "Get issue estimation for a board", handler.getIssueEstimationForBoardHandler)
 

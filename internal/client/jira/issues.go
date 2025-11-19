@@ -20,12 +20,12 @@ import (
 // Returns:
 //   - types.MapOutput: The issue data
 //   - error: An error if the request fails
-func (c *JiraClient) GetIssue(ctx context.Context, input GetIssueInput) (*Issue, error) {
+func (c *JiraClient) GetIssue(ctx context.Context, input GetIssueInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
 	// Pass nil as the invalid value for fields since we want to include fields when the slice is empty
 	client.SetQueryParam(queryParams, "fields", input.Fields, nil)
 
-	var output *Issue
+	var output types.MapOutput
 	err := client.ExecuteRequest(
 		ctx,
 		c.BaseClient,

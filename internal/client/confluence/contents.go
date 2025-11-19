@@ -18,13 +18,10 @@ import (
 //   - input: GetContentInput containing the parameters for the request
 //
 // Returns:
-//   - *Contents: The contents data
+//   - types.MapOutput: The content data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContent(ctx context.Context, input GetContentInput) (*Contents, error) {
+func (c *ConfluenceClient) GetContent(ctx context.Context, input GetContentInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
-	if len(input.Expand) == 0 {
-		input.Expand = []string{"container", "body.storage", "metadata.labels"}
-	}
 
 	client.SetQueryParam(queryParams, "type", input.TypeParam, "")
 	client.SetQueryParam(queryParams, "spaceKey", input.SpaceKey, "")
@@ -35,7 +32,7 @@ func (c *ConfluenceClient) GetContent(ctx context.Context, input GetContentInput
 	client.SetQueryParam(queryParams, "start", input.Start, 0)
 	client.SetQueryParam(queryParams, "limit", input.Limit, 0)
 
-	var output *Contents
+	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		ctx,
 		c.BaseClient,
@@ -58,16 +55,13 @@ func (c *ConfluenceClient) GetContent(ctx context.Context, input GetContentInput
 //   - input: GetContentByIDInput containing the parameters for the request
 //
 // Returns:
-//   - *Content: The content data
+//   - types.MapOutput: The content data
 //   - error: An error if the request fails
-func (c *ConfluenceClient) GetContentByID(ctx context.Context, input GetContentByIDInput) (*Content, error) {
+func (c *ConfluenceClient) GetContentByID(ctx context.Context, input GetContentByIDInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
-	if len(input.Expand) == 0 {
-		input.Expand = []string{"container", "body.storage", "metadata.labels", "space", "version"}
-	}
 	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 
-	var output *Content
+	var output types.MapOutput
 	if err := client.ExecuteRequest(
 		ctx,
 		c.BaseClient,

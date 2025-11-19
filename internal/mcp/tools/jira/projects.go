@@ -12,7 +12,7 @@ import (
 )
 
 // getProjectHandler handles getting a Jira project by key.
-func (h *Handler) getProjectHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetProjectInput) (*mcp.CallToolResult, *jira.Project, error) {
+func (h *Handler) getProjectHandler(ctx context.Context, req *mcp.CallToolRequest, input jira.GetProjectInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	project, err := h.client.GetProject(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get project failed: %w", err)
@@ -39,6 +39,6 @@ func (h *Handler) getProjectsHandler(ctx context.Context, req *mcp.CallToolReque
 func AddProjectTools(server *mcp.Server, client *jira.JiraClient, permissions map[string]bool) {
 	handler := NewHandler(client)
 
-	utils.RegisterTool[jira.GetProjectInput, *jira.Project](server, "jira_get_project", "Get a specific Jira project by key", handler.getProjectHandler)
+	utils.RegisterTool[jira.GetProjectInput, types.MapOutput](server, "jira_get_project", "Get a specific Jira project by key", handler.getProjectHandler)
 	utils.RegisterTool[jira.GetAllProjectsInput, types.MapOutput](server, "jira_get_projects", "Get all Jira projects with optional filters", handler.getProjectsHandler)
 }

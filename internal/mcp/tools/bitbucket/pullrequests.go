@@ -28,7 +28,7 @@ func (h *Handler) getPullRequestsHandler(ctx context.Context, req *mcp.CallToolR
 }
 
 // getPullRequestHandler handles getting a specific pull request
-func (h *Handler) getPullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestInput) (*mcp.CallToolResult, *bitbucket.PullRequest, error) {
+func (h *Handler) getPullRequestHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	pullRequest, err := h.client.GetPullRequest(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get pull request failed: %w", err)
@@ -38,7 +38,7 @@ func (h *Handler) getPullRequestHandler(ctx context.Context, req *mcp.CallToolRe
 }
 
 // getPullRequestActivitiesHandler handles getting pull request activities
-func (h *Handler) getPullRequestActivitiesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestActivitiesInput) (*mcp.CallToolResult, *bitbucket.PullRequestActivities, error) {
+func (h *Handler) getPullRequestActivitiesHandler(ctx context.Context, req *mcp.CallToolRequest, input bitbucket.GetPullRequestActivitiesInput) (*mcp.CallToolResult, types.MapOutput, error) {
 	activities, err := h.client.GetPullRequestActivities(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("get pull request activities failed: %w", err)
@@ -420,8 +420,8 @@ func AddPullRequestTools(server *mcp.Server, client *bitbucket.BitbucketClient, 
 	handler := NewHandler(client)
 
 	utils.RegisterTool[bitbucket.GetPullRequestsInput, types.MapOutput](server, "bitbucket_get_pull_requests", "Get a list of pull requests", handler.getPullRequestsHandler)
-	utils.RegisterTool[bitbucket.GetPullRequestInput, *bitbucket.PullRequest](server, "bitbucket_get_pull_request", "Get a specific pull request", handler.getPullRequestHandler)
-	utils.RegisterTool[bitbucket.GetPullRequestActivitiesInput, *bitbucket.PullRequestActivities](server, "bitbucket_get_pull_request_activities", "Get activities for a specific pull request", handler.getPullRequestActivitiesHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestInput, types.MapOutput](server, "bitbucket_get_pull_request", "Get a specific pull request", handler.getPullRequestHandler)
+	utils.RegisterTool[bitbucket.GetPullRequestActivitiesInput, types.MapOutput](server, "bitbucket_get_pull_request_activities", "Get activities for a specific pull request", handler.getPullRequestActivitiesHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestCommentsInput, types.MapOutput](server, "bitbucket_get_pull_request_comments", "Get comments for a specific pull request", handler.getPullRequestCommentsHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestChangesInput, types.MapOutput](server, "bitbucket_get_pull_request_changes", "Get changes for a specific pull request", handler.getPullRequestChangesHandler)
 	utils.RegisterTool[bitbucket.GetPullRequestDiffStreamInput, DiffOutput](server, "bitbucket_get_pull_request_diff_stream", "Stream the diff for a pull request", handler.getPullRequestDiffStreamHandler)
