@@ -126,32 +126,32 @@ prune:
     - "participants"
     - "user.id"
     - "user.links"
-    # - "user.name"      # Uncomment to remove user.name
+    - "user.displayName"
     - "user.slug"
     - "user.type"
     - "_links"
-    # - "links"          # Uncomment to remove links
-    # - "self"           # Uncomment to remove self
+    - "links"
+    - "self"
     - "scmId"
     - "public"
     - "author.id"
-    # - "author.name"    # Uncomment to remove author.name
+    - "author.displayName"
     - "author.slug"
     - "author.type"
     - "author.key"
     - "author.self"
     - "author.links"
-    # - "creator.name"   # Uncomment to remove creator.name
+    - "creator.displayName"
     - "creator.key"
     - "creator.self"
-    # - "reporter.name"  # Uncomment to remove reporter.name
+    - "reporter.displayName"
     - "reporter.key"
     - "reporter.self"
-    - "updateAuthor.name"
+    - "updateAuthor.displayName"
     - "updateAuthor.key"
     - "updateAuthor.self"
     - "committer.id"
-    # - "committer.name" # Uncomment to remove committer.name
+    - "committer.displayName"
     - "committer.slug"
     - "committer.type"
     - "avatarId"
@@ -160,7 +160,6 @@ prune:
     - "status.id"
     - "status.self"
     - "status.description"
-    # - "type"           # Uncomment to remove type
     - "fixVersions.id"
     - "fixVersions.self"
     - "issuetype.id"
@@ -185,6 +184,7 @@ prune:
     - "path.name"
     - "path.parent"
     - "workratio"
+    # - "type"           # Uncomment to remove type
     - "type.id"
     - "type.inward"
     - "type.outward"
