@@ -37,6 +37,7 @@ go.work
 /mcp
 /mcp-server
 atlassian-dc-mcp-go
+__debug_bin*
 
 # Log files
 *.log

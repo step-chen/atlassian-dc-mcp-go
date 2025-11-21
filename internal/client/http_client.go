@@ -8,6 +8,8 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
@@ -29,9 +31,9 @@ type HTTPClientConfig struct {
 
 // HTTPErrorHandlingOptions defines optional configuration for HTTP error handling
 type HTTPErrorHandlingOptions struct {
-	SkipLogging     bool
-	MaxBodySize     int64
-	SkipBodyReading bool
+	SkipLogging        bool
+	MaxBodySize        int64
+	SkipBodyReading    bool
 	CustomErrorHandler func(*http.Response) error
 }
 
@@ -123,6 +125,8 @@ func ExecuteRequest(ctx context.Context, client *BaseClient, method string, path
 		}
 	}
 
+	Prune(result)
+	//PruneMap(result)
 	return nil
 }
 
@@ -169,11 +173,11 @@ func HandleHTTPError(resp *http.Response, service string, opts ...HTTPErrorHandl
 	options := HTTPErrorHandlingOptions{
 		MaxBodySize: 1024 * 1024, // 1MB default
 	}
-	
+
 	if len(opts) > 0 {
 		options = opts[0]
 	}
-	
+
 	// Use custom error handler if provided
 	if options.CustomErrorHandler != nil {
 		if err := options.CustomErrorHandler(resp); err != nil {
@@ -181,12 +185,12 @@ func HandleHTTPError(resp *http.Response, service string, opts ...HTTPErrorHandl
 		}
 		// Continue with default handling if custom handler doesn't return an error
 	}
-	
+
 	// Check if status code indicates success
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		return nil
 	}
-	
+
 	var bodyString string
 	if !options.SkipBodyReading {
 		// Limit the size of response body read
@@ -194,7 +198,7 @@ func HandleHTTPError(resp *http.Response, service string, opts ...HTTPErrorHandl
 		bodyBytes, _ := io.ReadAll(limitReader)
 		bodyString = string(bodyBytes)
 	}
-	
+
 	// Log error (unless skipped)
 	if !options.SkipLogging {
 		logging.GetLogger().Warn("HTTP request failed",
@@ -202,7 +206,7 @@ func HandleHTTPError(resp *http.Response, service string, opts ...HTTPErrorHandl
 			zap.Int("status_code", resp.StatusCode),
 			zap.String("response_body", bodyString))
 	}
-	
+
 	// Return appropriate error based on status code
 	switch resp.StatusCode {
 	case http.StatusBadRequest:
@@ -267,4 +271,188 @@ func HandleHTTPError(resp *http.Response, service string, opts ...HTTPErrorHandl
 			Message: fmt.Sprintf("[%s] unexpected error with status %d: %s", service, resp.StatusCode, bodyString),
 		}
 	}
+}
+
+var fuzzyKeys = []string{
+	"customfield",
+}
+
+var removePaths = []string{
+	"emailAddress",
+	"clone",
+	"locked",
+	"permittedOperations",
+	"threadResolved",
+	"avatarUrls",
+	"timeZone",
+	"thumbnail",
+	"participants",
+	"user.id",
+	"user.links",
+	//"user.name",
+	"user.slug",
+	"user.type",
+	//"links",
+	//"self",
+	"scmId",
+	"public",
+	"author.id",
+	//"author.name",
+	"author.slug",
+	"author.type",
+	"author.key",
+	"author.self",  //--
+	"author.links", //--
+	//"creator.name",
+	"creator.key",
+	"creator.self", //--
+	//"reporter.name",
+	"reporter.key",
+	"reporter.self", //--
+	"updateAuthor.name",
+	"updateAuthor.key",
+	"updateAuthor.self", //--
+	"committer.id",
+	//"committer.name",
+	"committer.slug",
+	"committer.type",
+	"avatarId",
+	"iconUrl",
+	"statusCategory",
+	"status.id",
+	"status.self", //--
+	"status.description",
+	//"type",
+	"fixVersions.id",
+	"fixVersions.self",
+	"issuetype.id",
+	"issuetype.self",
+	"priority.id",
+	"priority.self",
+	"lastViewed",
+	"project.id",
+	"projectCategory",
+	"projectTypeKey",
+	"resolution.id",
+	"resolution.description",
+	"resolution.self",
+	"security",
+	"versions.id",
+	"versions.self", //--
+	"votes",
+	"watches",
+	"displayId",
+	"path.components", //?
+	"path.extension",
+	"path.name",
+	"path.componeparentnts",
+	"workratio", //?
+	"type.id",
+	"type.inward",
+	"type.outward",
+	"type.self", //
+}
+
+func Prune(m any) {
+	for {
+		switch v := m.(type) {
+		case *map[string]any:
+			if v == nil {
+				return
+			}
+			m = *v
+		case *[]any:
+			if v == nil {
+				return
+			}
+			m = *v
+		default:
+			goto done
+		}
+	}
+done:
+	switch m := m.(type) {
+	case map[string]any:
+		prune(m, "")
+	case []any:
+		for i, v := range m {
+			if v, ok := v.(map[string]any); ok {
+				prune(v, fmt.Sprintf("[%d]", i))
+			}
+		}
+	}
+}
+
+func prune(m map[string]any, prefix string) {
+	for k, v := range m {
+		currentPath := k
+		if prefix != "" {
+			currentPath = prefix + "." + k
+		}
+
+		if shouldRemove(currentPath) {
+			delete(m, k)
+			continue
+		}
+
+		if isZeroValue(v) {
+			delete(m, k)
+			continue
+		}
+
+		switch vv := v.(type) {
+		case map[string]any:
+			prune(vv, currentPath)
+		case []any:
+			for i, item := range vv {
+				if itemMap, ok := item.(map[string]any); ok {
+					prune(itemMap, currentPath+fmt.Sprintf("[%d]", i))
+				}
+			}
+		}
+	}
+}
+
+func isZeroValue(v any) bool {
+	switch vv := v.(type) {
+	case nil:
+		return true
+	case string:
+		return vv == ""
+	case map[string]any:
+		return len(vv) == 0
+	case []any:
+		return len(vv) == 0
+	default:
+		return false
+	}
+}
+
+func fuzzyMatch(key string) bool {
+	for _, fk := range fuzzyKeys {
+		if strings.HasPrefix(key, fk) {
+			return true
+		}
+	}
+	return false
+}
+
+func shouldRemove(path string) bool {
+	arrayIndexRegex := regexp.MustCompile(`\[\d+\]`)
+	cleanPath := arrayIndexRegex.ReplaceAllString(path, "")
+
+	for _, rp := range removePaths {
+		if strings.HasSuffix(cleanPath, "."+rp) || cleanPath == rp {
+			return true
+		}
+	}
+
+	keys := strings.Split(cleanPath, ".")
+	if len(keys) > 0 {
+		lastKey := keys[len(keys)-1]
+		if fuzzyMatch(lastKey) {
+			return true
+		}
+	}
+	return false
 }

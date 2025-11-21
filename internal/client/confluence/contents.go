@@ -22,7 +22,9 @@ import (
 //   - error: An error if the request fails
 func (c *ConfluenceClient) GetContent(ctx context.Context, input GetContentInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
-
+	if len(input.Expand) == 0 {
+		input.Expand = []string{"container", "body.storage", "metadata.labels"}
+	}
 	client.SetQueryParam(queryParams, "type", input.TypeParam, "")
 	client.SetQueryParam(queryParams, "spaceKey", input.SpaceKey, "")
 	client.SetQueryParam(queryParams, "title", input.Title, "")
@@ -59,6 +61,9 @@ func (c *ConfluenceClient) GetContent(ctx context.Context, input GetContentInput
 //   - error: An error if the request fails
 func (c *ConfluenceClient) GetContentByID(ctx context.Context, input GetContentByIDInput) (types.MapOutput, error) {
 	queryParams := url.Values{}
+	if len(input.Expand) == 0 {
+		input.Expand = []string{"container", "body.storage", "metadata.labels", "space", "version"}
+	}
 	client.SetQueryParam(queryParams, "expand", input.Expand, []string{})
 
 	var output types.MapOutput
