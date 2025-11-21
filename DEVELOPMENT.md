@@ -12,8 +12,7 @@ This guide explains how to develop new interfaces in the Atlassian DC MCP Go pro
    - [Step 4: Register the Tool](#step-4-register-the-tool)
 4. [Using AI Coding Assistants for Development](#using-ai-coding-assistants-for-development)
    - [AI Coding Assistant Prompt Template](#ai-coding-assistant-prompt-template)
-5. [Testing](#testing)
-6. [Best Practices](#best-practices)
+5. [Best Practices](#best-practices)
 
 ## Overview
 
@@ -230,14 +229,6 @@ Implement a new Bitbucket API endpoint for getting pull request changes followin
 
 API documentation: https://developer.atlassian.com/server/bitbucket/rest/v1000/api-group-pull-requests/#api-api-latest-projects-projectkey-repos-repositoryslug-pull-requests-pullrequestid-changes-get
 ```
-
-## Testing
-
-All new functionality should include appropriate tests:
-
-1. For client methods, add tests in the corresponding `_test.go` files
-2. For MCP handlers, ensure they properly call client methods and handle errors
-3. Test edge cases and error conditions
 
 ## Best Practices
 

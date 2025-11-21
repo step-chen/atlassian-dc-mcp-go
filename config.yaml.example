@@ -106,3 +106,87 @@ bitbucket:
     bitbucket_create_branch: false
     bitbucket_delete_branch: false
     bitbucket_create_tag: false
+
+# Prune configuration for removing sensitive/unnecessary fields from responses
+prune:
+  # Fuzzy keys are prefixes for keys that should be removed
+  fuzzy_keys:
+    - "customfield"
+
+  # Remove paths are exact paths or path suffixes that should be removed
+  remove_paths:
+    - "emailAddress"
+    - "clone"
+    - "locked"
+    - "permittedOperations"
+    - "threadResolved"
+    - "avatarUrls"
+    - "timeZone"
+    - "thumbnail"
+    - "participants"
+    - "user.id"
+    - "user.links"
+    # - "user.name"      # Uncomment to remove user.name
+    - "user.slug"
+    - "user.type"
+    - "_links"
+    # - "links"          # Uncomment to remove links
+    # - "self"           # Uncomment to remove self
+    - "scmId"
+    - "public"
+    - "author.id"
+    # - "author.name"    # Uncomment to remove author.name
+    - "author.slug"
+    - "author.type"
+    - "author.key"
+    - "author.self"
+    - "author.links"
+    # - "creator.name"   # Uncomment to remove creator.name
+    - "creator.key"
+    - "creator.self"
+    # - "reporter.name"  # Uncomment to remove reporter.name
+    - "reporter.key"
+    - "reporter.self"
+    - "updateAuthor.name"
+    - "updateAuthor.key"
+    - "updateAuthor.self"
+    - "committer.id"
+    # - "committer.name" # Uncomment to remove committer.name
+    - "committer.slug"
+    - "committer.type"
+    - "avatarId"
+    - "iconUrl"
+    - "statusCategory"
+    - "status.id"
+    - "status.self"
+    - "status.description"
+    # - "type"           # Uncomment to remove type
+    - "fixVersions.id"
+    - "fixVersions.self"
+    - "issuetype.id"
+    - "issuetype.self"
+    - "priority.id"
+    - "priority.self"
+    - "lastViewed"
+    - "project.id"
+    - "projectCategory"
+    - "projectTypeKey"
+    - "resolution.id"
+    - "resolution.description"
+    - "resolution.self"
+    - "security"
+    - "versions.id"
+    - "versions.self"
+    - "votes"
+    - "watches"
+    - "displayId"
+    - "path.components"
+    - "path.extension"
+    - "path.name"
+    - "path.parent"
+    - "workratio"
+    - "type.id"
+    - "type.inward"
+    - "type.outward"
+    - "type.self"
+    - "iconCssClass"

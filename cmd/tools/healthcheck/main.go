@@ -1,12 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
-	"encoding/json"
 )
 
 // HealthResponse represents the response from the health check endpoint
@@ -27,19 +27,19 @@ func main() {
 	if port == "" {
 		port = "8090"
 	}
-	
+
 	// Validate port is a number
 	_, err := strconv.Atoi(port)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Invalid port: %s\n", port)
 		os.Exit(1)
 	}
-	
+
 	// Create HTTP client with timeout
 	client := &http.Client{
 		Timeout: 5 * time.Second,
 	}
-	
+
 	// First check the health endpoint for basic liveness
 	healthURL := fmt.Sprintf("http://localhost:%s/health", port)
 	healthResp, err := client.Get(healthURL)
@@ -48,13 +48,13 @@ func main() {
 		os.Exit(1)
 	}
 	healthResp.Body.Close()
-	
+
 	// Check health status code
 	if healthResp.StatusCode < 200 || healthResp.StatusCode >= 300 {
 		fmt.Fprintf(os.Stderr, "Health check failed with status code: %d\n", healthResp.StatusCode)
 		os.Exit(1)
 	}
-	
+
 	// Then check the readiness endpoint for service dependencies
 	readyURL := fmt.Sprintf("http://localhost:%s/ready", port)
 	resp, err := client.Get(readyURL)
@@ -63,7 +63,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer resp.Body.Close()
-	
+
 	// Check readiness status code
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		// Try to decode the response

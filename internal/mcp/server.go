@@ -52,13 +52,18 @@ type Server struct {
 
 // NewServer creates a new MCP server instance with the provided configuration and version
 func NewServer(cfg *config.Config, authMode, version string) *Server {
-	return &Server{
+	server := &Server{
 		config:       cfg,
 		authMode:     authMode,
 		version:      version,
 		startTime:    time.Now(),
 		shutdownChan: make(chan struct{}),
 	}
+
+	// Initialize prune configuration
+	client.InitPruneConfig(cfg.Prune)
+
+	return server
 }
 
 // Initialize sets up the server with clients for Jira, Confluence, and Bitbucket based on configuration

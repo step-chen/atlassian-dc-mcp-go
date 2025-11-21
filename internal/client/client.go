@@ -36,3 +36,10 @@ func NewBaseClient(config *config.ClientConfig, name string, tokenKey ContextKey
 		Name:       name,
 	}, nil
 }
+
+// For backward compatibility, initialize with default values
+func init() {
+	defaultCfg := config.DefaultPruneConfig()
+	fuzzyKeys = defaultCfg.FuzzyKeys
+	removePaths = defaultCfg.RemovePaths
+}

@@ -53,6 +53,7 @@ type Config struct {
 	Logging       logging.Config  `mapstructure:"logging"`
 	Transport     TransportConfig `mapstructure:"transport"`
 	ClientTimeout int             `mapstructure:"client_timeout"`
+	Prune         PruneConfig     `mapstructure:"prune"`
 }
 
 // Validate checks that the configuration is valid
@@ -128,6 +129,11 @@ func (c *Config) Validate(authMode string) error {
 		c.Bitbucket.HTTP.IdleConnTimeout = 90
 	}
 
+	// Set default prune config if not specified
+	if len(c.Prune.FuzzyKeys) == 0 && len(c.Prune.RemovePaths) == 0 {
+		c.Prune = DefaultPruneConfig()
+	}
+
 	if authMode != "header" {
 		if c.Jira.URL != "" && c.Jira.Token == "" {
 			return fmt.Errorf("jira token must be set when jira url is configured")
@@ -199,6 +205,11 @@ func LoadConfig(configPath string, authMode string) (*Config, error) {
 	viper.SetDefault("bitbucket.http.max_idle_conns", 100)
 	viper.SetDefault("bitbucket.http.max_idle_conns_per_host", 20)
 	viper.SetDefault("bitbucket.http.idle_conn_timeout", 90)
+
+	// Set default prune config
+	defaultPrune := DefaultPruneConfig()
+	viper.SetDefault("prune.fuzzy_keys", defaultPrune.FuzzyKeys)
+	viper.SetDefault("prune.remove_paths", defaultPrune.RemovePaths)
 
 	viper.SetEnvPrefix("MCP")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))

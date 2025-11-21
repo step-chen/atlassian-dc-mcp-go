@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"atlassian-dc-mcp-go/internal/client"
 	"atlassian-dc-mcp-go/internal/config"
 	"atlassian-dc-mcp-go/internal/utils/logging"
 
@@ -38,7 +39,7 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
-	
+
 	if *versionFlag {
 		fmt.Printf("Atlassian Data Center MCP Client Version: %s\n", version)
 		fmt.Printf("Commit: %s\n", commit)
@@ -59,8 +60,11 @@ func main() {
 	// Load configuration
 	cfg, err := config.LoadConfig(*configPath, *authMode)
 	if err != nil {
-		logger.Fatal("Failed to load configuration", zap.Error(err))
+		logger.Fatal("Failed to load config", zap.Error(err))
 	}
+
+	// Initialize prune configuration
+	client.InitPruneConfig(cfg.Prune)
 
 	logger.Info("Atlassian Data Center MCP Client starting...",
 		zap.String("version", version),

@@ -79,6 +79,24 @@ cp config.yaml.example config.yaml
 
 The configuration file is self-documented with examples for all available settings. Please refer to the [config.yaml.example](config.yaml.example) file for detailed configuration options.
 
+### Prune Configuration
+
+The application includes a feature to remove sensitive or unnecessary fields from API responses before returning them to the client. This is configured through the `prune` section in the configuration file:
+
+- `fuzzy_keys`: List of key prefixes that should be removed from responses
+- `remove_paths`: List of exact paths or path suffixes that should be removed
+
+Example:
+```yaml
+prune:
+  fuzzy_keys:
+    - "customfield"
+  remove_paths:
+    - "emailAddress"
+    - "avatarUrls"
+    # ... other fields to remove
+```
+
 ### Authentication Modes
 
 The service supports two authentication modes:
